@@ -1,775 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Angle Sum Property - The Sum is Always 180°!</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Angle Sum Property</title>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f4f6f8;
+  touch-action: manipulation;
+}
 
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 10px;
-            font-size: 2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+}
 
-        .subtitle {
-            text-align: center;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-        }
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 4px;
+  color: #444;
+}
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 20px;
-        }
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
 
-        @media (max-width: 900px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
+.visual {
+  position: relative;
+  height: 40vh;
+  min-height: 270px;
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+}
 
-        .canvas-container {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
+svg { width: 100%; height: 100%; }
 
-        canvas {
-            display: block;
-            margin: 0 auto;
-            cursor: grab;
-        }
+.static-hint {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  color: #667eea;
+  font-weight: 500;
+}
 
-        canvas:active {
-            cursor: grabbing;
-        }
+.sum-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-align: center;
+}
 
-        .controls {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
+.sum-badge .label { font-size: 10px; opacity: 0.9; }
+.sum-badge .value { font-size: 20px; font-weight: 700; }
 
-        .sum-display {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
+.metrics {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  background: rgba(255,255,255,0.96);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  display: flex;
+  gap: 8px;
+}
 
-        .sum-display .label {
-            font-size: 1rem;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
+.angle-box {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  text-align: center;
+}
 
-        .sum-display .value {
-            font-size: 3rem;
-            font-weight: 700;
-        }
+.angle-box.a { background: #e74c3c20; color: #c0392b; }
+.angle-box.b { background: #3498db20; color: #2980b9; }
+.angle-box.c { background: #27ae6020; color: #27ae60; }
 
-        .sum-display .verification {
-            margin-top: 10px;
-            padding: 8px 15px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 20px;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
+.concept-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
 
-        .angle-cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+.concept-card h3 {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
 
-        .angle-card {
-            padding: 15px 10px;
-            border-radius: 12px;
-            text-align: center;
-            transition: transform 0.2s;
-        }
+.concept-card p {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+}
 
-        .angle-card:hover {
-            transform: scale(1.05);
-        }
+.concept-card .highlight {
+  background: #667eea20;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+  text-align: center;
+}
 
-        .angle-card.angle-a {
-            background: rgba(231, 76, 60, 0.15);
-            border: 2px solid #e74c3c;
-        }
+.concept-card .highlight strong {
+  color: #667eea;
+  font-size: 18px;
+}
 
-        .angle-card.angle-b {
-            background: rgba(52, 152, 219, 0.15);
-            border: 2px solid #3498db;
-        }
-
-        .angle-card.angle-c {
-            background: rgba(46, 204, 113, 0.15);
-            border: 2px solid #27ae60;
-        }
-
-        .angle-card .label {
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .angle-card.angle-a .label { color: #c0392b; }
-        .angle-card.angle-b .label { color: #2980b9; }
-        .angle-card.angle-c .label { color: #27ae60; }
-
-        .angle-card .value {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .visualization-toggle {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .toggle-btn {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .toggle-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: transparent;
-        }
-
-        .toggle-btn:hover:not(.active) {
-            border-color: #667eea;
-        }
-
-        .proof-section {
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .proof-section h3 {
-            color: #1e8449;
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-
-        .proof-steps {
-            font-size: 0.85rem;
-            color: #333;
-            line-height: 1.8;
-        }
-
-        .proof-steps li {
-            margin-bottom: 8px;
-        }
-
-        .highlight {
-            background: rgba(102, 126, 234, 0.2);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-
-        .concept-box {
-            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
-            border-left: 4px solid #f39c12;
-            padding: 15px;
-            border-radius: 0 12px 12px 0;
-        }
-
-        .concept-box h4 {
-            color: #d68910;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-
-        .concept-box p {
-            color: #555;
-            font-size: 0.85rem;
-            line-height: 1.5;
-        }
-
-        .nav-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 25px;
-            background: white;
-            color: #667eea;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .nav-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
-
-        .instructions {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            color: white;
-        }
-
-        .instructions h4 {
-            margin-bottom: 10px;
-        }
-
-        .instructions ul {
-            padding-left: 20px;
-            font-size: 0.9rem;
-            line-height: 1.8;
-        }
-    </style>
+/* SVG */
+.triangle-edge { stroke: #333; stroke-width: 3; fill: none; }
+.triangle-fill { fill: #667eea10; }
+.angle-arc { stroke-width: 2; fill-opacity: 0.3; }
+.arc-a { fill: #e74c3c; stroke: #e74c3c; }
+.arc-b { fill: #3498db; stroke: #3498db; }
+.arc-c { fill: #27ae60; stroke: #27ae60; }
+.drag-point { fill: white; stroke: #333; stroke-width: 2; cursor: grab; }
+.vertex-label { font-size: 14px; font-weight: 600; }
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Angle Sum Property</h1>
-        <p class="subtitle">The three angles of a triangle always add up to 180°</p>
-
-        <div class="main-content">
-            <div class="canvas-container">
-                <canvas id="canvas" width="600" height="500"></canvas>
-            </div>
-
-            <div class="controls">
-                <div class="sum-display">
-                    <div class="label">∠A + ∠B + ∠C =</div>
-                    <div class="value" id="sumValue">180°</div>
-                    <div class="verification">Always equals 180° ✓</div>
-                </div>
-
-                <div class="angle-cards">
-                    <div class="angle-card angle-a">
-                        <div class="label">∠A</div>
-                        <div class="value" id="angleA">60°</div>
-                    </div>
-                    <div class="angle-card angle-b">
-                        <div class="label">∠B</div>
-                        <div class="value" id="angleB">60°</div>
-                    </div>
-                    <div class="angle-card angle-c">
-                        <div class="label">∠C</div>
-                        <div class="value" id="angleC">60°</div>
-                    </div>
-                </div>
-
-                <div class="visualization-toggle">
-                    <button class="toggle-btn active" id="btnTriangle" onclick="setMode('triangle')">📐 Triangle</button>
-                    <button class="toggle-btn" id="btnFold" onclick="setMode('fold')">📄 Paper Fold</button>
-                    <button class="toggle-btn" id="btnParallel" onclick="setMode('parallel')">〰️ Parallel Line</button>
-                </div>
-
-                <div class="proof-section" id="proofSection">
-                    <h3>📖 Visual Proof Using Parallel Lines</h3>
-                    <ol class="proof-steps">
-                        <li>Draw a line XY through vertex A, <span class="highlight">parallel to BC</span></li>
-                        <li>∠XAB = ∠B (alternate angles with transversal AB)</li>
-                        <li>∠YAC = ∠C (alternate angles with transversal AC)</li>
-                        <li>∠XAB + ∠BAC + ∠YAC = 180° (straight line)</li>
-                        <li>Therefore: <span class="highlight">∠A + ∠B + ∠C = 180°</span></li>
-                    </ol>
-                </div>
-
-                <div class="concept-box">
-                    <h4>💡 Why is this Important?</h4>
-                    <p>If you know any two angles of a triangle, you can always find the third! This property is used everywhere - from architecture to navigation to computer graphics.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="instructions">
-            <h4>🎯 Try These Experiments</h4>
-            <ul>
-                <li><strong>Drag vertex C</strong> to change the triangle shape</li>
-                <li>Watch how angles change but <strong>always sum to 180°</strong></li>
-                <li>Use the <strong>Paper Fold</strong> view to see the visual proof</li>
-                <li>The <strong>Parallel Line</strong> view shows the mathematical proof</li>
-            </ul>
-        </div>
-
-        <a href="index.html" class="nav-link">← Back to All Simulations</a>
+<div id="app">
+  <div class="section-title">Reference (equilateral 60°-60°-60°)</div>
+  <div class="sim-card" id="ref"></div>
+  
+  <div class="section-title">Experiment (drag vertex C)</div>
+  <div class="sim-card" id="exp"></div>
+  
+  <div class="concept-card">
+    <h3>Angle Sum Property</h3>
+    <p>Drag point C anywhere. Watch the three angles.</p>
+    <p style="margin-top:8px;">No matter how you change the triangle shape...</p>
+    <div class="highlight">
+      <strong>∠A + ∠B + ∠C = 180°</strong>
+      <p style="margin-top:6px;font-size:11px;color:#666;">Always! This is true for ALL triangles.</p>
     </div>
-
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-
-        let mode = 'triangle';
-        let isDragging = false;
-        let dragVertex = null;
-
-        // Triangle vertices
-        let A = { x: 300, y: 80 };
-        let B = { x: 120, y: 380 };
-        let C = { x: 480, y: 380 };
-
-        function setMode(newMode) {
-            mode = newMode;
-            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn' + newMode.charAt(0).toUpperCase() + newMode.slice(1)).classList.add('active');
-            draw();
-        }
-
-        function calculateAngles() {
-            // Calculate side lengths
-            const a = Math.sqrt((B.x - C.x) ** 2 + (B.y - C.y) ** 2);
-            const b = Math.sqrt((A.x - C.x) ** 2 + (A.y - C.y) ** 2);
-            const c = Math.sqrt((A.x - B.x) ** 2 + (A.y - B.y) ** 2);
-
-            // Calculate angles using law of cosines
-            const angleA = Math.acos((b * b + c * c - a * a) / (2 * b * c)) * 180 / Math.PI;
-            const angleB = Math.acos((a * a + c * c - b * b) / (2 * a * c)) * 180 / Math.PI;
-            const angleC = 180 - angleA - angleB;
-
-            return { angleA, angleB, angleC };
-        }
-
-        function drawAngleArc(vertex, p1, p2, color, radius) {
-            const angle1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
-            const angle2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
-
-            // Determine which direction to draw
-            let startAngle = angle1;
-            let endAngle = angle2;
-
-            // Make sure we draw the smaller arc
-            let diff = endAngle - startAngle;
-            if (diff > Math.PI) startAngle += 2 * Math.PI;
-            if (diff < -Math.PI) endAngle += 2 * Math.PI;
-
-            ctx.beginPath();
-            ctx.moveTo(vertex.x, vertex.y);
-            ctx.arc(vertex.x, vertex.y, radius, startAngle, endAngle);
-            ctx.closePath();
-            ctx.fillStyle = color.replace(')', ', 0.3)').replace('rgb', 'rgba');
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.arc(vertex.x, vertex.y, radius, startAngle, endAngle);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const angles = calculateAngles();
-
-            // Update display
-            document.getElementById('angleA').textContent = angles.angleA.toFixed(1) + '°';
-            document.getElementById('angleB').textContent = angles.angleB.toFixed(1) + '°';
-            document.getElementById('angleC').textContent = angles.angleC.toFixed(1) + '°';
-            document.getElementById('sumValue').textContent = (angles.angleA + angles.angleB + angles.angleC).toFixed(1) + '°';
-
-            if (mode === 'triangle') {
-                drawTriangleMode(angles);
-            } else if (mode === 'fold') {
-                drawFoldMode(angles);
-            } else if (mode === 'parallel') {
-                drawParallelMode(angles);
-            }
-        }
-
-        function drawTriangleMode(angles) {
-            // Draw grid
-            ctx.strokeStyle = 'rgba(0,0,0,0.05)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < canvas.width; i += 20) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            for (let i = 0; i < canvas.height; i += 20) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
-
-            // Fill triangle
-            ctx.beginPath();
-            ctx.moveTo(A.x, A.y);
-            ctx.lineTo(B.x, B.y);
-            ctx.lineTo(C.x, C.y);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(102, 126, 234, 0.1)';
-            ctx.fill();
-
-            // Draw angle arcs
-            drawAngleArc(A, B, C, 'rgb(231, 76, 60)', 40);
-            drawAngleArc(B, C, A, 'rgb(52, 152, 219)', 40);
-            drawAngleArc(C, A, B, 'rgb(46, 204, 113)', 40);
-
-            // Draw triangle edges
-            ctx.beginPath();
-            ctx.moveTo(A.x, A.y);
-            ctx.lineTo(B.x, B.y);
-            ctx.lineTo(C.x, C.y);
-            ctx.closePath();
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            // Draw vertices
-            const vertices = [
-                { point: A, label: 'A', color: '#e74c3c', angle: angles.angleA },
-                { point: B, label: 'B', color: '#3498db', angle: angles.angleB },
-                { point: C, label: 'C', color: '#27ae60', angle: angles.angleC }
-            ];
-
-            vertices.forEach(v => {
-                ctx.beginPath();
-                ctx.arc(v.point.x, v.point.y, 10, 0, Math.PI * 2);
-                ctx.fillStyle = v.color;
-                ctx.fill();
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // Labels
-                let offsetX = 0, offsetY = 0;
-                if (v.label === 'A') { offsetY = -25; }
-                else if (v.label === 'B') { offsetX = -25; offsetY = 15; }
-                else { offsetX = 25; offsetY = 15; }
-
-                ctx.fillStyle = v.color;
-                ctx.font = 'bold 18px Segoe UI';
-                ctx.textAlign = 'center';
-                ctx.fillText(v.label + ' = ' + v.angle.toFixed(1) + '°', v.point.x + offsetX, v.point.y + offsetY);
-            });
-
-            // Drag hint
-            ctx.fillStyle = '#999';
-            ctx.font = '14px Segoe UI';
-            ctx.textAlign = 'center';
-            ctx.fillText('Drag any vertex to change the triangle', canvas.width / 2, canvas.height - 20);
-        }
-
-        function drawFoldMode(angles) {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2 - 50;
-            const scale = 0.6;
-
-            // Scaled triangle
-            const sA = { x: centerX + (A.x - 300) * scale, y: centerY + (A.y - 200) * scale - 50 };
-            const sB = { x: centerX + (B.x - 300) * scale, y: centerY + (B.y - 200) * scale - 50 };
-            const sC = { x: centerX + (C.x - 300) * scale, y: centerY + (C.y - 200) * scale - 50 };
-
-            // Draw original triangle
-            ctx.beginPath();
-            ctx.moveTo(sA.x, sA.y);
-            ctx.lineTo(sB.x, sB.y);
-            ctx.lineTo(sC.x, sC.y);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(102, 126, 234, 0.2)';
-            ctx.fill();
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Draw angle arcs at original positions
-            drawAngleArc(sA, sB, sC, 'rgb(231, 76, 60)', 25);
-            drawAngleArc(sB, sC, sA, 'rgb(52, 152, 219)', 25);
-            drawAngleArc(sC, sA, sB, 'rgb(46, 204, 113)', 25);
-
-            // Draw folded version (all angles meeting at a point)
-            const foldY = canvas.height - 100;
-            const foldX = centerX;
-
-            // Base line
-            ctx.beginPath();
-            ctx.moveTo(foldX - 150, foldY);
-            ctx.lineTo(foldX + 150, foldY);
-            ctx.strokeStyle = '#666';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Draw the three angles side by side
-            const angleA_rad = angles.angleA * Math.PI / 180;
-            const angleB_rad = angles.angleB * Math.PI / 180;
-            const angleC_rad = angles.angleC * Math.PI / 180;
-
-            // Angle A (red)
-            ctx.beginPath();
-            ctx.moveTo(foldX, foldY);
-            ctx.arc(foldX, foldY, 50, Math.PI, Math.PI + angleA_rad);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(231, 76, 60, 0.5)';
-            ctx.fill();
-            ctx.strokeStyle = '#e74c3c';
-            ctx.stroke();
-
-            // Angle B (blue)
-            ctx.beginPath();
-            ctx.moveTo(foldX, foldY);
-            ctx.arc(foldX, foldY, 50, Math.PI + angleA_rad, Math.PI + angleA_rad + angleB_rad);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(52, 152, 219, 0.5)';
-            ctx.fill();
-            ctx.strokeStyle = '#3498db';
-            ctx.stroke();
-
-            // Angle C (green)
-            ctx.beginPath();
-            ctx.moveTo(foldX, foldY);
-            ctx.arc(foldX, foldY, 50, Math.PI + angleA_rad + angleB_rad, 2 * Math.PI);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(46, 204, 113, 0.5)';
-            ctx.fill();
-            ctx.strokeStyle = '#27ae60';
-            ctx.stroke();
-
-            // Labels
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 16px Segoe UI';
-            ctx.textAlign = 'center';
-            ctx.fillText('Original Triangle', centerX, 30);
-            ctx.fillText('Fold corners to meet at one point', centerX, foldY - 80);
-            ctx.fillText('Together they form a straight line (180°)!', centerX, foldY + 80);
-        }
-
-        function drawParallelMode(angles) {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const scale = 0.7;
-
-            // Scaled triangle
-            const sA = { x: centerX + (A.x - 300) * scale, y: centerY + (A.y - 230) * scale };
-            const sB = { x: centerX + (B.x - 300) * scale, y: centerY + (B.y - 230) * scale };
-            const sC = { x: centerX + (C.x - 300) * scale, y: centerY + (C.y - 230) * scale };
-
-            // Draw parallel line XY through A
-            const lineLength = 200;
-            const X = { x: sA.x - lineLength, y: sA.y };
-            const Y = { x: sA.x + lineLength, y: sA.y };
-
-            // Parallel line
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(X.x, X.y);
-            ctx.lineTo(Y.x, Y.y);
-            ctx.strokeStyle = '#9b59b6';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // BC line extended
-            const dx = sC.x - sB.x;
-            const dy = sC.y - sB.y;
-            const len = Math.sqrt(dx * dx + dy * dy);
-            const ux = dx / len;
-            const uy = dy / len;
-
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(sB.x - ux * 50, sB.y - uy * 50);
-            ctx.lineTo(sC.x + ux * 50, sC.y + uy * 50);
-            ctx.strokeStyle = '#666';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Fill triangle
-            ctx.beginPath();
-            ctx.moveTo(sA.x, sA.y);
-            ctx.lineTo(sB.x, sB.y);
-            ctx.lineTo(sC.x, sC.y);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(102, 126, 234, 0.15)';
-            ctx.fill();
-
-            // Draw angle at A split into three parts
-            // Angle XAB (equals angle B - alternate angles)
-            const angleXAB = Math.atan2(sB.y - sA.y, sB.x - sA.x);
-            
-            ctx.beginPath();
-            ctx.moveTo(sA.x, sA.y);
-            ctx.arc(sA.x, sA.y, 35, Math.PI, angleXAB);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(52, 152, 219, 0.4)';
-            ctx.fill();
-            ctx.strokeStyle = '#3498db';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Angle BAC (angle A)
-            const angleYAC = Math.atan2(sC.y - sA.y, sC.x - sA.x);
-            
-            ctx.beginPath();
-            ctx.moveTo(sA.x, sA.y);
-            ctx.arc(sA.x, sA.y, 35, angleXAB, angleYAC);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(231, 76, 60, 0.4)';
-            ctx.fill();
-            ctx.strokeStyle = '#e74c3c';
-            ctx.stroke();
-
-            // Angle YAC (equals angle C - alternate angles)
-            ctx.beginPath();
-            ctx.moveTo(sA.x, sA.y);
-            ctx.arc(sA.x, sA.y, 35, angleYAC, 0);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(46, 204, 113, 0.4)';
-            ctx.fill();
-            ctx.strokeStyle = '#27ae60';
-            ctx.stroke();
-
-            // Draw triangle edges
-            ctx.beginPath();
-            ctx.moveTo(sA.x, sA.y);
-            ctx.lineTo(sB.x, sB.y);
-            ctx.lineTo(sC.x, sC.y);
-            ctx.closePath();
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            // Draw angle at B
-            drawAngleArc(sB, sC, sA, 'rgb(52, 152, 219)', 30);
-
-            // Draw angle at C
-            drawAngleArc(sC, sA, sB, 'rgb(46, 204, 113)', 30);
-
-            // Labels
-            ctx.fillStyle = '#9b59b6';
-            ctx.font = 'bold 16px Segoe UI';
-            ctx.fillText('X', X.x - 10, X.y - 15);
-            ctx.fillText('Y', Y.x + 10, Y.y - 15);
-
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 16px Segoe UI';
-            ctx.fillText('A', sA.x, sA.y - 50);
-            ctx.fillText('B', sB.x - 20, sB.y + 20);
-            ctx.fillText('C', sC.x + 20, sC.y + 20);
-
-            // Explanation
-            ctx.fillStyle = '#666';
-            ctx.font = '14px Segoe UI';
-            ctx.textAlign = 'center';
-            ctx.fillText('XY is parallel to BC', centerX, 30);
-            ctx.fillText('Alternate angles: ∠XAB = ∠B (blue), ∠YAC = ∠C (green)', centerX, canvas.height - 40);
-            ctx.fillText('Line XY shows ∠B + ∠A + ∠C = 180° (straight angle)', centerX, canvas.height - 15);
-        }
-
-        function getVertexAt(x, y) {
-            const threshold = 20;
-            if (Math.sqrt((x - A.x) ** 2 + (y - A.y) ** 2) < threshold) return 'A';
-            if (Math.sqrt((x - B.x) ** 2 + (y - B.y) ** 2) < threshold) return 'B';
-            if (Math.sqrt((x - C.x) ** 2 + (y - C.y) ** 2) < threshold) return 'C';
-            return null;
-        }
-
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            dragVertex = getVertexAt(x, y);
-            if (dragVertex) isDragging = true;
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const x = Math.max(30, Math.min(canvas.width - 30, e.clientX - rect.left));
-            const y = Math.max(30, Math.min(canvas.height - 30, e.clientY - rect.top));
-
-            if (dragVertex === 'A') { A.x = x; A.y = y; }
-            else if (dragVertex === 'B') { B.x = x; B.y = y; }
-            else if (dragVertex === 'C') { C.x = x; C.y = y; }
-
-            draw();
-        });
-
-        canvas.addEventListener('mouseup', () => {
-            isDragging = false;
-            dragVertex = null;
-        });
-
-        canvas.addEventListener('mouseleave', () => {
-            isDragging = false;
-            dragVertex = null;
-        });
-
-        // Touch support
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            dragVertex = getVertexAt(x, y);
-            if (dragVertex) isDragging = true;
-        });
-
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (!isDragging) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            const x = Math.max(30, Math.min(canvas.width - 30, touch.clientX - rect.left));
-            const y = Math.max(30, Math.min(canvas.height - 30, touch.clientY - rect.top));
-
-            if (dragVertex === 'A') { A.x = x; A.y = y; }
-            else if (dragVertex === 'B') { B.x = x; B.y = y; }
-            else if (dragVertex === 'C') { C.x = x; C.y = y; }
-
-            draw();
-        });
-
-        canvas.addEventListener('touchend', () => {
-            isDragging = false;
-            dragVertex = null;
-        });
-
-        // Initialize
-        draw();
-    </script>
+  </div>
+</div>
+
+<script>
+function createSimulation(containerId, isInteractive) {
+  const c = document.getElementById(containerId);
+  
+  // Vertex positions (in SVG coordinates)
+  let A = {x: 200, y: 50};
+  let B = {x: 80, y: 220};
+  let C = {x: 320, y: 220};
+  
+  if (!isInteractive) {
+    // Equilateral for reference
+    A = {x: 200, y: 60};
+    B = {x: 100, y: 220};
+    C = {x: 300, y: 220};
+  }
+  
+  function calcAngles() {
+    const ab = Math.sqrt((B.x-A.x)**2 + (B.y-A.y)**2);
+    const bc = Math.sqrt((C.x-B.x)**2 + (C.y-B.y)**2);
+    const ca = Math.sqrt((A.x-C.x)**2 + (A.y-C.y)**2);
+    
+    const angA = Math.acos((ab*ab + ca*ca - bc*bc) / (2*ab*ca)) * 180 / Math.PI;
+    const angB = Math.acos((ab*ab + bc*bc - ca*ca) / (2*ab*bc)) * 180 / Math.PI;
+    const angC = 180 - angA - angB;
+    
+    return {a: angA, b: angB, c: angC};
+  }
+  
+  function getMetricsHtml() {
+    const ang = calcAngles();
+    return `
+      <div class="angle-box a">∠A<br>${ang.a.toFixed(1)}°</div>
+      <div class="angle-box b">∠B<br>${ang.b.toFixed(1)}°</div>
+      <div class="angle-box c">∠C<br>${ang.c.toFixed(1)}°</div>
+    `;
+  }
+  
+  function getSumHtml() {
+    const ang = calcAngles();
+    return `
+      <div class="label">∠A + ∠B + ∠C</div>
+      <div class="value">${(ang.a + ang.b + ang.c).toFixed(1)}°</div>
+    `;
+  }
+
+  c.innerHTML = `
+  <div class="visual">
+    ${isInteractive ? '<div class="static-hint">Drag point C</div>' : ''}
+    <div class="sum-badge" id="sumBadge">${getSumHtml()}</div>
+    
+    <svg viewBox="0 0 400 280" id="svg_${containerId}"></svg>
+    
+    <div class="metrics" id="metricsBox">${getMetricsHtml()}</div>
+  </div>`;
+
+  const svg = c.querySelector('svg');
+  
+  function toRad(d) { return d * Math.PI / 180; }
+  
+  function arcPath(vertex, p1, p2, radius) {
+    const angle1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+    const angle2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+    
+    let start = angle1, end = angle2;
+    let diff = end - start;
+    if (diff > Math.PI) start += 2 * Math.PI;
+    if (diff < -Math.PI) end += 2 * Math.PI;
+    if (start > end) [start, end] = [end, start];
+    
+    const x1 = vertex.x + radius * Math.cos(start);
+    const y1 = vertex.y + radius * Math.sin(start);
+    const x2 = vertex.x + radius * Math.cos(end);
+    const y2 = vertex.y + radius * Math.sin(end);
+    
+    const largeArc = (end - start) > Math.PI ? 1 : 0;
+    return `M ${vertex.x} ${vertex.y} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+  }
+  
+  function render() {
+    const ang = calcAngles();
+    
+    c.querySelector('#metricsBox').innerHTML = getMetricsHtml();
+    c.querySelector('#sumBadge').innerHTML = getSumHtml();
+    
+    const arcR = 25;
+    
+    svg.innerHTML = `
+      <!-- Triangle fill -->
+      <polygon points="${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}" class="triangle-fill"/>
+      
+      <!-- Angle arcs -->
+      <path d="${arcPath(A, B, C, arcR)}" class="angle-arc arc-a"/>
+      <path d="${arcPath(B, A, C, arcR)}" class="angle-arc arc-b"/>
+      <path d="${arcPath(C, A, B, arcR)}" class="angle-arc arc-c"/>
+      
+      <!-- Triangle edges -->
+      <polygon points="${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}" class="triangle-edge"/>
+      
+      <!-- Vertex labels -->
+      <text x="${A.x}" y="${A.y - 15}" class="vertex-label" fill="#c0392b" text-anchor="middle">A</text>
+      <text x="${B.x - 15}" y="${B.y + 5}" class="vertex-label" fill="#2980b9" text-anchor="middle">B</text>
+      <text x="${C.x + 15}" y="${C.y + 5}" class="vertex-label" fill="#27ae60" text-anchor="middle">C</text>
+      
+      <!-- Vertices -->
+      <circle cx="${A.x}" cy="${A.y}" r="8" fill="#e74c3c" stroke="white" stroke-width="2"/>
+      <circle cx="${B.x}" cy="${B.y}" r="8" fill="#3498db" stroke="white" stroke-width="2"/>
+      ${isInteractive ? 
+        `<circle cx="${C.x}" cy="${C.y}" r="14" class="drag-point" id="dragC"/>` :
+        `<circle cx="${C.x}" cy="${C.y}" r="8" fill="#27ae60" stroke="white" stroke-width="2"/>`
+      }
+    `;
+  }
+  
+  render();
+  
+  if (isInteractive) {
+    let dragging = false;
+    
+    function updateC(clientX, clientY) {
+      const rect = svg.getBoundingClientRect();
+      C.x = Math.max(50, Math.min(350, (clientX - rect.left) / rect.width * 400));
+      C.y = Math.max(30, Math.min(260, (clientY - rect.top) / rect.height * 280));
+      render();
+    }
+    
+    svg.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      const handle = c.querySelector('#dragC');
+      if (!handle) return;
+      const rect = handle.getBoundingClientRect();
+      if (Math.hypot(touch.clientX - rect.left - 14, touch.clientY - rect.top - 14) < 50) {
+        dragging = true;
+        c.querySelector('.static-hint')?.remove();
+      }
+    });
+    
+    svg.addEventListener('touchmove', (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      updateC(e.touches[0].clientX, e.touches[0].clientY);
+    });
+    
+    svg.addEventListener('touchend', () => { dragging = false; });
+    
+    svg.addEventListener('mousedown', (e) => {
+      if (e.target.id === 'dragC') {
+        dragging = true;
+        c.querySelector('.static-hint')?.remove();
+      }
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      updateC(e.clientX, e.clientY);
+    });
+    
+    document.addEventListener('mouseup', () => { dragging = false; });
+  }
+}
+
+createSimulation('ref', false);
+createSimulation('exp', true);
+</script>
 </body>
 </html>

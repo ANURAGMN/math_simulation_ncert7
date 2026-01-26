@@ -1,838 +1,515 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parallel Lines & Transversal - Corresponding, Alternate & Interior Angles</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Parallel Lines & Transversal</title>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f4f6f8;
+  touch-action: manipulation;
+}
 
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 10px;
-            font-size: 2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+}
 
-        .subtitle {
-            text-align: center;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-        }
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 4px;
+  color: #444;
+}
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 420px;
-            gap: 20px;
-        }
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
 
-        @media (max-width: 1000px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
+.visual {
+  position: relative;
+  height: 38vh;
+  min-height: 260px;
+  background: linear-gradient(135deg, #f093fb15 0%, #f5576c15 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+}
 
-        .canvas-container {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
+svg { width: 100%; height: 100%; }
 
-        canvas {
-            display: block;
-            margin: 0 auto;
-            cursor: grab;
-        }
+.static-hint {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  color: #f5576c;
+  font-weight: 500;
+}
 
-        canvas:active {
-            cursor: grabbing;
-        }
+.metrics {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  background: rgba(255,255,255,0.96);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
 
-        .controls {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
+.metrics .row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
 
-        .control-group {
-            margin-bottom: 20px;
-        }
+.metrics .angle-box {
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 10px;
+}
 
-        .control-group label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
+.metrics .a1 { background: #e74c3c20; color: #c0392b; }
+.metrics .a2 { background: #3498db20; color: #2980b9; }
+.metrics .divider {
+  border-top: 1px solid #eee;
+  padding-top: 4px;
+  margin-top: 4px;
+}
 
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+.control-toggle {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  background: #f5576c;
+  color: #fff;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
 
-        input[type="range"] {
-            flex: 1;
-            height: 8px;
-            border-radius: 4px;
-            background: linear-gradient(90deg, #f093fb, #f5576c);
-            outline: none;
-            -webkit-appearance: none;
-        }
+.control-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.98);
+  border-top: 1px solid #ddd;
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  transform: translateY(100%);
+  transition: transform .25s ease;
+  max-height: 60%;
+  overflow-y: auto;
+}
 
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: white;
-            border: 3px solid #f5576c;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
+.control-overlay.open { transform: translateY(0); }
 
-        .angle-value {
-            min-width: 45px;
-            text-align: center;
-            font-weight: 700;
-            color: #f5576c;
-            font-size: 1rem;
-        }
+.control-group {
+  margin-bottom: 12px;
+}
 
-        .highlight-section {
-            margin-bottom: 20px;
-        }
+.control-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #333;
+}
 
-        .highlight-section h3 {
-            color: #333;
-            margin-bottom: 12px;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+.control-label span:last-child {
+  font-weight: 700;
+  color: #f5576c;
+}
 
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+.control-group input[type="range"] {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e0e0e0;
+  -webkit-appearance: none;
+}
 
-        .highlight-btn {
-            padding: 8px 14px;
-            border: 2px solid #ddd;
-            border-radius: 20px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f5576c;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
 
-        .highlight-btn:hover {
-            border-color: #f5576c;
-            background: #fff5f5;
-        }
+.highlight-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
 
-        .highlight-btn.active {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border-color: transparent;
-        }
+.highlight-btn {
+  flex: 1;
+  min-width: 45%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-        .angle-table {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
+.highlight-btn.active {
+  background: #f5576c;
+  color: white;
+  border-color: #f5576c;
+}
 
-        .angle-table h3 {
-            color: #333;
-            margin-bottom: 12px;
-            font-size: 0.95rem;
-            border-bottom: 2px solid #f5576c;
-            padding-bottom: 8px;
-        }
+.submit-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #f5576c;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
 
-        .angle-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-        }
+.concept-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
 
-        .angle-item {
-            padding: 10px 5px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-        }
+.concept-card h3 {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
 
-        .angle-1 { background: rgba(231, 76, 60, 0.2); color: #c0392b; }
-        .angle-2 { background: rgba(52, 152, 219, 0.2); color: #2980b9; }
-        .angle-3 { background: rgba(46, 204, 113, 0.2); color: #27ae60; }
-        .angle-4 { background: rgba(155, 89, 182, 0.2); color: #8e44ad; }
-        .angle-5 { background: rgba(231, 76, 60, 0.2); color: #c0392b; }
-        .angle-6 { background: rgba(52, 152, 219, 0.2); color: #2980b9; }
-        .angle-7 { background: rgba(46, 204, 113, 0.2); color: #27ae60; }
-        .angle-8 { background: rgba(155, 89, 182, 0.2); color: #8e44ad; }
+.concept-card p {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+}
 
-        .angle-item.highlighted {
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+.concept-card .rule {
+  background: #f5576c15;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 11px;
+}
 
-        .concept-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+.concept-card .rule strong { color: #f5576c; }
 
-        .concept-card {
-            padding: 15px;
-            border-radius: 12px;
-            transition: all 0.3s;
-        }
-
-        .concept-card h4 {
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .concept-card p {
-            font-size: 0.8rem;
-            line-height: 1.5;
-            color: #555;
-        }
-
-        .concept-card .formula {
-            background: rgba(255,255,255,0.7);
-            padding: 8px 12px;
-            border-radius: 8px;
-            margin-top: 8px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .corresponding-card {
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            border-left: 4px solid #27ae60;
-        }
-        .corresponding-card h4 { color: #1e8449; }
-
-        .alternate-card {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border-left: 4px solid #2196f3;
-        }
-        .alternate-card h4 { color: #1565c0; }
-
-        .interior-card {
-            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
-            border-left: 4px solid #f39c12;
-        }
-        .interior-card h4 { color: #d68910; }
-
-        .vertically-card {
-            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
-            border-left: 4px solid #e91e63;
-        }
-        .vertically-card h4 { color: #c2185b; }
-
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: white;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-        }
-
-        .legend-color {
-            width: 20px;
-            height: 4px;
-            border-radius: 2px;
-        }
-
-        .nav-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 25px;
-            background: white;
-            color: #f5576c;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .nav-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
-
-        .toggle-parallel {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 26px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.3s;
-            border-radius: 26px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
-        }
-
-        .toggle-switch input:checked + .toggle-slider {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .toggle-switch input:checked + .toggle-slider:before {
-            transform: translateX(24px);
-        }
-
-        .parallel-status {
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .parallel-status.is-parallel {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            color: #155724;
-        }
-
-        .parallel-status.not-parallel {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            color: #721c24;
-        }
-    </style>
+/* SVG */
+.line-l { stroke: #3498db; stroke-width: 3; }
+.line-m { stroke: #27ae60; stroke-width: 3; }
+.line-t { stroke: #e74c3c; stroke-width: 3; }
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Parallel Lines & Transversal</h1>
-        <p class="subtitle">Exploring Corresponding, Alternate, and Interior Angles</p>
-
-        <div class="main-content">
-            <div class="canvas-container">
-                <canvas id="canvas" width="700" height="550"></canvas>
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #3498db;"></div>
-                        <span>Line l (parallel)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #27ae60;"></div>
-                        <span>Line m (parallel)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #e74c3c;"></div>
-                        <span>Transversal t</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="controls">
-                <div class="toggle-parallel">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="parallelToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span style="font-weight: 600; color: #333;">Lines are Parallel</span>
-                    <span class="parallel-status is-parallel" id="parallelStatus">l ∥ m</span>
-                </div>
-
-                <div class="control-group">
-                    <label>Transversal Angle</label>
-                    <div class="slider-container">
-                        <input type="range" id="transversalAngle" min="20" max="160" value="60">
-                        <span class="angle-value" id="transversalValue">60°</span>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label>Distance Between Parallel Lines</label>
-                    <div class="slider-container">
-                        <input type="range" id="lineDistance" min="80" max="200" value="140">
-                        <span class="angle-value" id="distanceValue">140</span>
-                    </div>
-                </div>
-
-                <div class="control-group" id="nonParallelControl" style="display: none;">
-                    <label>Line m Tilt (Non-parallel)</label>
-                    <div class="slider-container">
-                        <input type="range" id="lineMTilt" min="-30" max="30" value="0">
-                        <span class="angle-value" id="tiltValue">0°</span>
-                    </div>
-                </div>
-
-                <div class="highlight-section">
-                    <h3>🔍 Highlight Angle Pairs</h3>
-                    <div class="button-group">
-                        <button class="highlight-btn" data-type="none">None</button>
-                        <button class="highlight-btn" data-type="corresponding">Corresponding</button>
-                        <button class="highlight-btn" data-type="alternate">Alternate</button>
-                        <button class="highlight-btn" data-type="interior">Co-Interior</button>
-                        <button class="highlight-btn" data-type="vertically">Vertically Opposite</button>
-                    </div>
-                </div>
-
-                <div class="angle-table">
-                    <h3>📐 Eight Angles Formed</h3>
-                    <div class="angle-grid">
-                        <div class="angle-item angle-1" id="a1">∠1 = <span id="angle1">60°</span></div>
-                        <div class="angle-item angle-2" id="a2">∠2 = <span id="angle2">120°</span></div>
-                        <div class="angle-item angle-3" id="a3">∠3 = <span id="angle3">60°</span></div>
-                        <div class="angle-item angle-4" id="a4">∠4 = <span id="angle4">120°</span></div>
-                        <div class="angle-item angle-5" id="a5">∠5 = <span id="angle5">60°</span></div>
-                        <div class="angle-item angle-6" id="a6">∠6 = <span id="angle6">120°</span></div>
-                        <div class="angle-item angle-7" id="a7">∠7 = <span id="angle7">60°</span></div>
-                        <div class="angle-item angle-8" id="a8">∠8 = <span id="angle8">120°</span></div>
-                    </div>
-                </div>
-
-                <div class="concept-cards">
-                    <div class="concept-card corresponding-card">
-                        <h4>🟢 Corresponding Angles</h4>
-                        <p>Angles in the same position at each intersection. When lines are parallel, they are <strong>equal</strong>.</p>
-                        <div class="formula">∠1 = ∠5, ∠2 = ∠6, ∠3 = ∠7, ∠4 = ∠8</div>
-                    </div>
-
-                    <div class="concept-card alternate-card">
-                        <h4>🔵 Alternate Angles</h4>
-                        <p>Angles on opposite sides of the transversal, between the parallel lines. They are <strong>equal</strong>.</p>
-                        <div class="formula">∠3 = ∠6 (Alternate Interior)<br>∠4 = ∠5 (Alternate Interior)</div>
-                    </div>
-
-                    <div class="concept-card interior-card">
-                        <h4>🟡 Co-Interior Angles</h4>
-                        <p>Angles on the same side of transversal, between parallel lines. They add up to <strong>180°</strong>.</p>
-                        <div class="formula">∠3 + ∠5 = 180°<br>∠4 + ∠6 = 180°</div>
-                    </div>
-
-                    <div class="concept-card vertically-card">
-                        <h4>🔴 Vertically Opposite</h4>
-                        <p>Angles opposite each other at an intersection point. Always <strong>equal</strong>.</p>
-                        <div class="formula">∠1 = ∠3, ∠2 = ∠4, ∠5 = ∠7, ∠6 = ∠8</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <a href="index.html" class="nav-link">← Back to All Simulations</a>
+<div id="app">
+  <div class="section-title">Reference (transversal at 60°)</div>
+  <div class="sim-card" id="ref"></div>
+  
+  <div class="section-title">Experiment (change angle)</div>
+  <div class="sim-card" id="exp"></div>
+  
+  <div class="concept-card">
+    <h3>What to observe</h3>
+    <p>Line <b style="color:#e74c3c">t</b> (transversal) cuts parallel lines <b style="color:#3498db">l</b> and <b style="color:#27ae60">m</b>.</p>
+    <div class="rule">
+      <p><strong>Corresponding:</strong> ∠1=∠5, ∠2=∠6... (same position, equal)</p>
+      <p style="margin-top:4px;"><strong>Alternate:</strong> ∠3=∠6, ∠4=∠5 (opposite sides, equal)</p>
+      <p style="margin-top:4px;"><strong>Co-interior:</strong> ∠3+∠5=180°, ∠4+∠6=180°</p>
     </div>
+  </div>
+</div>
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+<script>
+function createSimulation(containerId, isInteractive, initialAngle) {
+  const c = document.getElementById(containerId);
+  let angle = initialAngle;
+  let highlight = 'none';
+  
+  function getAngles() {
+    const a = angle;
+    const b = 180 - angle;
+    return {a1:a, a2:b, a3:a, a4:b, a5:a, a6:b, a7:a, a8:b};
+  }
+  
+  function getMetricsHtml() {
+    const ang = getAngles();
+    return `
+      <div style="font-weight:600;margin-bottom:4px;font-size:10px;color:#666;">At line l:</div>
+      <div class="row">
+        <span class="angle-box a1">∠1=${ang.a1.toFixed(0)}°</span>
+        <span class="angle-box a2">∠2=${ang.a2.toFixed(0)}°</span>
+        <span class="angle-box a1">∠3=${ang.a3.toFixed(0)}°</span>
+        <span class="angle-box a2">∠4=${ang.a4.toFixed(0)}°</span>
+      </div>
+      <div style="font-weight:600;margin:6px 0 4px;font-size:10px;color:#666;">At line m:</div>
+      <div class="row">
+        <span class="angle-box a1">∠5=${ang.a5.toFixed(0)}°</span>
+        <span class="angle-box a2">∠6=${ang.a6.toFixed(0)}°</span>
+        <span class="angle-box a1">∠7=${ang.a7.toFixed(0)}°</span>
+        <span class="angle-box a2">∠8=${ang.a8.toFixed(0)}°</span>
+      </div>
+      <div class="divider">
+        <span style="color:#666;">∠3+∠5 = </span><span style="font-weight:700;">${(ang.a3+ang.a5).toFixed(0)}°</span>
+      </div>
+    `;
+  }
 
-        // Controls
-        const transversalAngleSlider = document.getElementById('transversalAngle');
-        const transversalValue = document.getElementById('transversalValue');
-        const lineDistanceSlider = document.getElementById('lineDistance');
-        const distanceValue = document.getElementById('distanceValue');
-        const parallelToggle = document.getElementById('parallelToggle');
-        const lineMTiltSlider = document.getElementById('lineMTilt');
-        const tiltValue = document.getElementById('tiltValue');
-        const nonParallelControl = document.getElementById('nonParallelControl');
-        const parallelStatus = document.getElementById('parallelStatus');
-        const highlightButtons = document.querySelectorAll('.highlight-btn');
+  const controlsHtml = `
+    <div class="control-group">
+      <div class="control-label">
+        <span>Transversal angle</span>
+        <span id="slider_val">${angle}°</span>
+      </div>
+      <input type="range" id="angleSlider" min="25" max="155" step="1" value="${angle}">
+    </div>
+    <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:#333;">Highlight angle pairs:</div>
+    <div class="highlight-btns">
+      <button class="highlight-btn active" data-type="none">None</button>
+      <button class="highlight-btn" data-type="corresponding">Corresponding</button>
+      <button class="highlight-btn" data-type="alternate">Alternate</button>
+      <button class="highlight-btn" data-type="cointerior">Co-interior</button>
+    </div>
+  `;
 
-        let transversalAngle = 60;
-        let lineDistance = 140;
-        let isParallel = true;
-        let lineMTilt = 0;
-        let highlightType = 'none';
+  c.innerHTML = `
+  <div class="visual">
+    ${isInteractive ? '<div class="static-hint">Drag ↻ transversal</div>' : ''}
+    ${isInteractive ? '<button class="control-toggle">Adjust</button>' : ''}
+    
+    <svg viewBox="0 0 400 300" id="svg_${containerId}"></svg>
+    
+    <div class="metrics" id="metricsBox">${getMetricsHtml()}</div>
+    
+    ${isInteractive ? `
+    <div class="control-overlay">
+      ${controlsHtml}
+      <button class="submit-btn">Apply Changes</button>
+    </div>` : ''}
+  </div>`;
 
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-
-        function toRadians(deg) {
-            return deg * Math.PI / 180;
+  const svg = c.querySelector('svg');
+  const gap = 90;
+  const ly = 105, my = ly + gap;
+  
+  function toRad(d) { return d * Math.PI / 180; }
+  
+  function render() {
+    const ang = getAngles();
+    c.querySelector('#metricsBox').innerHTML = getMetricsHtml();
+    
+    // Transversal intersection points
+    const intL = {x: 200, y: ly};
+    const intM = {x: 200 + gap / Math.tan(toRad(angle)), y: my};
+    
+    // Transversal endpoints
+    const tLen = 80;
+    const t1 = {x: intL.x - tLen * Math.cos(toRad(angle)), y: intL.y + tLen * Math.sin(toRad(angle))};
+    const t2 = {x: intM.x + tLen * Math.cos(toRad(angle)), y: intM.y - tLen * Math.sin(toRad(angle))};
+    
+    // Highlight colors
+    function getHighlight(angleNum) {
+      if (highlight === 'corresponding') {
+        if ([1,5].includes(angleNum) || [2,6].includes(angleNum) || 
+            [3,7].includes(angleNum) || [4,8].includes(angleNum)) {
+          return (angleNum % 2 === 1) ? '#e74c3c' : '#3498db';
         }
+      } else if (highlight === 'alternate') {
+        if ([3,6].includes(angleNum) || [4,5].includes(angleNum)) return '#9b59b6';
+      } else if (highlight === 'cointerior') {
+        if ([3,5].includes(angleNum) || [4,6].includes(angleNum)) return '#f39c12';
+      }
+      return 'transparent';
+    }
+    
+    // Arc paths
+    const arcR = 20;
+    function arcPath(cx, cy, startAng, endAng) {
+      const s = toRad(startAng);
+      const e = toRad(endAng);
+      const x1 = cx + arcR * Math.cos(s);
+      const y1 = cy + arcR * Math.sin(s);
+      const x2 = cx + arcR * Math.cos(e);
+      const y2 = cy + arcR * Math.sin(e);
+      return `M ${cx} ${cy} L ${x1} ${y1} A ${arcR} ${arcR} 0 0 1 ${x2} ${y2} Z`;
+    }
+    
+    // Angle arcs at line l
+    const arcsL = `
+      <path d="${arcPath(intL.x, intL.y, -angle, 0)}" fill="${getHighlight(1)}" opacity="0.4"/>
+      <path d="${arcPath(intL.x, intL.y, 180, 360-angle)}" fill="${getHighlight(2)}" opacity="0.4"/>
+      <path d="${arcPath(intL.x, intL.y, 180-angle, 180)}" fill="${getHighlight(3)}" opacity="0.4"/>
+      <path d="${arcPath(intL.x, intL.y, 0, 180-angle)}" fill="${getHighlight(4)}" opacity="0.4"/>
+    `;
+    
+    // Angle arcs at line m
+    const arcsM = `
+      <path d="${arcPath(intM.x, intM.y, -angle, 0)}" fill="${getHighlight(5)}" opacity="0.4"/>
+      <path d="${arcPath(intM.x, intM.y, 180, 360-angle)}" fill="${getHighlight(6)}" opacity="0.4"/>
+      <path d="${arcPath(intM.x, intM.y, 180-angle, 180)}" fill="${getHighlight(7)}" opacity="0.4"/>
+      <path d="${arcPath(intM.x, intM.y, 0, 180-angle)}" fill="${getHighlight(8)}" opacity="0.4"/>
+    `;
+    
+    svg.innerHTML = `
+      ${arcsL}
+      ${arcsM}
+      
+      <!-- Parallel lines -->
+      <line x1="50" y1="${ly}" x2="350" y2="${ly}" class="line-l"/>
+      <line x1="50" y1="${my}" x2="350" y2="${my}" class="line-m"/>
+      
+      <!-- Parallel marks -->
+      <path d="M 120 ${ly-6} L 130 ${ly-6} M 120 ${ly-2} L 130 ${ly-2}" stroke="#666" stroke-width="2" fill="none"/>
+      <path d="M 120 ${my-6} L 130 ${my-6} M 120 ${my-2} L 130 ${my-2}" stroke="#666" stroke-width="2" fill="none"/>
+      
+      <!-- Transversal -->
+      <line x1="${t1.x}" y1="${t1.y}" x2="${t2.x}" y2="${t2.y}" class="line-t"/>
+      
+      <!-- Labels -->
+      <text x="355" y="${ly+4}" font-size="14" fill="#3498db" font-weight="600">l</text>
+      <text x="355" y="${my+4}" font-size="14" fill="#27ae60" font-weight="600">m</text>
+      <text x="${t2.x+5}" y="${t2.y-5}" font-size="14" fill="#e74c3c" font-weight="600">t</text>
+      
+      <!-- Angle labels at l -->
+      <text x="${intL.x+25}" y="${intL.y-8}" font-size="10" fill="#c0392b">1</text>
+      <text x="${intL.x-35}" y="${intL.y-8}" font-size="10" fill="#2980b9">2</text>
+      <text x="${intL.x-35}" y="${intL.y+15}" font-size="10" fill="#c0392b">3</text>
+      <text x="${intL.x+25}" y="${intL.y+15}" font-size="10" fill="#2980b9">4</text>
+      
+      <!-- Angle labels at m -->
+      <text x="${intM.x+25}" y="${intM.y-8}" font-size="10" fill="#c0392b">5</text>
+      <text x="${intM.x-35}" y="${intM.y-8}" font-size="10" fill="#2980b9">6</text>
+      <text x="${intM.x-35}" y="${intM.y+15}" font-size="10" fill="#c0392b">7</text>
+      <text x="${intM.x+25}" y="${intM.y+15}" font-size="10" fill="#2980b9">8</text>
+      
+      <!-- Intersection points -->
+      <circle cx="${intL.x}" cy="${intL.y}" r="4" fill="#333"/>
+      <circle cx="${intM.x}" cy="${intM.y}" r="4" fill="#333"/>
+      
+      ${isInteractive ? `<circle cx="${t2.x}" cy="${t2.y}" r="14" fill="#e74c3c" stroke="white" stroke-width="2" id="dragHandle" style="cursor:grab"/>` : ''}
+    `;
+  }
+  
+  render();
+  
+  if (isInteractive) {
+    let dragging = false;
+    const intLy = ly;
+    
+    function getAngleFromPoint(clientX, clientY) {
+      const rect = svg.getBoundingClientRect();
+      const svgX = (clientX - rect.left) / rect.width * 400;
+      const svgY = (clientY - rect.top) / rect.height * 300;
+      const dx = svgX - 200;
+      const dy = intLy - svgY;
+      let a = Math.atan2(dy, dx) * 180 / Math.PI;
+      if (a < 0) a += 180;
+      return Math.max(25, Math.min(155, a));
+    }
+    
+    svg.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      const handle = c.querySelector('#dragHandle');
+      if (!handle) return;
+      const rect = handle.getBoundingClientRect();
+      if (Math.hypot(touch.clientX - rect.left - 14, touch.clientY - rect.top - 14) < 40) {
+        dragging = true;
+        c.querySelector('.static-hint')?.remove();
+      }
+    });
+    
+    svg.addEventListener('touchmove', (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      angle = getAngleFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+      render();
+    });
+    
+    svg.addEventListener('touchend', () => { dragging = false; });
+    
+    svg.addEventListener('mousedown', (e) => {
+      if (e.target.id === 'dragHandle') {
+        dragging = true;
+        c.querySelector('.static-hint')?.remove();
+      }
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      angle = getAngleFromPoint(e.clientX, e.clientY);
+      render();
+    });
+    
+    document.addEventListener('mouseup', () => { dragging = false; });
+    
+    // Controls
+    const toggleBtn = c.querySelector('.control-toggle');
+    const overlay = c.querySelector('.control-overlay');
+    const slider = c.querySelector('#angleSlider');
+    const sliderVal = c.querySelector('#slider_val');
+    const submitBtn = c.querySelector('.submit-btn');
+    const highlightBtns = c.querySelectorAll('.highlight-btn');
+    
+    toggleBtn.addEventListener('click', () => {
+      overlay.classList.toggle('open');
+      toggleBtn.textContent = overlay.classList.contains('open') ? 'Close' : 'Adjust';
+    });
+    
+    slider.addEventListener('input', () => {
+      sliderVal.textContent = slider.value + '°';
+    });
+    
+    highlightBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        highlightBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        highlight = btn.dataset.type;
+        render();
+      });
+    });
+    
+    submitBtn.addEventListener('click', () => {
+      angle = parseFloat(slider.value);
+      render();
+      overlay.classList.remove('open');
+      toggleBtn.textContent = 'Adjust';
+    });
+  }
+}
 
-        function drawLine(x1, y1, x2, y2, color, width, label, labelPos) {
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = width;
-            ctx.stroke();
-
-            if (label) {
-                ctx.fillStyle = color;
-                ctx.font = 'bold 18px Segoe UI';
-                ctx.fillText(label, labelPos.x, labelPos.y);
-            }
-        }
-
-        function drawAngleArc(cx, cy, startAngle, endAngle, color, radius, label, highlight) {
-            const alpha = highlight ? 0.4 : 0.15;
-            const lineWidth = highlight ? 4 : 2;
-
-            ctx.beginPath();
-            ctx.arc(cx, cy, radius, toRadians(startAngle), toRadians(endAngle));
-            ctx.strokeStyle = color;
-            ctx.lineWidth = lineWidth;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.arc(cx, cy, radius, toRadians(startAngle), toRadians(endAngle));
-            ctx.closePath();
-            ctx.fillStyle = color.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
-            ctx.fill();
-
-            if (label) {
-                const midAngle = (startAngle + endAngle) / 2;
-                const labelRadius = radius + 18;
-                const labelX = cx + labelRadius * Math.cos(toRadians(midAngle));
-                const labelY = cy + labelRadius * Math.sin(toRadians(midAngle));
-                
-                ctx.fillStyle = highlight ? color : '#666';
-                ctx.font = highlight ? 'bold 14px Segoe UI' : '12px Segoe UI';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(label, labelX, labelY);
-            }
-        }
-
-        function drawParallelMarks(x, y, angle) {
-            const markLength = 10;
-            const offset = 15;
-            
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(toRadians(angle));
-            
-            ctx.beginPath();
-            ctx.moveTo(-offset - markLength/2, -5);
-            ctx.lineTo(-offset + markLength/2, -5);
-            ctx.moveTo(-offset - markLength/2, 0);
-            ctx.lineTo(-offset + markLength/2, 0);
-            ctx.strokeStyle = '#666';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            ctx.restore();
-        }
-
-        function getHighlightedAngles() {
-            switch (highlightType) {
-                case 'corresponding':
-                    return [[1, 5], [2, 6], [3, 7], [4, 8]];
-                case 'alternate':
-                    return [[3, 6], [4, 5]];
-                case 'interior':
-                    return [[3, 5], [4, 6]];
-                case 'vertically':
-                    return [[1, 3], [2, 4], [5, 7], [6, 8]];
-                default:
-                    return [];
-            }
-        }
-
-        function isAngleHighlighted(angleNum) {
-            const pairs = getHighlightedAngles();
-            return pairs.some(pair => pair.includes(angleNum));
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw grid
-            ctx.strokeStyle = 'rgba(0,0,0,0.03)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < canvas.width; i += 25) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            for (let i = 0; i < canvas.height; i += 25) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
-
-            const halfDist = lineDistance / 2;
-            const lineLength = 300;
-
-            // Line l position (upper)
-            const l_y = centerY - halfDist;
-            // Line m position (lower)
-            const m_y = centerY + halfDist;
-
-            // Line m tilt for non-parallel case
-            const mTiltRad = isParallel ? 0 : toRadians(lineMTilt);
-
-            // Calculate transversal intersection points
-            const tAngleRad = toRadians(transversalAngle);
-            
-            // Intersection with line l
-            const intL_x = centerX;
-            const intL_y = l_y;
-            
-            // Intersection with line m
-            const intM_x = centerX + (m_y - l_y) / Math.tan(tAngleRad);
-            const intM_y = m_y;
-
-            // Draw lines l and m
-            drawLine(50, l_y, canvas.width - 50, l_y, '#3498db', 4, 'l', { x: canvas.width - 40, y: l_y - 10 });
-            
-            if (isParallel) {
-                drawLine(50, m_y, canvas.width - 50, m_y, '#27ae60', 4, 'm', { x: canvas.width - 40, y: m_y - 10 });
-                // Draw parallel marks
-                drawParallelMarks(150, l_y, 0);
-                drawParallelMarks(150, m_y, 0);
-            } else {
-                const m_x1 = 50;
-                const m_y1 = m_y - (intM_x - 50) * Math.tan(mTiltRad);
-                const m_x2 = canvas.width - 50;
-                const m_y2 = m_y + (canvas.width - 50 - intM_x) * Math.tan(mTiltRad);
-                drawLine(m_x1, m_y1, m_x2, m_y2, '#27ae60', 4, 'm', { x: canvas.width - 40, y: m_y2 - 10 });
-            }
-
-            // Draw transversal
-            const t_extend = 250;
-            const t_x1 = intL_x - t_extend * Math.cos(tAngleRad);
-            const t_y1 = intL_y + t_extend * Math.sin(tAngleRad);
-            const t_x2 = intM_x + t_extend * Math.cos(tAngleRad);
-            const t_y2 = intM_y - t_extend * Math.sin(tAngleRad);
-            
-            drawLine(t_x1, t_y1, t_x2, t_y2, '#e74c3c', 4, 't', { x: t_x2 + 10, y: t_y2 - 5 });
-
-            // Calculate angles
-            const angleAtL = transversalAngle;
-            const angleAtM = isParallel ? transversalAngle : transversalAngle + lineMTilt;
-
-            // Angles at intersection with line l
-            const a1 = angleAtL;
-            const a2 = 180 - angleAtL;
-            const a3 = angleAtL;
-            const a4 = 180 - angleAtL;
-
-            // Angles at intersection with line m
-            const a5 = angleAtM;
-            const a6 = 180 - angleAtM;
-            const a7 = angleAtM;
-            const a8 = 180 - angleAtM;
-
-            // Draw angle arcs at line l intersection
-            const arcRadius = 30;
-            const colors = {
-                1: 'rgb(231, 76, 60)',
-                2: 'rgb(52, 152, 219)',
-                3: 'rgb(46, 204, 113)',
-                4: 'rgb(155, 89, 182)',
-                5: 'rgb(231, 76, 60)',
-                6: 'rgb(52, 152, 219)',
-                7: 'rgb(46, 204, 113)',
-                8: 'rgb(155, 89, 182)'
-            };
-
-            // Line l angles
-            drawAngleArc(intL_x, intL_y, -angleAtL, 0, colors[1], arcRadius, '1', isAngleHighlighted(1));
-            drawAngleArc(intL_x, intL_y, 180, 360 - angleAtL, colors[2], arcRadius + 12, '2', isAngleHighlighted(2));
-            drawAngleArc(intL_x, intL_y, 180 - angleAtL, 180, colors[3], arcRadius, '3', isAngleHighlighted(3));
-            drawAngleArc(intL_x, intL_y, 0, 180 - angleAtL, colors[4], arcRadius + 12, '4', isAngleHighlighted(4));
-
-            // Line m angles (adjust position for non-parallel)
-            const m_int_y = isParallel ? m_y : m_y;
-            drawAngleArc(intM_x, m_int_y, -angleAtM, 0, colors[5], arcRadius, '5', isAngleHighlighted(5));
-            drawAngleArc(intM_x, m_int_y, 180, 360 - angleAtM, colors[6], arcRadius + 12, '6', isAngleHighlighted(6));
-            drawAngleArc(intM_x, m_int_y, 180 - angleAtM, 180, colors[7], arcRadius, '7', isAngleHighlighted(7));
-            drawAngleArc(intM_x, m_int_y, 0, 180 - angleAtM, colors[8], arcRadius + 12, '8', isAngleHighlighted(8));
-
-            // Draw intersection points
-            ctx.beginPath();
-            ctx.arc(intL_x, intL_y, 6, 0, Math.PI * 2);
-            ctx.fillStyle = '#2c3e50';
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.arc(intM_x, m_int_y, 6, 0, Math.PI * 2);
-            ctx.fillStyle = '#2c3e50';
-            ctx.fill();
-
-            // Update angle displays
-            document.getElementById('angle1').textContent = a1.toFixed(1) + '°';
-            document.getElementById('angle2').textContent = a2.toFixed(1) + '°';
-            document.getElementById('angle3').textContent = a3.toFixed(1) + '°';
-            document.getElementById('angle4').textContent = a4.toFixed(1) + '°';
-            document.getElementById('angle5').textContent = a5.toFixed(1) + '°';
-            document.getElementById('angle6').textContent = a6.toFixed(1) + '°';
-            document.getElementById('angle7').textContent = a7.toFixed(1) + '°';
-            document.getElementById('angle8').textContent = a8.toFixed(1) + '°';
-
-            // Update highlighting
-            for (let i = 1; i <= 8; i++) {
-                const elem = document.getElementById('a' + i);
-                if (isAngleHighlighted(i)) {
-                    elem.classList.add('highlighted');
-                } else {
-                    elem.classList.remove('highlighted');
-                }
-            }
-
-            // Draw relationship lines for highlighted pairs
-            if (highlightType !== 'none') {
-                const pairs = getHighlightedAngles();
-                ctx.setLineDash([5, 5]);
-                
-                pairs.forEach(pair => {
-                    const angle1Num = pair[0];
-                    const angle2Num = pair[1];
-                    
-                    // Get positions
-                    let pos1, pos2;
-                    if (angle1Num <= 4) {
-                        pos1 = { x: intL_x, y: intL_y };
-                    } else {
-                        pos1 = { x: intM_x, y: m_int_y };
-                    }
-                    if (angle2Num <= 4) {
-                        pos2 = { x: intL_x, y: intL_y };
-                    } else {
-                        pos2 = { x: intM_x, y: m_int_y };
-                    }
-
-                    if (pos1.x !== pos2.x || pos1.y !== pos2.y) {
-                        ctx.beginPath();
-                        ctx.moveTo(pos1.x, pos1.y);
-                        ctx.lineTo(pos2.x, pos2.y);
-                        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-                        ctx.lineWidth = 2;
-                        ctx.stroke();
-                    }
-                });
-                
-                ctx.setLineDash([]);
-            }
-        }
-
-        // Event listeners
-        transversalAngleSlider.addEventListener('input', function() {
-            transversalAngle = parseFloat(this.value);
-            transversalValue.textContent = transversalAngle + '°';
-            draw();
-        });
-
-        lineDistanceSlider.addEventListener('input', function() {
-            lineDistance = parseFloat(this.value);
-            distanceValue.textContent = lineDistance;
-            draw();
-        });
-
-        parallelToggle.addEventListener('change', function() {
-            isParallel = this.checked;
-            nonParallelControl.style.display = isParallel ? 'none' : 'block';
-            
-            if (isParallel) {
-                parallelStatus.textContent = 'l ∥ m';
-                parallelStatus.classList.remove('not-parallel');
-                parallelStatus.classList.add('is-parallel');
-                lineMTilt = 0;
-                lineMTiltSlider.value = 0;
-                tiltValue.textContent = '0°';
-            } else {
-                parallelStatus.textContent = 'l ∦ m';
-                parallelStatus.classList.remove('is-parallel');
-                parallelStatus.classList.add('not-parallel');
-            }
-            draw();
-        });
-
-        lineMTiltSlider.addEventListener('input', function() {
-            lineMTilt = parseFloat(this.value);
-            tiltValue.textContent = lineMTilt + '°';
-            draw();
-        });
-
-        highlightButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
-                highlightButtons.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                highlightType = this.dataset.type;
-                draw();
-            });
-        });
-
-        // Set initial active button
-        document.querySelector('[data-type="none"]').classList.add('active');
-
-        // Initial draw
-        draw();
-    </script>
+createSimulation('ref', false, 60);
+createSimulation('exp', true, 60);
+</script>
 </body>
 </html>
