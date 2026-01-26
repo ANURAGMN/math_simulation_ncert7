@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Light and Shadows</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f4f6f8;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 4px;
+  color: #444;
+}
+
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
+
+.visual {
+  position: relative;
+  height: 32vh;
+  min-height: 220px;
+  background: #eef3f9;
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+}
+
+svg { width: 100%; height: 100%; }
+
+.static-hint {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.3;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.metrics {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  background: rgba(255,255,255,0.96);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.control-toggle {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  background: #007AFF;
+  color: #fff;
+  font-size: 11px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.control-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.97);
+  border-top: 1px solid #ddd;
+  padding: 8px;
+  transform: translateY(100%);
+  transition: transform .25s ease;
+}
+
+.control-overlay.open { transform: translateY(0); }
+
+.control-group {
+  margin-bottom: 6px;
+}
+
+.control-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.control-group input[type="range"] {
+  width: 100%;
+}
+
+.segmented {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.segmented button {
+  flex: 1;
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  font-size: 11px;
+  background: #e0e0e0;
+  cursor: pointer;
+}
+
+.segmented button.active {
+  background: #007AFF;
+  color: white;
+  font-weight: 600;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background: #007AFF;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* SVG element styles - customize per simulation */
+.hover-hint text {
+  font-size: 16px;
+  fill: #333;
+  font-weight: 500;
+}
+
+.hover-hint rect {
+  fill: rgba(255,255,255,0.95);
+  stroke: #007AFF;
+  stroke-dasharray: 4 3;
+  rx: 6;
+  ry: 6;
+}
+
+.light-source { fill: #FFD700; stroke: #FFA500; stroke-width: 2; }
+.object { fill: #333; stroke: #111; stroke-width: 2; }
+.screen { fill: #eee; stroke: #ccc; stroke-width: 1; }
+.shadow { fill: rgba(0,0,0,0.55); }
+.light-ray { stroke: #FFD700; stroke-width: 3; stroke-dasharray: 5 5; }
+</style>
+</head>
+
+<body>
+<div id="app">
+  <div class="section-title">Reference (baseline)</div>
+  <div class="sim-card" id="ref"></div>
+  
+  <div class="section-title">Experiment (change & observe)</div>
+  <div class="sim-card" id="exp"></div>
+</div>
+
+<script>
+function createSimulation(containerId, isInteractive) {
+  const c = document.getElementById(containerId);
+  
+  // Helper to generate SVG elements
+  function generateSvgElement(element, isInteractive) {
+      let attrs = Object.entries(element.attributes || {})
+          .map(([key, value]) => `${key}="${value}"`)
+          .join(" ");
+      let styles = Object.entries(element.style || {})
+          .map(([key, value]) => `${key}:${value}`)
+          .join(";");
+      if (styles) attrs += ` style="${styles}"`;
+      if (element.class) attrs += ` class="${element.class}"`;
+      if (element.id) attrs += ` id="${element.id}"`;
+
+      let innerHtml = "";
+      if (element.children) {
+          innerHtml = element.children.map(child => generateSvgElement(child, isInteractive)).join("");
+      }
+
+      let svgString = `<${element.type} ${attrs}>${innerHtml}</${element.type}>`;
+
+      if (element.draggable && element.hover_hint && isInteractive) {
+          const hintText = element.hover_hint.text;
+          const textWidth = hintText.length * 6 + 10; // Heuristic for text width
+          const textHeight = 16;
+          const rectPadding = 8;
+          const rectWidth = textWidth + rectPadding * 2;
+          const rectHeight = textHeight + rectPadding * 2;
+
+          let rectX, rectY, textX, textY;
+
+          if (element.id === "lightSource") {
+              const cx = element.attributes.cx || 0;
+              const cy = element.attributes.cy || 0;
+              const r = element.attributes.r || 0;
+              rectX = cx - rectWidth / 2;
+              rectY = cy - r - rectHeight - 5;
+              textX = cx;
+              textY = cy - r - rectHeight / 2 - 5;
+          } else if (element.id === "objectGroup") {
+              const objectRect = element.children.find(c => c.id === "objectRect");
+              const objX = objectRect.attributes.x;
+              const objY = objectRect.attributes.y;
+              const objWidth = objectRect.attributes.width;
+              rectX = objX + objWidth / 2 - rectWidth / 2;
+              rectY = objY - rectHeight - 5;
+              textX = objX + objWidth / 2;
+              textY = objY - rectHeight / 2 - 5;
+          }
+
+          svgString = `
+              <g id="${element.id}_draggable_wrapper">
+                  ${svgString}
+                  <g class="hover-hint" id="${element.id}_hover_hint">
+                      <rect x="${rectX}" y="${rectY}" width="${rectWidth}" height="${rectHeight}" />
+                      <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="middle">${hintText}</text>
+                  </g>
+              </g>
+          `;
+      }
+      return svgString;
+  }
+
+  const svgElementsHtml = [
+    {
+      "id": "lightSource",
+      "type": "circle",
+      "class": "light-source draggable",
+      "attributes": {
+        "cx": 120,
+        "cy": 250,
+        "r": 20
+      },
+      "style": {
+        "fill": "#FFD700",
+        "stroke": "#FFA500",
+        "stroke-width": 2
+      },
+      "draggable": true,
+      "drag_config": {
+        "axis": "y",
+        "min": 50,
+        "max": 450,
+        "maps_to_variable": "light_source_angle"
+      },
+      "hover_hint": {
+        "show": true,
+        "text": "Drag \u2195",
+        "disappear_on_first_drag": true
+      }
+    },
+    {
+      "id": "objectGroup",
+      "type": "g",
+      "class": "object-group",
+      "draggable": true,
+      "drag_config": {
+        "axis": "x",
+        "min": 220,
+        "max": 720,
+        "maps_to_variable": "light_source_distance"
+      },
+      "hover_hint": {
+        "show": true,
+        "text": "Drag \u2194",
+        "disappear_on_first_drag": true
+      },
+      "children": [
+        {
+          "id": "objectRect",
+          "type": "rect",
+          "class": "object",
+          "attributes": {
+            "x": 400,
+            "y": 200,
+            "width": 30,
+            "height": 100
+          },
+          "style": {
+            "fill": "#333",
+            "stroke": "#111",
+            "stroke-width": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "screen",
+      "type": "rect",
+      "class": "screen",
+      "attributes": {
+        "x": 850,
+        "y": 0,
+        "width": 10,
+        "height": 500
+      },
+      "style": {
+        "fill": "#eee",
+        "stroke": "#ccc",
+        "stroke-width": 1
+      }
+    },
+    {
+      "id": "shadow",
+      "type": "rect",
+      "class": "shadow",
+      "attributes": {
+        "x": 850,
+        "y": 200,
+        "width": 10,
+        "height": 100
+      },
+      "style": {
+        "fill": "rgba(0,0,0,0.55)"
+      }
+    },
+    {
+      "id": "rayTop1",
+      "type": "line",
+      "class": "light-ray",
+      "attributes": {
+        "x1": 120,
+        "y1": 250,
+        "x2": 400,
+        "y2": 200
+      },
+      "style": {
+        "stroke": "#FFD700",
+        "stroke-width": 3,
+        "stroke-dasharray": "5 5"
+      }
+    },
+    {
+      "id": "rayTop2",
+      "type": "line",
+      "class": "light-ray",
+      "attributes": {
+        "x1": 400,
+        "y1": 200,
+        "x2": 850,
+        "y2": 200
+      },
+      "style": {
+        "stroke": "#FFD700",
+        "stroke-width": 3,
+        "stroke-dasharray": "5 5"
+      }
+    },
+    {
+      "id": "rayBottom1",
+      "type": "line",
+      "class": "light-ray",
+      "attributes": {
+        "x1": 120,
+        "y1": 250,
+        "x2": 400,
+        "y2": 300
+      },
+      "style": {
+        "stroke": "#FFD700",
+        "stroke-width": 3,
+        "stroke-dasharray": "5 5"
+      }
+    },
+    {
+      "id": "rayBottom2",
+      "type": "line",
+      "class": "light-ray",
+      "attributes": {
+        "x1": 400,
+        "y1": 300,
+        "x2": 850,
+        "y2": 300
+      },
+      "style": {
+        "stroke": "#FFD700",
+        "stroke-width": 3,
+        "stroke-dasharray": "5 5"
+      }
+    }
+  ].map(el => generateSvgElement(el, isInteractive)).join("");
+
+  const controlsHtml = `
+    <div class="control-group">
+      <div class="control-label">Light-Object Distance: <span id="light_source_distance_val">150cm</span></div>
+      <input type="range" data-variable="light_source_distance" min="50" max="300" step="5" value="150">
+    </div>
+    <div class="control-group">
+      <div class="control-label">Object Height: <span id="object_height_val">50cm</span></div>
+      <input type="range" data-variable="object_height" min="10" max="100" step="5" value="50">
+    </div>
+    <div class="control-group">
+      <div class="control-label">Light Angle (vertical): <span id="light_source_angle_val">45degrees</span></div>
+      <input type="range" data-variable="light_source_angle" min="0" max="90" step="5" value="45">
+    </div>
+    <div class="control-group">
+      <div class="control-label">Object Material:</div>
+      <div class="segmented" data-variable="object_material_type">
+        <button class="active" data-value="Opaque">Opaque</button>
+        <button data-value="Translucent">Translucent</button>
+        <button data-value="Transparent">Transparent</button>
+      </div>
+    </div>
+  `;
+
+  const metricsHtml = `
+    <div id="light_source_distance_actual_display">Light-Object Distance: 0 cm</div>
+    <div id="object_distance_from_screen_display">Object-Screen Distance: 0 cm</div>
+    <div id="shadow_length_display">Shadow Length: 0 cm</div>
+    <div id="shadow_clarity_display">Shadow Clarity: 0%</div>
+    <div id="light_blocked_percentage_display">Light Blocked: 0%</div>
+  `;
+
+  // Build HTML structure with visual, controls, metrics
+  c.innerHTML = `
+  <div class="visual">
+    ${isInteractive ? '<div class="static-hint">Drag \u2194 / \u2195</div>' : ''}
+    ${isInteractive ? '<button class="control-toggle">Adjust</button>' : ''}
+    
+    <svg viewBox="0 0 1000 500">
+      ${svgElementsHtml}
+    </svg>
+    
+    <div class="metrics">
+      ${metricsHtml}
+    </div>
+    
+    ${isInteractive ? `
+    <div class="control-overlay">
+      ${controlsHtml}
+      <button class="submit-btn">Apply Changes</button>
+    </div>` : ''}
+  </div>`;
+
+  // Initialize state from design spec defaults
+  let state = {
+    light_source_distance: 150,
+    object_height: 50,
+    light_source_angle: 45,
+    object_material_type: "Opaque"
+  };
+  
+  // Fixed parameters
+  const FIXED_LIGHT_CX = 120;
+  const FIXED_SCREEN_X = 850;
+  const FIXED_OBJECT_WIDTH = 30; // From objectRect width
+
+  // Cache DOM elements
+  const svg = c.querySelector("svg");
+  const lightSourceWrapper = c.querySelector("#lightSource_draggable_wrapper");
+  const lightSource = c.querySelector("#lightSource");
+  const objectGroupWrapper = c.querySelector("#objectGroup_draggable_wrapper");
+  const objectRect = c.querySelector("#objectRect");
+  const screenEl = c.querySelector("#screen");
+  const shadowEl = c.querySelector("#shadow");
+  const rayTop1 = c.querySelector("#rayTop1");
+  const rayTop2 = c.querySelector("#rayTop2");
+  const rayBottom1 = c.querySelector("#rayBottom1");
+  const rayBottom2 = c.querySelector("#rayBottom2");
+
+  const lightSourceHoverHint = c.querySelector("#lightSource_hover_hint");
+  const objectGroupHoverHint = c.querySelector("#objectGroup_hover_hint");
+
+  const lightSourceDistanceVal = c.querySelector("#light_source_distance_val");
+  const objectHeightVal = c.querySelector("#object_height_val");
+  const lightSourceAngleVal = c.querySelector("#light_source_angle_val");
+
+  const lightSourceDistanceActualDisplay = c.querySelector("#light_source_distance_actual_display");
+  const objectDistanceFromScreenDisplay = c.querySelector("#object_distance_from_screen_display");
+  const shadowLengthDisplay = c.querySelector("#shadow_length_display");
+  const shadowClarityDisplay = c.querySelector("#shadow_clarity_display");
+  const lightBlockedPercentageDisplay = c.querySelector("#light_blocked_percentage_display");
+
+  // Physics helper functions from design spec
+  function getIntersectionY(x1, y1, x2, y2, targetX) {
+      if (x1 === x2) { // Vertical line, avoid division by zero
+          return y1; // If targetX is also x1, any y is valid. Here we return y1.
+      }
+      const slope = (y2 - y1) / (x2 - x1);
+      const y_intercept = y1 - slope * x1;
+      return slope * targetX + y_intercept;
+  }
+
+  // Maps angle (0-90) to lightSource.cy (450-50)
+  const angleToCy = (angle) => {
+      const cy_min = 50;
+      const cy_max = 450;
+      const angle_min = 0;
+      const angle_max = 90;
+      return cy_max - ((angle - angle_min) / (angle_max - angle_min)) * (cy_max - cy_min);
+  };
+
+  // Maps lightSource.cy (450-50) to angle (0-90)
+  const cyToAngle = (cy) => {
+      const cy_min = 50;
+      const cy_max = 450;
+      const angle_min = 0;
+      const angle_max = 90;
+      return angle_max - ((cy - cy_min) / (cy_max - cy_min)) * (angle_max - angle_min);
+  };
+  
+  function render() {
+    // Update SVG elements based on state
+    const current_light_cy = angleToCy(state.light_source_angle);
+    const current_object_x = FIXED_LIGHT_CX + state.light_source_distance;
+    const current_object_height_px = state.object_height; // Assuming 1cm = 1px
+    const current_object_y = current_light_cy - current_object_height_px / 2; // Keep object centered vertically with light
+
+    // Update light source position
+    lightSource.setAttribute("cx", FIXED_LIGHT_CX);
+    lightSource.setAttribute("cy", current_light_cy);
+
+    // Update object position and size
+    objectRect.setAttribute("x", current_object_x);
+    objectRect.setAttribute("y", current_object_y);
+    objectRect.setAttribute("width", FIXED_OBJECT_WIDTH);
+    objectRect.setAttribute("height", current_object_height_px);
+
+    // Calculate shadow
+    const object_top_y = current_object_y;
+    const object_bottom_y = current_object_y + current_object_height_px;
+
+    const shadow_top_y = getIntersectionY(FIXED_LIGHT_CX, current_light_cy, current_object_x, object_top_y, FIXED_SCREEN_X);
+    const shadow_bottom_y = getIntersectionY(FIXED_LIGHT_CX, current_light_cy, current_object_x, object_bottom_y, FIXED_SCREEN_X);
+
+    shadowEl.setAttribute("x", FIXED_SCREEN_X);
+    shadowEl.setAttribute("y", Math.min(shadow_top_y, shadow_bottom_y));
+    shadowEl.setAttribute("width", screenEl.getAttribute("width"));
+    shadowEl.setAttribute("height", Math.abs(shadow_bottom_y - shadow_top_y));
+
+    // Update light rays
+    rayTop1.setAttribute("x1", FIXED_LIGHT_CX);
+    rayTop1.setAttribute("y1", current_light_cy);
+    rayTop1.setAttribute("x2", current_object_x);
+    rayTop1.setAttribute("y2", object_top_y);
+
+    rayTop2.setAttribute("x1", current_object_x);
+    rayTop2.setAttribute("y1", object_top_y);
+    rayTop2.setAttribute("x2", FIXED_SCREEN_X);
+    rayTop2.setAttribute("y2", shadow_top_y);
+
+    rayBottom1.setAttribute("x1", FIXED_LIGHT_CX);
+    rayBottom1.setAttribute("y1", current_light_cy);
+    rayBottom1.setAttribute("x2", current_object_x);
+    rayBottom1.setAttribute("y2", object_bottom_y);
+
+    rayBottom2.setAttribute("x1", current_object_x);
+    rayBottom2.setAttribute("y1", object_bottom_y);
+    rayBottom2.setAttribute("x2", FIXED_SCREEN_X);
+    rayBottom2.setAttribute("y2", shadow_bottom_y);
+
+    // Update metrics display
+    const light_source_distance_actual = Math.round(current_object_x - FIXED_LIGHT_CX);
+    const object_distance_from_screen = Math.round(FIXED_SCREEN_X - (current_object_x + FIXED_OBJECT_WIDTH));
+    const shadow_length = Math.round(Math.abs(shadow_bottom_y - shadow_top_y));
+
+    let shadow_clarity = 0;
+    let light_blocked_percentage = 0;
+    let shadowFill = "rgba(0,0,0,0.55)"; // Default for Opaque
+    switch (state.object_material_type) {
+        case "Opaque":
+            shadow_clarity = 100;
+            light_blocked_percentage = 100;
+            shadowFill = "rgba(0,0,0,0.55)";
+            break;
+        case "Translucent":
+            shadow_clarity = 50;
+            light_blocked_percentage = 50;
+            shadowFill = "rgba(0,0,0,0.25)";
+            break;
+        case "Transparent":
+            shadow_clarity = 0;
+            light_blocked_percentage = 0;
+            shadowFill = "rgba(0,0,0,0)";
+            break;
+    }
+    shadowEl.style.fill = shadowFill;
+
+    if (lightSourceDistanceActualDisplay) lightSourceDistanceActualDisplay.innerHTML = `Light-Object Distance: ${light_source_distance_actual} cm`;
+    if (objectDistanceFromScreenDisplay) objectDistanceFromScreenDisplay.innerHTML = `Object-Screen Distance: ${object_distance_from_screen} cm`;
+    if (shadowLengthDisplay) shadowLengthDisplay.innerHTML = `Shadow Length: ${shadow_length} cm`;
+    if (shadowClarityDisplay) shadowClarityDisplay.innerHTML = `Shadow Clarity: ${shadow_clarity}%`;
+    if (lightBlockedPercentageDisplay) lightBlockedPercentageDisplay.innerHTML = `Light Blocked: ${light_blocked_percentage}%`;
+
+    // Update control labels
+    if (lightSourceDistanceVal) lightSourceDistanceVal.textContent = `${state.light_source_distance}cm`;
+    if (objectHeightVal) objectHeightVal.textContent = `${state.object_height}cm`;
+    if (lightSourceAngleVal) lightSourceAngleVal.textContent = `${state.light_source_angle}degrees`;
+  }
+  
+  // Setup interactions (only for experiment panel)
+  if (isInteractive) {
+    let isDraggingLight = false;
+    let initialPointerY = 0;
+    let initialLightCyPx = 0;
+
+    let isDraggingObject = false;
+    let initialPointerX = 0;
+    let initialObjectX = 0;
+
+    // Drag handling for lightSource
+    if (lightSourceWrapper) {
+      lightSourceWrapper.onpointerdown = (e) => {
+        e.preventDefault();
+        isDraggingLight = true;
+        initialPointerY = e.clientY;
+        initialLightCyPx = parseFloat(lightSource.getAttribute("cy"));
+        if (lightSourceHoverHint) lightSourceHoverHint.style.display = "none";
+        lightSourceWrapper.setPointerCapture(e.pointerId);
+      };
+      lightSourceWrapper.onpointermove = (e) => {
+        if (!isDraggingLight) return;
+        const deltaY = e.clientY - initialPointerY;
+        let newCy = initialLightCyPx + deltaY;
+        newCy = Math.max(50, Math.min(450, newCy)); // Clamp to drag_config min/max
+        state.light_source_angle = cyToAngle(newCy);
+        render();
+      };
+      lightSourceWrapper.onpointerup = () => {
+        isDraggingLight = false;
+      };
+    }
+
+    // Drag handling for objectGroup
+    if (objectGroupWrapper) {
+      objectGroupWrapper.onpointerdown = (e) => {
+        e.preventDefault();
+        isDraggingObject = true;
+        initialPointerX = e.clientX;
+        initialObjectX = parseFloat(objectRect.getAttribute("x"));
+        if (objectGroupHoverHint) objectGroupHoverHint.style.display = "none";
+        objectGroupWrapper.setPointerCapture(e.pointerId);
+      };
+      objectGroupWrapper.onpointermove = (e) => {
+        if (!isDraggingObject) return;
+        const deltaX = e.clientX - initialPointerX;
+        let newX = initialObjectX + deltaX;
+        newX = Math.max(220, Math.min(720, newX)); // Clamp to drag_config min/max
+        state.light_source_distance = newX - FIXED_LIGHT_CX;
+        render();
+      };
+      objectGroupWrapper.onpointerup = () => {
+        isDraggingObject = false;
+      };
+    }
+    
+    // Control panel toggle
+    c.querySelector(".control-toggle").onclick = () => {
+      c.querySelector(".control-overlay").classList.toggle("open");
+    };
+    
+    // Slider handlers
+    c.querySelectorAll(".control-group input[type='range']").forEach(slider => {
+      slider.oninput = () => {
+        const variable = slider.dataset.variable;
+        state[variable] = parseFloat(slider.value);
+        render();
+      };
+      // Set initial slider value
+      slider.value = state[slider.dataset.variable];
+    });
+    
+    // Segmented button handlers (if any)
+    c.querySelectorAll(".segmented").forEach(segmentedGroup => {
+      const variable = segmentedGroup.dataset.variable;
+      segmentedGroup.querySelectorAll("button").forEach(button => {
+        button.onclick = () => {
+          segmentedGroup.querySelectorAll("button").forEach(btn => btn.classList.remove("active"));
+          button.classList.add("active");
+          state[variable] = button.dataset.value;
+          render();
+        };
+        // Set initial active button
+        if (button.dataset.value === state[variable]) {
+          button.classList.add("active");
+        }
+      });
+    });
+    
+    // Submit button closes overlay
+    c.querySelector(".submit-btn").onclick = () => {
+      c.querySelector(".control-overlay").classList.remove("open");
+    };
+  }
+  
+  render();
+}
+
+createSimulation("ref", false);
+createSimulation("exp", true);
+</script>
+</body>
+</html>
