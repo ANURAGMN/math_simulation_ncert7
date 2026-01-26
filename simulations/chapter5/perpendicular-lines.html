@@ -257,8 +257,9 @@ function render() {
   // Lines
   const m1 = {x: cx - lineLen, y: cy};
   const m2 = {x: cx + lineLen, y: cy};
-  const l1 = {x: cx - lineLen * Math.cos(toRad(angle - 90)), y: cy + lineLen * Math.sin(toRad(angle - 90))};
-  const l2 = {x: cx + lineLen * Math.cos(toRad(angle - 90)), y: cy - lineLen * Math.sin(toRad(angle - 90))};
+  // Line l: angle is measured from horizontal (0° = horizontal right, 90° = vertical up)
+  const l1 = {x: cx - lineLen * Math.cos(toRad(angle)), y: cy + lineLen * Math.sin(toRad(angle))};
+  const l2 = {x: cx + lineLen * Math.cos(toRad(angle)), y: cy - lineLen * Math.sin(toRad(angle))};
   
   // Store handle position for hit testing
   dragHandlePos = {x: l2.x, y: l2.y};
@@ -325,12 +326,14 @@ function isNearHandle(svgX, svgY) {
 function getAngleFromPoint(svgX, svgY) {
   const dx = svgX - cx;
   const dy = cy - svgY;
-  let a = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-  if (a < 0) a += 360;
-  if (a > 180) a = 360 - a;
-  // Snap to 90 if close
+  // Calculate angle from horizontal (0° = right, 90° = up, 180° = left)
+  let a = Math.atan2(dy, dx) * 180 / Math.PI;
+  // Convert to 0-180 range for our display
+  if (a < 0) a += 180;
+  // Snap to 90 if close (for easier perpendicular finding)
   if (Math.abs(a - 90) < 5) a = 90;
-  return Math.max(20, Math.min(160, a));
+  // Allow range from 15° to 165°
+  return Math.max(15, Math.min(165, a));
 }
 
 // Drag handling
