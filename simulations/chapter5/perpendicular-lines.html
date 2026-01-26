@@ -2,50 +2,72 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Perpendicular Lines</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#27ae60">
+<title>Perpendicular Lines – Right Angles</title>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f4f6f8;
-  touch-action: manipulation;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  -webkit-font-smoothing: antialiased;
 }
 
 #app {
   max-width: 420px;
   margin: auto;
   padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
 }
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 12px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.header h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 12px; opacity: 0.95; }
 
 .section-title {
   font-size: 13px;
   font-weight: 600;
   margin: 8px 4px;
-  color: #444;
+  color: #fff;
 }
 
 .sim-card {
   background: #fff;
   border-radius: 14px;
-  padding: 8px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  padding: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
   margin-bottom: 12px;
 }
 
 .visual {
   position: relative;
   height: 42vh;
-  min-height: 280px;
-  background: linear-gradient(135deg, #11998e15 0%, #38ef7d15 100%);
+  min-height: 300px;
+  background: linear-gradient(145deg, #e8f5e9 0%, #c8e6c9 100%);
   border-radius: 12px;
   overflow: hidden;
   touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-svg { width: 100%; height: 100%; }
+svg { width: 100%; height: 100%; display: block; }
 
 .static-hint {
   position: absolute;
@@ -55,384 +77,277 @@ svg { width: 100%; height: 100%; }
   border-radius: 8px;
   padding: 6px 10px;
   font-size: 11px;
-  line-height: 1.3;
   box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-  color: #11998e;
+  color: #27ae60;
   font-weight: 500;
+  z-index: 10;
 }
 
 .status-badge {
   position: absolute;
   top: 8px;
   right: 8px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 12px;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 13px;
   font-weight: 600;
+  z-index: 10;
 }
 
-.status-badge.yes {
-  background: #27ae60;
-  color: white;
-}
-
-.status-badge.no {
-  background: #e74c3c;
-  color: white;
-}
+.status-badge.yes { background: #27ae60; color: white; }
+.status-badge.no { background: #e74c3c; color: white; }
 
 .metrics {
-  position: absolute;
-  left: 8px;
-  bottom: 8px;
-  background: rgba(255,255,255,0.96);
+  background: #e8f5e9;
   border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 12px;
-  line-height: 1.6;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-}
-
-.metrics .label { color: #666; }
-.metrics .value { font-weight: 700; color: #333; }
-.metrics .value.perfect { color: #27ae60; }
-
-.control-toggle {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  background: #11998e;
-  color: #fff;
-  font-size: 12px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.control-overlay {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  background: rgba(255,255,255,0.98);
-  border-top: 1px solid #ddd;
-  border-radius: 16px 16px 0 0;
-  padding: 16px;
-  transform: translateY(100%);
-  transition: transform .25s ease;
-}
-
-.control-overlay.open { transform: translateY(0); }
-
-.control-group {
-  margin-bottom: 12px;
-}
-
-.control-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  margin-bottom: 6px;
-  color: #333;
-}
-
-.control-label span:last-child {
-  font-weight: 700;
-  color: #11998e;
-}
-
-.control-group input[type="range"] {
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #e0e0e0;
-  -webkit-appearance: none;
-}
-
-.control-group input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #11998e;
-  border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-.submit-btn {
-  width: 100%;
-  margin-top: 8px;
   padding: 12px;
-  border-radius: 10px;
-  border: none;
-  background: #11998e;
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
+  margin-top: 10px;
 }
 
-.snap-btn {
-  width: 100%;
-  margin-top: 8px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 2px solid #11998e;
+.angles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.angle-box {
+  padding: 8px 4px;
+  border-radius: 6px;
+  text-align: center;
   background: white;
-  color: #11998e;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
+  transition: background 0.3s;
 }
 
-.concept-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  margin-bottom: 12px;
-}
+.angle-box.perfect { background: #27ae6030; }
+.angle-box .label { font-size: 10px; color: #666; }
+.angle-box .value { font-size: 14px; font-weight: 700; color: #333; }
+.angle-box.perfect .value { color: #27ae60; }
 
-.concept-card h3 {
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.concept-card p {
+.insight-box {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
   font-size: 12px;
-  color: #666;
   line-height: 1.5;
+  border-left: 4px solid #27ae60;
 }
 
-.concept-card .highlight {
-  background: #11998e20;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 600;
-  color: #11998e;
+.insight-title { font-weight: 600; color: #1b5e20; margin-bottom: 6px; }
+
+.challenge-box {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  text-align: center;
 }
 
-/* SVG styles */
+.challenge-box .icon { font-size: 30px; margin-bottom: 6px; }
+.challenge-box .text { font-size: 12px; color: #666; }
+.challenge-box .goal { font-size: 14px; font-weight: 600; color: #27ae60; margin-top: 6px; }
+
+.takeaway {
+  background: linear-gradient(135deg, #27ae6020 0%, #2ecc7120 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  display: none;
+}
+
+.takeaway.show { display: block; }
+.takeaway-title { font-weight: 600; color: #1b5e20; margin-bottom: 6px; }
+
 .line-m { stroke: #2c3e50; stroke-width: 3; }
 .line-l { stroke: #27ae60; stroke-width: 3; }
 .line-l.not-perp { stroke: #e74c3c; }
-.right-angle-mark { fill: none; stroke: #27ae60; stroke-width: 2; }
-.drag-handle { fill: #27ae60; stroke: white; stroke-width: 2; cursor: grab; }
-.drag-handle.not-perp { fill: #e74c3c; }
+.right-mark { stroke: #27ae60; stroke-width: 2; fill: none; }
 </style>
 </head>
 
 <body>
 <div id="app">
-  <div class="section-title">Reference (perpendicular at 90°)</div>
-  <div class="sim-card" id="ref"></div>
-  
-  <div class="section-title">Experiment (find 90°)</div>
-  <div class="sim-card" id="exp"></div>
-  
-  <div class="concept-card">
-    <h3>Challenge</h3>
-    <p>Drag the green line to make it <span class="highlight">perpendicular</span> to line m.</p>
-    <p style="margin-top:8px;">Perpendicular means all 4 angles are <span class="highlight">90°</span> (right angles).</p>
-    <p style="margin-top:8px;">Notice the □ symbol appears at 90°.</p>
-  </div>
+
+<div class="header">
+  <h1>📐 Perpendicular Lines</h1>
+  <p>Find the perfect 90° angle!</p>
+</div>
+
+<div class="section-title">Drag the green line to make it perpendicular</div>
+<div class="sim-card" id="sim"></div>
+
+<div class="challenge-box">
+  <div class="icon">🎯</div>
+  <div class="text">Can you make all 4 angles equal?</div>
+  <div class="goal">Goal: Each angle = 90°</div>
+</div>
+
+<div class="insight-box">
+  <div class="insight-title">🔑 Key Concept</div>
+  <strong>Perpendicular lines</strong> meet at exactly <strong>90°</strong> (a right angle). When lines are perpendicular, all 4 angles are equal! We mark right angles with a small square □ symbol.
+</div>
+
+<div class="takeaway" id="takeaway">
+  <div class="takeaway-title">🎉 You found it!</div>
+  <span id="takeaway-text"></span>
+</div>
+
 </div>
 
 <script>
-function createSimulation(containerId, isInteractive, initialAngle) {
-  const c = document.getElementById(containerId);
-  let angle = initialAngle;
-  
-  function isPerpendicular() {
-    return Math.abs(angle - 90) < 2;
-  }
-  
-  function getMetricsHtml() {
-    const isPerp = isPerpendicular();
-    const cls = isPerp ? 'perfect' : '';
-    return `
-      <div><span class="label">∠1 = </span><span class="value ${cls}">${angle.toFixed(1)}°</span></div>
-      <div><span class="label">∠2 = </span><span class="value ${cls}">${(180-angle).toFixed(1)}°</span></div>
-      <div><span class="label">∠3 = </span><span class="value ${cls}">${angle.toFixed(1)}°</span></div>
-      <div><span class="label">∠4 = </span><span class="value ${cls}">${(180-angle).toFixed(1)}°</span></div>
-    `;
-  }
+const container = document.getElementById('sim');
+let angle = 45;
+let foundPerpendicular = false;
 
-  const controlsHtml = `
-    <div class="control-group">
-      <div class="control-label">
-        <span>Rotate line l</span>
-        <span id="slider_val">${angle}°</span>
-      </div>
-      <input type="range" id="angleSlider" min="15" max="165" step="1" value="${angle}">
-    </div>
-    <button class="snap-btn" id="snapBtn">📐 Snap to 90°</button>
+function isPerpendicular() {
+  return Math.abs(angle - 90) < 2;
+}
+
+container.innerHTML = `
+<div class="visual">
+  <div class="static-hint" id="hint">👆 Drag to find 90°</div>
+  <div class="status-badge no" id="status">✗ Not perpendicular</div>
+  <svg viewBox="0 0 400 340" id="svg"></svg>
+</div>
+
+<div class="metrics">
+  <div class="angles-grid">
+    <div class="angle-box" id="box1"><div class="label">∠1</div><div class="value" id="a1">45°</div></div>
+    <div class="angle-box" id="box2"><div class="label">∠2</div><div class="value" id="a2">135°</div></div>
+    <div class="angle-box" id="box3"><div class="label">∠3</div><div class="value" id="a3">45°</div></div>
+    <div class="angle-box" id="box4"><div class="label">∠4</div><div class="value" id="a4">135°</div></div>
+  </div>
+</div>`;
+
+const svg = document.getElementById('svg');
+const cx = 200, cy = 170, lineLen = 120;
+
+function toRad(d) { return d * Math.PI / 180; }
+
+function render() {
+  const isPerp = isPerpendicular();
+  const a1 = angle, a2 = 180 - angle;
+  
+  // Update metrics
+  document.getElementById('a1').textContent = a1.toFixed(0) + '°';
+  document.getElementById('a2').textContent = a2.toFixed(0) + '°';
+  document.getElementById('a3').textContent = a1.toFixed(0) + '°';
+  document.getElementById('a4').textContent = a2.toFixed(0) + '°';
+  
+  ['box1', 'box2', 'box3', 'box4'].forEach(id => {
+    document.getElementById(id).className = isPerp ? 'angle-box perfect' : 'angle-box';
+  });
+  
+  // Status badge
+  const status = document.getElementById('status');
+  if (isPerp) {
+    status.className = 'status-badge yes';
+    status.textContent = '✓ Perpendicular!';
+  } else {
+    status.className = 'status-badge no';
+    status.textContent = '✗ Not perpendicular';
+  }
+  
+  // Lines
+  const m1 = {x: cx - lineLen, y: cy};
+  const m2 = {x: cx + lineLen, y: cy};
+  const l1 = {x: cx - lineLen * Math.cos(toRad(angle - 90)), y: cy + lineLen * Math.sin(toRad(angle - 90))};
+  const l2 = {x: cx + lineLen * Math.cos(toRad(angle - 90)), y: cy - lineLen * Math.sin(toRad(angle - 90))};
+  
+  const lineClass = isPerp ? 'line-l' : 'line-l not-perp';
+  const handleColor = isPerp ? '#27ae60' : '#e74c3c';
+  
+  // Right angle marks
+  const markSize = 18;
+  const rightMarks = isPerp ? `
+    <path d="M ${cx + markSize} ${cy} L ${cx + markSize} ${cy - markSize} L ${cx} ${cy - markSize}" class="right-mark"/>
+    <path d="M ${cx - markSize} ${cy} L ${cx - markSize} ${cy + markSize} L ${cx} ${cy + markSize}" class="right-mark"/>
+  ` : '';
+  
+  svg.innerHTML = `
+    <!-- Lines -->
+    <line x1="${m1.x}" y1="${m1.y}" x2="${m2.x}" y2="${m2.y}" class="line-m"/>
+    <line x1="${l1.x}" y1="${l1.y}" x2="${l2.x}" y2="${l2.y}" class="${lineClass}"/>
+    
+    ${rightMarks}
+    
+    <!-- Labels -->
+    <text x="${m2.x + 10}" y="${m2.y + 5}" font-size="16" fill="#2c3e50" font-weight="600">m</text>
+    <text x="${l2.x + 10}" y="${l2.y - 5}" font-size="16" fill="${handleColor}" font-weight="600">l</text>
+    
+    <!-- Angle display -->
+    <text x="${cx}" y="${cy - 50}" text-anchor="middle" font-size="24" fill="${handleColor}" font-weight="700">${a1.toFixed(0)}°</text>
+    
+    <!-- Intersection -->
+    <circle cx="${cx}" cy="${cy}" r="6" fill="#333"/>
+    
+    <!-- Drag handle -->
+    <circle cx="${l2.x}" cy="${l2.y}" r="20" fill="${handleColor}" stroke="white" stroke-width="3" id="dragHandle" style="cursor:grab"/>
+    <text x="${l2.x}" y="${l2.y + 4}" text-anchor="middle" font-size="12" fill="white" pointer-events="none">↻</text>
   `;
-
-  c.innerHTML = `
-  <div class="visual">
-    ${isInteractive ? '<div class="static-hint">Drag ↻ to find 90°</div>' : ''}
-    <div class="status-badge ${isPerpendicular() ? 'yes' : 'no'}" id="statusBadge">
-      ${isPerpendicular() ? '✓ Perpendicular' : '✗ Not perpendicular'}
-    </div>
-    
-    <svg viewBox="0 0 400 300" id="svg_${containerId}"></svg>
-    
-    <div class="metrics" id="metricsBox">${getMetricsHtml()}</div>
-    
-    ${isInteractive ? `
-    <button class="control-toggle">Adjust</button>
-    <div class="control-overlay">
-      ${controlsHtml}
-      <button class="submit-btn">Apply Changes</button>
-    </div>` : ''}
-  </div>`;
-
-  const svg = c.querySelector('svg');
-  const cx = 200, cy = 150, lineLen = 110;
   
-  function toRad(d) { return d * Math.PI / 180; }
-  
-  function render() {
-    const isPerp = isPerpendicular();
-    const lineClass = isPerp ? 'line-l' : 'line-l not-perp';
-    const handleClass = isPerp ? 'drag-handle' : 'drag-handle not-perp';
-    
-    // Update status
-    const badge = c.querySelector('#statusBadge');
-    badge.className = `status-badge ${isPerp ? 'yes' : 'no'}`;
-    badge.textContent = isPerp ? '✓ Perpendicular' : '✗ Not perpendicular';
-    
-    // Update metrics
-    c.querySelector('#metricsBox').innerHTML = getMetricsHtml();
-    
-    // Line endpoints
-    const m1 = {x: cx - lineLen, y: cy};
-    const m2 = {x: cx + lineLen, y: cy};
-    const l1 = {x: cx, y: cy + lineLen};
-    const l2 = {x: cx + lineLen * Math.cos(toRad(angle - 90)), y: cy - lineLen * Math.sin(toRad(angle - 90))};
-    const l1b = {x: cx - lineLen * Math.cos(toRad(angle - 90)), y: cy + lineLen * Math.sin(toRad(angle - 90))};
-    
-    // Right angle mark
-    const markSize = 15;
-    const rightAngleMark = isPerp ? `
-      <path d="M ${cx + markSize} ${cy} L ${cx + markSize} ${cy - markSize} L ${cx} ${cy - markSize}" class="right-angle-mark"/>
-      <path d="M ${cx - markSize} ${cy} L ${cx - markSize} ${cy + markSize} L ${cx} ${cy + markSize}" class="right-angle-mark"/>
-    ` : '';
-    
-    svg.innerHTML = `
-      <!-- Lines -->
-      <line x1="${m1.x}" y1="${m1.y}" x2="${m2.x}" y2="${m2.y}" class="line-m"/>
-      <line x1="${l1b.x}" y1="${l1b.y}" x2="${l2.x}" y2="${l2.y}" class="${lineClass}"/>
-      
-      <!-- Right angle marks -->
-      ${rightAngleMark}
-      
-      <!-- Labels -->
-      <text x="${m2.x + 8}" y="${m2.y + 4}" font-size="14" fill="#2c3e50" font-weight="600">m</text>
-      <text x="${l2.x + 8}" y="${l2.y - 4}" font-size="14" fill="${isPerp ? '#27ae60' : '#e74c3c'}" font-weight="600">l</text>
-      
-      <!-- Intersection point -->
-      <circle cx="${cx}" cy="${cy}" r="5" fill="#333"/>
-      
-      ${isInteractive ? `
-      <!-- Drag handle -->
-      <circle cx="${l2.x}" cy="${l2.y}" r="14" class="${handleClass}" id="dragHandle"/>
-      ` : ''}
-    `;
-  }
-  
-  render();
-  
-  if (isInteractive) {
-    let dragging = false;
-    
-    function getAngleFromPoint(clientX, clientY) {
-      const rect = svg.getBoundingClientRect();
-      const svgX = (clientX - rect.left) / rect.width * 400;
-      const svgY = (clientY - rect.top) / rect.height * 300;
-      const dx = svgX - cx;
-      const dy = cy - svgY;
-      let a = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-      if (a < 0) a += 360;
-      if (a > 180) a = 360 - a;
-      // Snap to 90 if close
-      if (Math.abs(a - 90) < 5) a = 90;
-      return Math.max(15, Math.min(165, a));
-    }
-    
-    svg.addEventListener('touchstart', (e) => {
-      const touch = e.touches[0];
-      const handle = c.querySelector('#dragHandle');
-      if (!handle) return;
-      const rect = handle.getBoundingClientRect();
-      const dist = Math.hypot(touch.clientX - rect.left - 14, touch.clientY - rect.top - 14);
-      if (dist < 40) {
-        dragging = true;
-        c.querySelector('.static-hint')?.remove();
-      }
-    });
-    
-    svg.addEventListener('touchmove', (e) => {
-      if (!dragging) return;
-      e.preventDefault();
-      angle = getAngleFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-      render();
-    });
-    
-    svg.addEventListener('touchend', () => { dragging = false; });
-    
-    // Mouse fallback
-    svg.addEventListener('mousedown', (e) => {
-      if (e.target.id === 'dragHandle') {
-        dragging = true;
-        c.querySelector('.static-hint')?.remove();
-      }
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-      if (!dragging) return;
-      angle = getAngleFromPoint(e.clientX, e.clientY);
-      render();
-    });
-    
-    document.addEventListener('mouseup', () => { dragging = false; });
-    
-    // Control panel
-    const toggleBtn = c.querySelector('.control-toggle');
-    const overlay = c.querySelector('.control-overlay');
-    const slider = c.querySelector('#angleSlider');
-    const sliderVal = c.querySelector('#slider_val');
-    const submitBtn = c.querySelector('.submit-btn');
-    const snapBtn = c.querySelector('#snapBtn');
-    
-    toggleBtn.addEventListener('click', () => {
-      overlay.classList.toggle('open');
-      toggleBtn.textContent = overlay.classList.contains('open') ? 'Close' : 'Adjust';
-    });
-    
-    slider.addEventListener('input', () => {
-      sliderVal.textContent = slider.value + '°';
-    });
-    
-    submitBtn.addEventListener('click', () => {
-      angle = parseFloat(slider.value);
-      render();
-      overlay.classList.remove('open');
-      toggleBtn.textContent = 'Adjust';
-    });
-    
-    snapBtn.addEventListener('click', () => {
-      slider.value = 90;
-      sliderVal.textContent = '90°';
-    });
+  // Takeaway
+  if (isPerp && !foundPerpendicular) {
+    foundPerpendicular = true;
+    document.getElementById('hint')?.remove();
+    const takeaway = document.getElementById('takeaway');
+    document.getElementById('takeaway-text').innerHTML = 
+      `When l ⊥ m (perpendicular), all angles = <strong>90°</strong>. The □ symbol marks right angles. This special case makes both lines form <strong>equal angles</strong>!`;
+    takeaway.classList.add('show');
   }
 }
 
-// Create simulations
-createSimulation('ref', false, 90);
-createSimulation('exp', true, 45);
+render();
+
+// Drag handling
+let dragging = false;
+
+function getAngleFromPoint(clientX, clientY) {
+  const rect = svg.getBoundingClientRect();
+  const svgX = (clientX - rect.left) / rect.width * 400;
+  const svgY = (clientY - rect.top) / rect.height * 340;
+  const dx = svgX - cx;
+  const dy = cy - svgY;
+  let a = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+  if (a < 0) a += 360;
+  if (a > 180) a = 360 - a;
+  // Snap to 90 if close
+  if (Math.abs(a - 90) < 5) a = 90;
+  return Math.max(20, Math.min(160, a));
+}
+
+svg.addEventListener('touchstart', (e) => {
+  const touch = e.touches[0];
+  const handle = document.getElementById('dragHandle');
+  const rect = handle.getBoundingClientRect();
+  if (Math.hypot(touch.clientX - rect.left - 20, touch.clientY - rect.top - 20) < 50) {
+    dragging = true;
+    e.preventDefault();
+  }
+}, {passive: false});
+
+svg.addEventListener('touchmove', (e) => {
+  if (!dragging) return;
+  e.preventDefault();
+  angle = getAngleFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+  render();
+}, {passive: false});
+
+svg.addEventListener('touchend', () => { dragging = false; });
+
+svg.addEventListener('mousedown', (e) => {
+  if (e.target.id === 'dragHandle') dragging = true;
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  angle = getAngleFromPoint(e.clientX, e.clientY);
+  render();
+});
+
+document.addEventListener('mouseup', () => { dragging = false; });
 </script>
 </body>
 </html>

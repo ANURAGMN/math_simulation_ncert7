@@ -2,50 +2,68 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#e91e63">
 <title>Parallel Lines & Transversal</title>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f4f6f8;
-  touch-action: manipulation;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #e91e63 0%, #f06292 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 #app {
   max-width: 420px;
   margin: auto;
   padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
 }
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 12px;
+}
+
+.header h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 12px; opacity: 0.95; }
 
 .section-title {
   font-size: 13px;
   font-weight: 600;
   margin: 8px 4px;
-  color: #444;
+  color: #fff;
 }
 
 .sim-card {
   background: #fff;
   border-radius: 14px;
-  padding: 8px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  padding: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
   margin-bottom: 12px;
 }
 
 .visual {
   position: relative;
   height: 38vh;
-  min-height: 260px;
-  background: linear-gradient(135deg, #f093fb15 0%, #f5576c15 100%);
+  min-height: 280px;
+  background: linear-gradient(145deg, #fce4ec 0%, #f8bbd9 100%);
   border-radius: 12px;
   overflow: hidden;
   touch-action: none;
 }
 
-svg { width: 100%; height: 100%; }
+svg { width: 100%; height: 100%; display: block; }
 
 .static-hint {
   position: absolute;
@@ -56,176 +74,135 @@ svg { width: 100%; height: 100%; }
   padding: 6px 10px;
   font-size: 11px;
   box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-  color: #f5576c;
+  color: #e91e63;
   font-weight: 500;
+  z-index: 10;
 }
 
 .metrics {
-  position: absolute;
-  left: 8px;
-  bottom: 8px;
-  background: rgba(255,255,255,0.96);
+  background: #fce4ec;
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.metrics-title {
   font-size: 11px;
-  line-height: 1.4;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 6px;
 }
 
-.metrics .row {
+.angles-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 4px;
+  margin-bottom: 6px;
 }
 
-.metrics .angle-box {
-  padding: 3px 6px;
-  border-radius: 4px;
-  font-weight: 600;
+.angle-chip {
+  flex: 1;
+  padding: 6px 2px;
+  border-radius: 6px;
+  text-align: center;
   font-size: 10px;
-}
-
-.metrics .a1 { background: #e74c3c20; color: #c0392b; }
-.metrics .a2 { background: #3498db20; color: #2980b9; }
-.metrics .divider {
-  border-top: 1px solid #eee;
-  padding-top: 4px;
-  margin-top: 4px;
-}
-
-.control-toggle {
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  background: #f5576c;
-  color: #fff;
-  font-size: 12px;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
   font-weight: 600;
+  transition: all 0.2s;
 }
 
-.control-overlay {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  background: rgba(255,255,255,0.98);
-  border-top: 1px solid #ddd;
-  border-radius: 16px 16px 0 0;
-  padding: 16px;
-  transform: translateY(100%);
-  transition: transform .25s ease;
-  max-height: 60%;
-  overflow-y: auto;
-}
+.angle-chip.type-a { background: #e74c3c20; color: #c0392b; }
+.angle-chip.type-b { background: #3498db20; color: #2980b9; }
+.angle-chip.highlighted { transform: scale(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 
-.control-overlay.open { transform: translateY(0); }
-
-.control-group {
-  margin-bottom: 12px;
+.control-panel {
+  background: #fce4ec;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
 }
 
 .control-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  margin-bottom: 6px;
-  color: #333;
-}
-
-.control-label span:last-child {
-  font-weight: 700;
-  color: #f5576c;
-}
-
-.control-group input[type="range"] {
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #e0e0e0;
-  -webkit-appearance: none;
-}
-
-.control-group input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #f5576c;
-  border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
 }
 
 .highlight-btns {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 12px;
 }
 
 .highlight-btn {
   flex: 1;
   min-width: 45%;
-  padding: 8px;
+  padding: 10px 6px;
   border-radius: 8px;
-  border: 2px solid #e0e0e0;
-  background: white;
-  font-size: 11px;
+  border: 2px solid #f8bbd9;
+  font-size: 10px;
   font-weight: 600;
-  cursor: pointer;
-}
-
-.highlight-btn.active {
-  background: #f5576c;
-  color: white;
-  border-color: #f5576c;
-}
-
-.submit-btn {
-  width: 100%;
-  margin-top: 8px;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  background: #f5576c;
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.concept-card {
   background: #fff;
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  margin-bottom: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
 }
 
-.concept-card h3 {
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 8px;
-}
+.highlight-btn:active { transform: scale(0.95); }
+.highlight-btn.active { border-color: #e91e63; background: #fce4ec; }
 
-.concept-card p {
-  font-size: 12px;
-  color: #666;
-  line-height: 1.5;
-}
-
-.concept-card .rule {
-  background: #f5576c15;
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
   padding: 10px;
+  background: #fff;
+  border-radius: 10px;
+  margin-top: 12px;
+  font-size: 10px;
+}
+
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-line { width: 20px; height: 3px; border-radius: 2px; }
+.legend-line.l { background: #3498db; }
+.legend-line.m { background: #27ae60; }
+.legend-line.t { background: #e74c3c; }
+
+.insight-box {
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  border-left: 4px solid #e91e63;
+}
+
+.insight-title { font-weight: 600; color: #c2185b; margin-bottom: 6px; }
+
+.rule-box {
+  background: #fff;
   border-radius: 8px;
-  margin-top: 10px;
+  padding: 10px;
+  margin-top: 8px;
   font-size: 11px;
 }
 
-.concept-card .rule strong { color: #f5576c; }
+.rule-item { margin-bottom: 6px; }
+.rule-item:last-child { margin-bottom: 0; }
+.rule-item strong { color: #e91e63; }
 
-/* SVG */
+.takeaway {
+  background: linear-gradient(135deg, #f8bbd9 0%, #f48fb1 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  display: none;
+}
+
+.takeaway.show { display: block; }
+.takeaway-title { font-weight: 600; color: #880e4f; margin-bottom: 6px; }
+
 .line-l { stroke: #3498db; stroke-width: 3; }
 .line-m { stroke: #27ae60; stroke-width: 3; }
 .line-t { stroke: #e74c3c; stroke-width: 3; }
@@ -234,282 +211,253 @@ svg { width: 100%; height: 100%; }
 
 <body>
 <div id="app">
-  <div class="section-title">Reference (transversal at 60°)</div>
-  <div class="sim-card" id="ref"></div>
-  
-  <div class="section-title">Experiment (change angle)</div>
-  <div class="sim-card" id="exp"></div>
-  
-  <div class="concept-card">
-    <h3>What to observe</h3>
-    <p>Line <b style="color:#e74c3c">t</b> (transversal) cuts parallel lines <b style="color:#3498db">l</b> and <b style="color:#27ae60">m</b>.</p>
-    <div class="rule">
-      <p><strong>Corresponding:</strong> ∠1=∠5, ∠2=∠6... (same position, equal)</p>
-      <p style="margin-top:4px;"><strong>Alternate:</strong> ∠3=∠6, ∠4=∠5 (opposite sides, equal)</p>
-      <p style="margin-top:4px;"><strong>Co-interior:</strong> ∠3+∠5=180°, ∠4+∠6=180°</p>
-    </div>
+
+<div class="header">
+  <h1>〰️ Parallel Lines & Transversal</h1>
+  <p>8 angles, amazing relationships!</p>
+</div>
+
+<div class="section-title">Drag the transversal & highlight angle pairs</div>
+<div class="sim-card" id="sim"></div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-line l"></div> Line l</div>
+  <div class="legend-item"><div class="legend-line m"></div> Line m</div>
+  <div class="legend-item"><div class="legend-line t"></div> Transversal t</div>
+  <div class="legend-item">l ∥ m (parallel)</div>
+</div>
+
+<div class="insight-box">
+  <div class="insight-title">🔑 The 3 Rules</div>
+  <div class="rule-box">
+    <div class="rule-item"><strong>Corresponding:</strong> ∠1=∠5, ∠2=∠6... (same position = equal)</div>
+    <div class="rule-item"><strong>Alternate:</strong> ∠3=∠6, ∠4=∠5 (Z-pattern = equal)</div>
+    <div class="rule-item"><strong>Co-interior:</strong> ∠3+∠5=180°, ∠4+∠6=180° (C-pattern = 180°)</div>
   </div>
 </div>
 
+<div class="takeaway" id="takeaway">
+  <div class="takeaway-title">💡 What you discovered</div>
+  <span id="takeaway-text"></span>
+</div>
+
+</div>
+
 <script>
-function createSimulation(containerId, isInteractive, initialAngle) {
-  const c = document.getElementById(containerId);
-  let angle = initialAngle;
-  let highlight = 'none';
-  
-  function getAngles() {
-    const a = angle;
-    const b = 180 - angle;
-    return {a1:a, a2:b, a3:a, a4:b, a5:a, a6:b, a7:a, a8:b};
-  }
-  
-  function getMetricsHtml() {
-    const ang = getAngles();
-    return `
-      <div style="font-weight:600;margin-bottom:4px;font-size:10px;color:#666;">At line l:</div>
-      <div class="row">
-        <span class="angle-box a1">∠1=${ang.a1.toFixed(0)}°</span>
-        <span class="angle-box a2">∠2=${ang.a2.toFixed(0)}°</span>
-        <span class="angle-box a1">∠3=${ang.a3.toFixed(0)}°</span>
-        <span class="angle-box a2">∠4=${ang.a4.toFixed(0)}°</span>
-      </div>
-      <div style="font-weight:600;margin:6px 0 4px;font-size:10px;color:#666;">At line m:</div>
-      <div class="row">
-        <span class="angle-box a1">∠5=${ang.a5.toFixed(0)}°</span>
-        <span class="angle-box a2">∠6=${ang.a6.toFixed(0)}°</span>
-        <span class="angle-box a1">∠7=${ang.a7.toFixed(0)}°</span>
-        <span class="angle-box a2">∠8=${ang.a8.toFixed(0)}°</span>
-      </div>
-      <div class="divider">
-        <span style="color:#666;">∠3+∠5 = </span><span style="font-weight:700;">${(ang.a3+ang.a5).toFixed(0)}°</span>
-      </div>
-    `;
-  }
+const container = document.getElementById('sim');
+let angle = 60;
+let highlight = 'none';
+let hasInteracted = false;
 
-  const controlsHtml = `
-    <div class="control-group">
-      <div class="control-label">
-        <span>Transversal angle</span>
-        <span id="slider_val">${angle}°</span>
-      </div>
-      <input type="range" id="angleSlider" min="25" max="155" step="1" value="${angle}">
-    </div>
-    <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:#333;">Highlight angle pairs:</div>
-    <div class="highlight-btns">
-      <button class="highlight-btn active" data-type="none">None</button>
-      <button class="highlight-btn" data-type="corresponding">Corresponding</button>
-      <button class="highlight-btn" data-type="alternate">Alternate</button>
-      <button class="highlight-btn" data-type="cointerior">Co-interior</button>
-    </div>
-  `;
+container.innerHTML = `
+<div class="visual">
+  <div class="static-hint" id="hint">👆 Drag red endpoint</div>
+  <svg viewBox="0 0 400 300" id="svg"></svg>
+</div>
 
-  c.innerHTML = `
-  <div class="visual">
-    ${isInteractive ? '<div class="static-hint">Drag ↻ transversal</div>' : ''}
-    ${isInteractive ? '<button class="control-toggle">Adjust</button>' : ''}
-    
-    <svg viewBox="0 0 400 300" id="svg_${containerId}"></svg>
-    
-    <div class="metrics" id="metricsBox">${getMetricsHtml()}</div>
-    
-    ${isInteractive ? `
-    <div class="control-overlay">
-      ${controlsHtml}
-      <button class="submit-btn">Apply Changes</button>
-    </div>` : ''}
-  </div>`;
+<div class="metrics">
+  <div class="metrics-title">At line l:</div>
+  <div class="angles-row" id="row-l"></div>
+  <div class="metrics-title">At line m:</div>
+  <div class="angles-row" id="row-m"></div>
+</div>
 
-  const svg = c.querySelector('svg');
-  const gap = 90;
-  const ly = 105, my = ly + gap;
-  
-  function toRad(d) { return d * Math.PI / 180; }
-  
-  function render() {
-    const ang = getAngles();
-    c.querySelector('#metricsBox').innerHTML = getMetricsHtml();
-    
-    // Transversal intersection points
-    const intL = {x: 200, y: ly};
-    const intM = {x: 200 + gap / Math.tan(toRad(angle)), y: my};
-    
-    // Transversal endpoints
-    const tLen = 80;
-    const t1 = {x: intL.x - tLen * Math.cos(toRad(angle)), y: intL.y + tLen * Math.sin(toRad(angle))};
-    const t2 = {x: intM.x + tLen * Math.cos(toRad(angle)), y: intM.y - tLen * Math.sin(toRad(angle))};
-    
-    // Highlight colors
-    function getHighlight(angleNum) {
-      if (highlight === 'corresponding') {
-        if ([1,5].includes(angleNum) || [2,6].includes(angleNum) || 
-            [3,7].includes(angleNum) || [4,8].includes(angleNum)) {
-          return (angleNum % 2 === 1) ? '#e74c3c' : '#3498db';
-        }
-      } else if (highlight === 'alternate') {
-        if ([3,6].includes(angleNum) || [4,5].includes(angleNum)) return '#9b59b6';
-      } else if (highlight === 'cointerior') {
-        if ([3,5].includes(angleNum) || [4,6].includes(angleNum)) return '#f39c12';
-      }
-      return 'transparent';
-    }
-    
-    // Arc paths
-    const arcR = 20;
-    function arcPath(cx, cy, startAng, endAng) {
-      const s = toRad(startAng);
-      const e = toRad(endAng);
-      const x1 = cx + arcR * Math.cos(s);
-      const y1 = cy + arcR * Math.sin(s);
-      const x2 = cx + arcR * Math.cos(e);
-      const y2 = cy + arcR * Math.sin(e);
-      return `M ${cx} ${cy} L ${x1} ${y1} A ${arcR} ${arcR} 0 0 1 ${x2} ${y2} Z`;
-    }
-    
-    // Angle arcs at line l
-    const arcsL = `
-      <path d="${arcPath(intL.x, intL.y, -angle, 0)}" fill="${getHighlight(1)}" opacity="0.4"/>
-      <path d="${arcPath(intL.x, intL.y, 180, 360-angle)}" fill="${getHighlight(2)}" opacity="0.4"/>
-      <path d="${arcPath(intL.x, intL.y, 180-angle, 180)}" fill="${getHighlight(3)}" opacity="0.4"/>
-      <path d="${arcPath(intL.x, intL.y, 0, 180-angle)}" fill="${getHighlight(4)}" opacity="0.4"/>
-    `;
-    
-    // Angle arcs at line m
-    const arcsM = `
-      <path d="${arcPath(intM.x, intM.y, -angle, 0)}" fill="${getHighlight(5)}" opacity="0.4"/>
-      <path d="${arcPath(intM.x, intM.y, 180, 360-angle)}" fill="${getHighlight(6)}" opacity="0.4"/>
-      <path d="${arcPath(intM.x, intM.y, 180-angle, 180)}" fill="${getHighlight(7)}" opacity="0.4"/>
-      <path d="${arcPath(intM.x, intM.y, 0, 180-angle)}" fill="${getHighlight(8)}" opacity="0.4"/>
-    `;
-    
-    svg.innerHTML = `
-      ${arcsL}
-      ${arcsM}
-      
-      <!-- Parallel lines -->
-      <line x1="50" y1="${ly}" x2="350" y2="${ly}" class="line-l"/>
-      <line x1="50" y1="${my}" x2="350" y2="${my}" class="line-m"/>
-      
-      <!-- Parallel marks -->
-      <path d="M 120 ${ly-6} L 130 ${ly-6} M 120 ${ly-2} L 130 ${ly-2}" stroke="#666" stroke-width="2" fill="none"/>
-      <path d="M 120 ${my-6} L 130 ${my-6} M 120 ${my-2} L 130 ${my-2}" stroke="#666" stroke-width="2" fill="none"/>
-      
-      <!-- Transversal -->
-      <line x1="${t1.x}" y1="${t1.y}" x2="${t2.x}" y2="${t2.y}" class="line-t"/>
-      
-      <!-- Labels -->
-      <text x="355" y="${ly+4}" font-size="14" fill="#3498db" font-weight="600">l</text>
-      <text x="355" y="${my+4}" font-size="14" fill="#27ae60" font-weight="600">m</text>
-      <text x="${t2.x+5}" y="${t2.y-5}" font-size="14" fill="#e74c3c" font-weight="600">t</text>
-      
-      <!-- Angle labels at l -->
-      <text x="${intL.x+25}" y="${intL.y-8}" font-size="10" fill="#c0392b">1</text>
-      <text x="${intL.x-35}" y="${intL.y-8}" font-size="10" fill="#2980b9">2</text>
-      <text x="${intL.x-35}" y="${intL.y+15}" font-size="10" fill="#c0392b">3</text>
-      <text x="${intL.x+25}" y="${intL.y+15}" font-size="10" fill="#2980b9">4</text>
-      
-      <!-- Angle labels at m -->
-      <text x="${intM.x+25}" y="${intM.y-8}" font-size="10" fill="#c0392b">5</text>
-      <text x="${intM.x-35}" y="${intM.y-8}" font-size="10" fill="#2980b9">6</text>
-      <text x="${intM.x-35}" y="${intM.y+15}" font-size="10" fill="#c0392b">7</text>
-      <text x="${intM.x+25}" y="${intM.y+15}" font-size="10" fill="#2980b9">8</text>
-      
-      <!-- Intersection points -->
-      <circle cx="${intL.x}" cy="${intL.y}" r="4" fill="#333"/>
-      <circle cx="${intM.x}" cy="${intM.y}" r="4" fill="#333"/>
-      
-      ${isInteractive ? `<circle cx="${t2.x}" cy="${t2.y}" r="14" fill="#e74c3c" stroke="white" stroke-width="2" id="dragHandle" style="cursor:grab"/>` : ''}
-    `;
-  }
-  
-  render();
-  
-  if (isInteractive) {
-    let dragging = false;
-    const intLy = ly;
-    
-    function getAngleFromPoint(clientX, clientY) {
-      const rect = svg.getBoundingClientRect();
-      const svgX = (clientX - rect.left) / rect.width * 400;
-      const svgY = (clientY - rect.top) / rect.height * 300;
-      const dx = svgX - 200;
-      const dy = intLy - svgY;
-      let a = Math.atan2(dy, dx) * 180 / Math.PI;
-      if (a < 0) a += 180;
-      return Math.max(25, Math.min(155, a));
-    }
-    
-    svg.addEventListener('touchstart', (e) => {
-      const touch = e.touches[0];
-      const handle = c.querySelector('#dragHandle');
-      if (!handle) return;
-      const rect = handle.getBoundingClientRect();
-      if (Math.hypot(touch.clientX - rect.left - 14, touch.clientY - rect.top - 14) < 40) {
-        dragging = true;
-        c.querySelector('.static-hint')?.remove();
-      }
-    });
-    
-    svg.addEventListener('touchmove', (e) => {
-      if (!dragging) return;
-      e.preventDefault();
-      angle = getAngleFromPoint(e.touches[0].clientX, e.touches[0].clientY);
-      render();
-    });
-    
-    svg.addEventListener('touchend', () => { dragging = false; });
-    
-    svg.addEventListener('mousedown', (e) => {
-      if (e.target.id === 'dragHandle') {
-        dragging = true;
-        c.querySelector('.static-hint')?.remove();
-      }
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-      if (!dragging) return;
-      angle = getAngleFromPoint(e.clientX, e.clientY);
-      render();
-    });
-    
-    document.addEventListener('mouseup', () => { dragging = false; });
-    
-    // Controls
-    const toggleBtn = c.querySelector('.control-toggle');
-    const overlay = c.querySelector('.control-overlay');
-    const slider = c.querySelector('#angleSlider');
-    const sliderVal = c.querySelector('#slider_val');
-    const submitBtn = c.querySelector('.submit-btn');
-    const highlightBtns = c.querySelectorAll('.highlight-btn');
-    
-    toggleBtn.addEventListener('click', () => {
-      overlay.classList.toggle('open');
-      toggleBtn.textContent = overlay.classList.contains('open') ? 'Close' : 'Adjust';
-    });
-    
-    slider.addEventListener('input', () => {
-      sliderVal.textContent = slider.value + '°';
-    });
-    
-    highlightBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        highlightBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        highlight = btn.dataset.type;
-        render();
-      });
-    });
-    
-    submitBtn.addEventListener('click', () => {
-      angle = parseFloat(slider.value);
-      render();
-      overlay.classList.remove('open');
-      toggleBtn.textContent = 'Adjust';
-    });
-  }
+<div class="control-panel">
+  <div class="control-label">Highlight angle pairs:</div>
+  <div class="highlight-btns">
+    <button class="highlight-btn active" data-type="none">None</button>
+    <button class="highlight-btn" data-type="corresponding">Corresponding</button>
+    <button class="highlight-btn" data-type="alternate">Alternate</button>
+    <button class="highlight-btn" data-type="cointerior">Co-interior</button>
+  </div>
+</div>`;
+
+const svg = document.getElementById('svg');
+const gap = 80;
+const ly = 100, my = ly + gap;
+
+function toRad(d) { return d * Math.PI / 180; }
+
+function getHighlightedAngles() {
+  if (highlight === 'corresponding') return [1,5,2,6,3,7,4,8];
+  if (highlight === 'alternate') return [3,6,4,5];
+  if (highlight === 'cointerior') return [3,5,4,6];
+  return [];
 }
 
-createSimulation('ref', false, 60);
-createSimulation('exp', true, 60);
+function render() {
+  const a = angle, b = 180 - angle;
+  const highlighted = getHighlightedAngles();
+  
+  // Update metrics
+  const rowL = document.getElementById('row-l');
+  const rowM = document.getElementById('row-m');
+  
+  rowL.innerHTML = [1,2,3,4].map(n => {
+    const val = (n % 2 === 1) ? a : b;
+    const type = (n % 2 === 1) ? 'type-a' : 'type-b';
+    const hl = highlighted.includes(n) ? 'highlighted' : '';
+    return `<div class="angle-chip ${type} ${hl}">∠${n}=${val.toFixed(0)}°</div>`;
+  }).join('');
+  
+  rowM.innerHTML = [5,6,7,8].map(n => {
+    const val = (n % 2 === 1) ? a : b;
+    const type = (n % 2 === 1) ? 'type-a' : 'type-b';
+    const hl = highlighted.includes(n) ? 'highlighted' : '';
+    return `<div class="angle-chip ${type} ${hl}">∠${n}=${val.toFixed(0)}°</div>`;
+  }).join('');
+  
+  // Transversal points
+  const intL = {x: 200, y: ly};
+  const intM = {x: 200 + gap / Math.tan(toRad(angle)), y: my};
+  
+  const tLen = 70;
+  const t1 = {x: intL.x - tLen * Math.cos(toRad(angle)), y: intL.y + tLen * Math.sin(toRad(angle))};
+  const t2 = {x: intM.x + tLen * Math.cos(toRad(angle)), y: intM.y - tLen * Math.sin(toRad(angle))};
+  
+  // Highlight colors
+  function getHl(n) {
+    if (!highlighted.includes(n)) return 'transparent';
+    if (highlight === 'corresponding') return (n % 2 === 1) ? '#e74c3c' : '#3498db';
+    if (highlight === 'alternate') return '#9b59b6';
+    if (highlight === 'cointerior') return '#f39c12';
+    return 'transparent';
+  }
+  
+  const arcR = 18;
+  function arcPath(cx, cy, startAng, endAng) {
+    const s = toRad(startAng), e = toRad(endAng);
+    const x1 = cx + arcR * Math.cos(s), y1 = cy + arcR * Math.sin(s);
+    const x2 = cx + arcR * Math.cos(e), y2 = cy + arcR * Math.sin(e);
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${arcR} ${arcR} 0 0 1 ${x2} ${y2} Z`;
+  }
+  
+  svg.innerHTML = `
+    <!-- Angle arcs at l -->
+    <path d="${arcPath(intL.x, intL.y, -angle, 0)}" fill="${getHl(1)}" opacity="0.5"/>
+    <path d="${arcPath(intL.x, intL.y, 180, 360-angle)}" fill="${getHl(2)}" opacity="0.5"/>
+    <path d="${arcPath(intL.x, intL.y, 180-angle, 180)}" fill="${getHl(3)}" opacity="0.5"/>
+    <path d="${arcPath(intL.x, intL.y, 0, 180-angle)}" fill="${getHl(4)}" opacity="0.5"/>
+    
+    <!-- Angle arcs at m -->
+    <path d="${arcPath(intM.x, intM.y, -angle, 0)}" fill="${getHl(5)}" opacity="0.5"/>
+    <path d="${arcPath(intM.x, intM.y, 180, 360-angle)}" fill="${getHl(6)}" opacity="0.5"/>
+    <path d="${arcPath(intM.x, intM.y, 180-angle, 180)}" fill="${getHl(7)}" opacity="0.5"/>
+    <path d="${arcPath(intM.x, intM.y, 0, 180-angle)}" fill="${getHl(8)}" opacity="0.5"/>
+    
+    <!-- Lines -->
+    <line x1="40" y1="${ly}" x2="360" y2="${ly}" class="line-l"/>
+    <line x1="40" y1="${my}" x2="360" y2="${my}" class="line-m"/>
+    <line x1="${t1.x}" y1="${t1.y}" x2="${t2.x}" y2="${t2.y}" class="line-t"/>
+    
+    <!-- Parallel marks -->
+    <path d="M 100 ${ly-5} L 108 ${ly-5} M 100 ${ly-1} L 108 ${ly-1}" stroke="#666" stroke-width="2" fill="none"/>
+    <path d="M 100 ${my-5} L 108 ${my-5} M 100 ${my-1} L 108 ${my-1}" stroke="#666" stroke-width="2" fill="none"/>
+    
+    <!-- Labels -->
+    <text x="365" y="${ly+4}" font-size="14" fill="#3498db" font-weight="600">l</text>
+    <text x="365" y="${my+4}" font-size="14" fill="#27ae60" font-weight="600">m</text>
+    <text x="${t2.x+5}" y="${t2.y-5}" font-size="14" fill="#e74c3c" font-weight="600">t</text>
+    
+    <!-- Angle numbers -->
+    <text x="${intL.x+22}" y="${intL.y-6}" font-size="9" fill="#c0392b">1</text>
+    <text x="${intL.x-28}" y="${intL.y-6}" font-size="9" fill="#2980b9">2</text>
+    <text x="${intL.x-28}" y="${intL.y+12}" font-size="9" fill="#c0392b">3</text>
+    <text x="${intL.x+22}" y="${intL.y+12}" font-size="9" fill="#2980b9">4</text>
+    <text x="${intM.x+22}" y="${intM.y-6}" font-size="9" fill="#c0392b">5</text>
+    <text x="${intM.x-28}" y="${intM.y-6}" font-size="9" fill="#2980b9">6</text>
+    <text x="${intM.x-28}" y="${intM.y+12}" font-size="9" fill="#c0392b">7</text>
+    <text x="${intM.x+22}" y="${intM.y+12}" font-size="9" fill="#2980b9">8</text>
+    
+    <!-- Intersection points -->
+    <circle cx="${intL.x}" cy="${intL.y}" r="4" fill="#333"/>
+    <circle cx="${intM.x}" cy="${intM.y}" r="4" fill="#333"/>
+    
+    <!-- Drag handle -->
+    <circle cx="${t2.x}" cy="${t2.y}" r="16" fill="#e74c3c" stroke="white" stroke-width="3" id="dragHandle" style="cursor:grab"/>
+  `;
+}
+
+render();
+
+// Event handlers
+let dragging = false;
+
+function getAngleFromPoint(clientX, clientY) {
+  const rect = svg.getBoundingClientRect();
+  const svgX = (clientX - rect.left) / rect.width * 400;
+  const svgY = (clientY - rect.top) / rect.height * 300;
+  const dx = svgX - 200;
+  const dy = ly - svgY;
+  let a = Math.atan2(dy, dx) * 180 / Math.PI;
+  if (a < 0) a += 180;
+  return Math.max(30, Math.min(150, a));
+}
+
+function showTakeaway() {
+  if (!hasInteracted) {
+    hasInteracted = true;
+    document.getElementById('hint')?.remove();
+  }
+  
+  const takeaway = document.getElementById('takeaway');
+  const takeawayText = document.getElementById('takeaway-text');
+  
+  if (highlight === 'corresponding') {
+    takeawayText.innerHTML = `Corresponding angles (same position) are <strong>always equal</strong> when lines are parallel: ∠1=∠5, ∠2=∠6, etc.`;
+  } else if (highlight === 'alternate') {
+    takeawayText.innerHTML = `Alternate angles (Z-shape) are <strong>always equal</strong>: ∠3=∠6 and ∠4=∠5.`;
+  } else if (highlight === 'cointerior') {
+    takeawayText.innerHTML = `Co-interior angles (C-shape) <strong>always add to 180°</strong>: ∠3+∠5=180° and ∠4+∠6=180°.`;
+  } else {
+    takeawayText.innerHTML = `Change the angle and watch how the 8 angles relate. Try the highlight buttons to see patterns!`;
+  }
+  takeaway.classList.add('show');
+}
+
+svg.addEventListener('touchstart', (e) => {
+  const touch = e.touches[0];
+  const handle = document.getElementById('dragHandle');
+  const rect = handle.getBoundingClientRect();
+  if (Math.hypot(touch.clientX - rect.left - 16, touch.clientY - rect.top - 16) < 50) {
+    dragging = true;
+    e.preventDefault();
+  }
+}, {passive: false});
+
+svg.addEventListener('touchmove', (e) => {
+  if (!dragging) return;
+  e.preventDefault();
+  angle = getAngleFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+  render();
+  showTakeaway();
+}, {passive: false});
+
+svg.addEventListener('touchend', () => { dragging = false; });
+
+svg.addEventListener('mousedown', (e) => {
+  if (e.target.id === 'dragHandle') dragging = true;
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  angle = getAngleFromPoint(e.clientX, e.clientY);
+  render();
+  showTakeaway();
+});
+
+document.addEventListener('mouseup', () => { dragging = false; });
+
+// Highlight buttons
+container.querySelectorAll('.highlight-btn').forEach(btn => {
+  btn.onclick = () => {
+    container.querySelectorAll('.highlight-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    highlight = btn.dataset.type;
+    render();
+    showTakeaway();
+  };
+});
 </script>
 </body>
 </html>
