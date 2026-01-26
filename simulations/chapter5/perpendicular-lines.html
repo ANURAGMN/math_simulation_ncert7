@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perpendicular Lines - Right Angles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            cursor: grab;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #11998e, #38ef7d);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #11998e;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .angle-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 700;
+            color: #11998e;
+            font-size: 1.1rem;
+        }
+
+        .status-box {
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .status-box.perpendicular {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 3px solid #28a745;
+        }
+
+        .status-box.not-perpendicular {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 3px solid #dc3545;
+        }
+
+        .status-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .status-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .status-box.perpendicular .status-text {
+            color: #155724;
+        }
+
+        .status-box.not-perpendicular .status-text {
+            color: #721c24;
+        }
+
+        .angle-display {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .angle-display h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            border-bottom: 2px solid #11998e;
+            padding-bottom: 8px;
+        }
+
+        .angle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .angle-item {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .angle-item.is-90 {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            transform: scale(1.05);
+        }
+
+        .angle-item.not-90 {
+            background: rgba(0,0,0,0.05);
+            color: #666;
+        }
+
+        .concept-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 15px;
+        }
+
+        .concept-box h4 {
+            color: #1565c0;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .concept-box p {
+            color: #6c757d;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .examples-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .examples-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .example-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px;
+        }
+
+        .example-item .icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .example-item .label {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .snap-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .snap-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: white;
+        }
+
+        .instructions h4 {
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: white;
+            color: #11998e;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Perpendicular Lines</h1>
+        <p class="subtitle">When Two Lines Meet at Right Angles (90°)</p>
+
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="canvas" width="600" height="500"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="status-box not-perpendicular" id="statusBox">
+                    <div class="status-icon" id="statusIcon">❌</div>
+                    <div class="status-text" id="statusText">Lines are NOT Perpendicular</div>
+                </div>
+
+                <div class="control-group">
+                    <label>Rotate Line l to find 90°</label>
+                    <div class="slider-container">
+                        <input type="range" id="angleSlider" min="10" max="170" value="45">
+                        <span class="angle-value" id="sliderValue">45°</span>
+                    </div>
+                </div>
+
+                <button class="snap-button" id="snapButton">📐 Snap to 90° (Perpendicular)</button>
+
+                <div class="angle-display">
+                    <h3>📐 All Four Angles</h3>
+                    <div class="angle-grid">
+                        <div class="angle-item not-90" id="angle1">∠1 = <span id="angleA">45°</span></div>
+                        <div class="angle-item not-90" id="angle2">∠2 = <span id="angleB">135°</span></div>
+                        <div class="angle-item not-90" id="angle3">∠3 = <span id="angleC">45°</span></div>
+                        <div class="angle-item not-90" id="angle4">∠4 = <span id="angleD">135°</span></div>
+                    </div>
+                </div>
+
+                <div class="concept-box">
+                    <h4>✏️ What are Perpendicular Lines?</h4>
+                    <p>Perpendicular lines are a special case of intersecting lines where <strong>all four angles are equal</strong> and each angle measures exactly <strong>90°</strong> (a right angle).</p>
+                </div>
+
+                <div class="concept-box">
+                    <h4>🔲 The Right Angle Symbol</h4>
+                    <p>When lines are perpendicular, we mark the angle with a small square (□) instead of an arc. This symbol indicates a 90° angle.</p>
+                </div>
+
+                <div class="examples-box">
+                    <h4>📍 Examples of Perpendicular Lines</h4>
+                    <div class="example-grid">
+                        <div class="example-item">
+                            <div class="icon">📐</div>
+                            <div class="label">Set Square</div>
+                        </div>
+                        <div class="example-item">
+                            <div class="icon">🏠</div>
+                            <div class="label">Wall & Floor</div>
+                        </div>
+                        <div class="example-item">
+                            <div class="icon">➕</div>
+                            <div class="label">Plus Sign</div>
+                        </div>
+                        <div class="example-item">
+                            <div class="icon">📱</div>
+                            <div class="label">Screen Edges</div>
+                        </div>
+                        <div class="example-item">
+                            <div class="icon">📚</div>
+                            <div class="label">Book Corner</div>
+                        </div>
+                        <div class="example-item">
+                            <div class="icon">🚪</div>
+                            <div class="label">Door Frame</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h4>🎯 Challenge: Find the Perpendicular Position!</h4>
+            <ul>
+                <li><strong>Drag</strong> line l or use the slider to rotate it</li>
+                <li>Try to make all four angles equal to <strong>90°</strong></li>
+                <li>Watch the angles change as you rotate the line</li>
+                <li>Notice the right angle symbol (□) appears when perpendicular</li>
+                <li>Click "Snap to 90°" to see the perfect perpendicular position</li>
+            </ul>
+        </div>
+
+        <a href="index.html" class="nav-link">← Back to All Simulations</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const angleSlider = document.getElementById('angleSlider');
+        const sliderValue = document.getElementById('sliderValue');
+        const snapButton = document.getElementById('snapButton');
+
+        let angle = 45; // degrees
+        let isDragging = false;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const lineLength = 200;
+
+        function toRadians(deg) {
+            return deg * Math.PI / 180;
+        }
+
+        function isPerpendicular(ang) {
+            return Math.abs(ang - 90) < 1;
+        }
+
+        function drawRightAngleSymbol(x, y, angle1, angle2, size) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(toRadians(angle1));
+            
+            ctx.beginPath();
+            ctx.moveTo(size, 0);
+            ctx.lineTo(size, -size);
+            ctx.lineTo(0, -size);
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+
+        function drawAngleArc(startAngle, endAngle, color, radius) {
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, toRadians(startAngle), toRadians(endAngle));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Fill
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, toRadians(startAngle), toRadians(endAngle));
+            ctx.closePath();
+            ctx.fillStyle = color.replace(')', ', 0.15)').replace('rgb', 'rgba');
+            ctx.fill();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const isPerp = isPerpendicular(angle);
+
+            // Draw grid background
+            ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+
+            // Calculate line endpoints
+            // Line m (horizontal)
+            const m1 = { x: centerX - lineLength, y: centerY };
+            const m2 = { x: centerX + lineLength, y: centerY };
+
+            // Line l (rotated)
+            const l1 = {
+                x: centerX - lineLength * Math.cos(toRadians(angle)),
+                y: centerY + lineLength * Math.sin(toRadians(angle))
+            };
+            const l2 = {
+                x: centerX + lineLength * Math.cos(toRadians(angle)),
+                y: centerY - lineLength * Math.sin(toRadians(angle))
+            };
+
+            // Colors based on perpendicular state
+            const angleColor = isPerp ? 'rgb(39, 174, 96)' : 'rgb(149, 165, 166)';
+            const arcRadius = 35;
+
+            // Draw angle arcs or right angle symbols
+            if (isPerp) {
+                // Draw right angle symbols
+                const symbolSize = 20;
+                drawRightAngleSymbol(centerX, centerY, 0, -90, symbolSize);
+                drawRightAngleSymbol(centerX, centerY, 90, -90, symbolSize);
+                drawRightAngleSymbol(centerX, centerY, 180, -90, symbolSize);
+                drawRightAngleSymbol(centerX, centerY, 270, -90, symbolSize);
+            } else {
+                // Draw angle arcs
+                drawAngleArc(-angle, 0, angleColor, arcRadius);
+                drawAngleArc(180 - angle, 180, angleColor, arcRadius);
+                drawAngleArc(180, 360 - angle, angleColor, arcRadius + 15);
+                drawAngleArc(0, 180 - angle, angleColor, arcRadius + 15);
+            }
+
+            // Draw lines
+            ctx.beginPath();
+            ctx.moveTo(m1.x, m1.y);
+            ctx.lineTo(m2.x, m2.y);
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(l1.x, l1.y);
+            ctx.lineTo(l2.x, l2.y);
+            ctx.strokeStyle = isPerp ? '#27ae60' : '#e74c3c';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Draw line labels
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 20px Segoe UI';
+            ctx.fillText('m', m2.x + 10, m2.y + 5);
+            ctx.fillStyle = isPerp ? '#27ae60' : '#e74c3c';
+            ctx.fillText('l', l2.x + 10, l2.y - 10);
+
+            // Draw intersection point
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+            ctx.fillStyle = isPerp ? '#27ae60' : '#e74c3c';
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw angle value near center
+            if (!isPerp) {
+                ctx.fillStyle = '#666';
+                ctx.font = '14px Segoe UI';
+                ctx.fillText(angle.toFixed(1) + '°', centerX + 50, centerY - 50);
+            } else {
+                ctx.fillStyle = '#27ae60';
+                ctx.font = 'bold 16px Segoe UI';
+                ctx.fillText('90°', centerX + 50, centerY - 50);
+            }
+
+            // Update UI
+            const angleA = angle;
+            const angleB = 180 - angle;
+
+            document.getElementById('angleA').textContent = angleA.toFixed(1) + '°';
+            document.getElementById('angleB').textContent = angleB.toFixed(1) + '°';
+            document.getElementById('angleC').textContent = angleA.toFixed(1) + '°';
+            document.getElementById('angleD').textContent = angleB.toFixed(1) + '°';
+
+            // Update angle item classes
+            const angleItems = ['angle1', 'angle2', 'angle3', 'angle4'];
+            const angles = [angleA, angleB, angleA, angleB];
+            
+            angleItems.forEach((id, i) => {
+                const elem = document.getElementById(id);
+                if (Math.abs(angles[i] - 90) < 1) {
+                    elem.classList.remove('not-90');
+                    elem.classList.add('is-90');
+                } else {
+                    elem.classList.remove('is-90');
+                    elem.classList.add('not-90');
+                }
+            });
+
+            // Update status box
+            const statusBox = document.getElementById('statusBox');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+
+            if (isPerp) {
+                statusBox.classList.remove('not-perpendicular');
+                statusBox.classList.add('perpendicular');
+                statusIcon.textContent = '✅';
+                statusText.textContent = 'Lines ARE Perpendicular! (l ⊥ m)';
+            } else {
+                statusBox.classList.remove('perpendicular');
+                statusBox.classList.add('not-perpendicular');
+                statusIcon.textContent = '❌';
+                statusText.textContent = 'Lines are NOT Perpendicular';
+            }
+        }
+
+        // Event handlers
+        angleSlider.addEventListener('input', function() {
+            angle = parseFloat(this.value);
+            sliderValue.textContent = Math.round(angle) + '°';
+            draw();
+        });
+
+        snapButton.addEventListener('click', function() {
+            angle = 90;
+            angleSlider.value = 90;
+            sliderValue.textContent = '90°';
+            draw();
+        });
+
+        canvas.addEventListener('mousedown', function(e) {
+            isDragging = true;
+        });
+
+        canvas.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left - centerX;
+            const y = centerY - (e.clientY - rect.top);
+
+            let newAngle = Math.atan2(y, x) * 180 / Math.PI;
+            
+            if (newAngle < 10) newAngle = 10;
+            if (newAngle > 170) newAngle = 170;
+
+            // Snap to 90 if close
+            if (Math.abs(newAngle - 90) < 5) {
+                newAngle = 90;
+            }
+
+            angle = newAngle;
+            angleSlider.value = angle;
+            sliderValue.textContent = Math.round(angle) + '°';
+            draw();
+        });
+
+        canvas.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        canvas.addEventListener('mouseleave', function() {
+            isDragging = false;
+        });
+
+        // Touch support
+        canvas.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            isDragging = true;
+        });
+
+        canvas.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            if (!isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left - centerX;
+            const y = centerY - (touch.clientY - rect.top);
+
+            let newAngle = Math.atan2(y, x) * 180 / Math.PI;
+            
+            if (newAngle < 10) newAngle = 10;
+            if (newAngle > 170) newAngle = 170;
+
+            if (Math.abs(newAngle - 90) < 5) {
+                newAngle = 90;
+            }
+
+            angle = newAngle;
+            angleSlider.value = angle;
+            sliderValue.textContent = Math.round(angle) + '°';
+            draw();
+        });
+
+        canvas.addEventListener('touchend', function() {
+            isDragging = false;
+        });
+
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>

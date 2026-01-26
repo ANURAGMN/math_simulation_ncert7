@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intersecting Lines - Vertically Opposite Angles & Linear Pairs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            cursor: grab;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .angle-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .angle-display {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .angle-display h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .angle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .angle-item {
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .angle-item:hover {
+            transform: scale(1.05);
+        }
+
+        .angle-a { background: rgba(231, 76, 60, 0.2); color: #c0392b; }
+        .angle-b { background: rgba(52, 152, 219, 0.2); color: #2980b9; }
+        .angle-c { background: rgba(231, 76, 60, 0.2); color: #c0392b; }
+        .angle-d { background: rgba(52, 152, 219, 0.2); color: #2980b9; }
+
+        .concept-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 15px;
+        }
+
+        .concept-box h4 {
+            color: #d68910;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .concept-box p {
+            color: #6c757d;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .linear-pair-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 4px solid #27ae60;
+        }
+
+        .linear-pair-box h4 {
+            color: #1e8449;
+        }
+
+        .verification {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .verification h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .verification-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+        }
+
+        .verification-item:last-child {
+            border-bottom: none;
+        }
+
+        .check-mark {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: white;
+        }
+
+        .instructions h4 {
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Intersecting Lines</h1>
+        <p class="subtitle">Understanding Vertically Opposite Angles and Linear Pairs</p>
+
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="canvas" width="600" height="500"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Rotate Line l (drag on canvas or use slider)</label>
+                    <div class="slider-container">
+                        <input type="range" id="angleSlider" min="10" max="170" value="60">
+                        <span class="angle-value" id="sliderValue">60°</span>
+                    </div>
+                </div>
+
+                <div class="angle-display">
+                    <h3>📐 Angle Measurements</h3>
+                    <div class="angle-grid">
+                        <div class="angle-item angle-a">∠a = <span id="angleA">60°</span></div>
+                        <div class="angle-item angle-b">∠b = <span id="angleB">120°</span></div>
+                        <div class="angle-item angle-c">∠c = <span id="angleC">60°</span></div>
+                        <div class="angle-item angle-d">∠d = <span id="angleD">120°</span></div>
+                    </div>
+                </div>
+
+                <div class="concept-box">
+                    <h4>🔄 Vertically Opposite Angles</h4>
+                    <p>When two lines intersect, the angles opposite to each other are always equal.<br>
+                    <strong>∠a = ∠c</strong> and <strong>∠b = ∠d</strong></p>
+                </div>
+
+                <div class="concept-box linear-pair-box">
+                    <h4>📏 Linear Pairs</h4>
+                    <p>Adjacent angles formed by intersecting lines always add up to 180°.<br>
+                    <strong>∠a + ∠b = 180°</strong>, <strong>∠b + ∠c = 180°</strong></p>
+                </div>
+
+                <div class="verification">
+                    <h4>✓ Verification</h4>
+                    <div class="verification-item">
+                        <span>∠a = ∠c (Vertically Opposite)</span>
+                        <span class="check-mark" id="verify1">✓</span>
+                    </div>
+                    <div class="verification-item">
+                        <span>∠b = ∠d (Vertically Opposite)</span>
+                        <span class="check-mark" id="verify2">✓</span>
+                    </div>
+                    <div class="verification-item">
+                        <span>∠a + ∠b = <span id="sumAB">180°</span></span>
+                        <span class="check-mark" id="verify3">✓</span>
+                    </div>
+                    <div class="verification-item">
+                        <span>∠b + ∠c = <span id="sumBC">180°</span></span>
+                        <span class="check-mark" id="verify4">✓</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h4>🎯 How to Use This Simulation</h4>
+            <ul>
+                <li><strong>Drag</strong> the line l on the canvas to change the angle of intersection</li>
+                <li>Use the <strong>slider</strong> to precisely set the angle</li>
+                <li>Observe how vertically opposite angles are always equal</li>
+                <li>Notice that linear pairs always sum to 180°</li>
+            </ul>
+        </div>
+
+        <a href="index.html" class="nav-link">← Back to All Simulations</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const angleSlider = document.getElementById('angleSlider');
+        const sliderValue = document.getElementById('sliderValue');
+
+        let angle = 60; // degrees
+        let isDragging = false;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const lineLength = 200;
+
+        function toRadians(deg) {
+            return deg * Math.PI / 180;
+        }
+
+        function drawLine(x1, y1, x2, y2, color, label, labelOffset) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Draw label
+            ctx.fillStyle = color;
+            ctx.font = 'bold 18px Segoe UI';
+            ctx.fillText(label, x2 + labelOffset.x, y2 + labelOffset.y);
+        }
+
+        function drawAngleArc(startAngle, endAngle, color, label, radius) {
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, toRadians(startAngle), toRadians(endAngle));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Fill angle region with transparency
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, toRadians(startAngle), toRadians(endAngle));
+            ctx.closePath();
+            ctx.fillStyle = color.replace(')', ', 0.2)').replace('rgb', 'rgba');
+            ctx.fill();
+
+            // Draw label
+            const midAngle = (startAngle + endAngle) / 2;
+            const labelRadius = radius + 25;
+            const labelX = centerX + labelRadius * Math.cos(toRadians(midAngle));
+            const labelY = centerY + labelRadius * Math.sin(toRadians(midAngle));
+            
+            ctx.fillStyle = color;
+            ctx.font = 'bold 16px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, labelX, labelY);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid background
+            ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+
+            // Calculate line endpoints
+            // Line m (horizontal)
+            const m1 = { x: centerX - lineLength, y: centerY };
+            const m2 = { x: centerX + lineLength, y: centerY };
+
+            // Line l (rotated)
+            const l1 = {
+                x: centerX - lineLength * Math.cos(toRadians(angle)),
+                y: centerY + lineLength * Math.sin(toRadians(angle))
+            };
+            const l2 = {
+                x: centerX + lineLength * Math.cos(toRadians(angle)),
+                y: centerY - lineLength * Math.sin(toRadians(angle))
+            };
+
+            // Draw angle arcs (before lines so they appear behind)
+            const arcRadius = 40;
+            const arcRadius2 = 55;
+
+            // Angle a (between m2 and l2, upper right quadrant)
+            drawAngleArc(-angle, 0, 'rgb(231, 76, 60)', '∠a', arcRadius);
+            
+            // Angle b (between l2 and m1, upper left quadrant)
+            drawAngleArc(180, 360 - angle, 'rgb(52, 152, 219)', '∠b', arcRadius2);
+            
+            // Angle c (between m1 and l1, lower left quadrant)
+            drawAngleArc(180 - angle, 180, 'rgb(231, 76, 60)', '∠c', arcRadius);
+            
+            // Angle d (between l1 and m2, lower right quadrant)
+            drawAngleArc(0, 180 - angle, 'rgb(52, 152, 219)', '∠d', arcRadius2);
+
+            // Draw lines
+            drawLine(m1.x, m1.y, m2.x, m2.y, '#2c3e50', 'm', { x: 10, y: 5 });
+            drawLine(l1.x, l1.y, l2.x, l2.y, '#8e44ad', 'l', { x: 10, y: -10 });
+
+            // Draw intersection point
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#e74c3c';
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Update angle displays
+            const angleA = angle;
+            const angleB = 180 - angle;
+            const angleC = angle;
+            const angleD = 180 - angle;
+
+            document.getElementById('angleA').textContent = angleA.toFixed(1) + '°';
+            document.getElementById('angleB').textContent = angleB.toFixed(1) + '°';
+            document.getElementById('angleC').textContent = angleC.toFixed(1) + '°';
+            document.getElementById('angleD').textContent = angleD.toFixed(1) + '°';
+
+            document.getElementById('sumAB').textContent = (angleA + angleB).toFixed(1) + '°';
+            document.getElementById('sumBC').textContent = (angleB + angleC).toFixed(1) + '°';
+        }
+
+        // Event handlers
+        angleSlider.addEventListener('input', function() {
+            angle = parseFloat(this.value);
+            sliderValue.textContent = angle + '°';
+            draw();
+        });
+
+        canvas.addEventListener('mousedown', function(e) {
+            isDragging = true;
+        });
+
+        canvas.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left - centerX;
+            const y = centerY - (e.clientY - rect.top);
+
+            let newAngle = Math.atan2(y, x) * 180 / Math.PI;
+            
+            // Constrain angle
+            if (newAngle < 10) newAngle = 10;
+            if (newAngle > 170) newAngle = 170;
+
+            angle = newAngle;
+            angleSlider.value = angle;
+            sliderValue.textContent = Math.round(angle) + '°';
+            draw();
+        });
+
+        canvas.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        canvas.addEventListener('mouseleave', function() {
+            isDragging = false;
+        });
+
+        // Touch support
+        canvas.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            isDragging = true;
+        });
+
+        canvas.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            if (!isDragging) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left - centerX;
+            const y = centerY - (touch.clientY - rect.top);
+
+            let newAngle = Math.atan2(y, x) * 180 / Math.PI;
+            
+            if (newAngle < 10) newAngle = 10;
+            if (newAngle > 170) newAngle = 170;
+
+            angle = newAngle;
+            angleSlider.value = angle;
+            sliderValue.textContent = Math.round(angle) + '°';
+            draw();
+        });
+
+        canvas.addEventListener('touchend', function() {
+            isDragging = false;
+        });
+
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>

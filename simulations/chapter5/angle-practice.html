@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angle Practice - Interactive Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            border-radius: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-item .label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .score-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .score-item .value.correct {
+            color: #27ae60;
+        }
+
+        .score-item .value.wrong {
+            color: #e74c3c;
+        }
+
+        .question-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .question-box h3 {
+            color: #856404;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .question-box .question {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .question-box .hint {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .answer-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .answer-input input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .answer-input input:focus {
+            border-color: #fa709a;
+        }
+
+        .answer-input input.correct {
+            border-color: #27ae60;
+            background: #d4edda;
+        }
+
+        .answer-input input.wrong {
+            border-color: #e74c3c;
+            background: #f8d7da;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(250, 112, 154, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback.correct {
+            display: block;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+        }
+
+        .feedback.wrong {
+            display: block;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 15px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            display: none;
+            transition: all 0.3s;
+        }
+
+        .next-btn.show {
+            display: block;
+        }
+
+        .next-btn:hover {
+            background: #1e8449;
+        }
+
+        .difficulty-selector {
+            margin-bottom: 20px;
+        }
+
+        .difficulty-selector label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .difficulty-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .difficulty-btn:hover:not(.active) {
+            border-color: #fa709a;
+        }
+
+        .concept-reminder {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+        }
+
+        .concept-reminder h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        .concept-reminder ul {
+            padding-left: 20px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: white;
+            color: #fa709a;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .type-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .type-indicator.intersecting {
+            background: rgba(231, 76, 60, 0.2);
+            color: #c0392b;
+        }
+
+        .type-indicator.parallel {
+            background: rgba(46, 204, 113, 0.2);
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Angle Practice Quiz</h1>
+        <p class="subtitle">Test your understanding of angle relationships</p>
+
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="canvas" width="600" height="450"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="score-display">
+                    <div class="score-item">
+                        <div class="label">Question</div>
+                        <div class="value" id="questionNum">1</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Correct</div>
+                        <div class="value correct" id="correctScore">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Wrong</div>
+                        <div class="value wrong" id="wrongScore">0</div>
+                    </div>
+                </div>
+
+                <div class="difficulty-selector">
+                    <label>Difficulty Level</label>
+                    <div class="difficulty-buttons">
+                        <button class="difficulty-btn active" data-level="easy">Easy</button>
+                        <button class="difficulty-btn" data-level="medium">Medium</button>
+                        <button class="difficulty-btn" data-level="hard">Hard</button>
+                    </div>
+                </div>
+
+                <div class="question-box">
+                    <span class="type-indicator intersecting" id="typeIndicator">Intersecting Lines</span>
+                    <h3>Find the missing angle:</h3>
+                    <div class="question" id="question">What is the value of ∠x?</div>
+                    <div class="hint" id="hint">Use: Vertically opposite angles are equal</div>
+                </div>
+
+                <div class="answer-input">
+                    <input type="number" id="answerInput" placeholder="Enter angle in degrees">
+                    <span style="display: flex; align-items: center; font-size: 1.2rem;">°</span>
+                </div>
+
+                <button class="submit-btn" id="submitBtn">Check Answer</button>
+
+                <div class="feedback" id="feedback"></div>
+
+                <button class="next-btn" id="nextBtn">Next Question →</button>
+
+                <div class="concept-reminder">
+                    <h4>📝 Quick Reference</h4>
+                    <ul>
+                        <li>Vertically opposite angles are <strong>equal</strong></li>
+                        <li>Linear pairs add up to <strong>180°</strong></li>
+                        <li>Corresponding angles are <strong>equal</strong> (parallel lines)</li>
+                        <li>Alternate angles are <strong>equal</strong> (parallel lines)</li>
+                        <li>Co-interior angles add to <strong>180°</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <a href="index.html" class="nav-link">← Back to All Simulations</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const feedback = document.getElementById('feedback');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+
+        let currentQuestion = null;
+        let questionNumber = 1;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let difficulty = 'easy';
+        let answered = false;
+
+        const questionTypes = {
+            easy: [
+                { type: 'verticallyOpposite', name: 'Vertically Opposite' },
+                { type: 'linearPair', name: 'Linear Pair' }
+            ],
+            medium: [
+                { type: 'verticallyOpposite', name: 'Vertically Opposite' },
+                { type: 'linearPair', name: 'Linear Pair' },
+                { type: 'corresponding', name: 'Corresponding Angles' },
+                { type: 'alternate', name: 'Alternate Angles' }
+            ],
+            hard: [
+                { type: 'corresponding', name: 'Corresponding Angles' },
+                { type: 'alternate', name: 'Alternate Angles' },
+                { type: 'coInterior', name: 'Co-Interior Angles' },
+                { type: 'mixed', name: 'Mixed Problem' }
+            ]
+        };
+
+        function generateQuestion() {
+            const types = questionTypes[difficulty];
+            const selectedType = types[Math.floor(Math.random() * types.length)];
+            
+            let givenAngle = Math.floor(Math.random() * 120) + 30; // 30-150
+            let answer, hint, questionText, isParallel = false;
+
+            switch (selectedType.type) {
+                case 'verticallyOpposite':
+                    answer = givenAngle;
+                    hint = "Vertically opposite angles are equal";
+                    questionText = `If ∠a = ${givenAngle}°, find ∠c`;
+                    break;
+                case 'linearPair':
+                    answer = 180 - givenAngle;
+                    hint = "Linear pairs add up to 180°";
+                    questionText = `If ∠a = ${givenAngle}°, find ∠b`;
+                    break;
+                case 'corresponding':
+                    answer = givenAngle;
+                    hint = "Corresponding angles are equal (parallel lines)";
+                    questionText = `If ∠1 = ${givenAngle}°, find ∠5`;
+                    isParallel = true;
+                    break;
+                case 'alternate':
+                    answer = givenAngle;
+                    hint = "Alternate interior angles are equal (parallel lines)";
+                    questionText = `If ∠3 = ${givenAngle}°, find ∠6`;
+                    isParallel = true;
+                    break;
+                case 'coInterior':
+                    answer = 180 - givenAngle;
+                    hint = "Co-interior angles add up to 180° (parallel lines)";
+                    questionText = `If ∠3 = ${givenAngle}°, find ∠5`;
+                    isParallel = true;
+                    break;
+                case 'mixed':
+                    const subTypes = ['corresponding', 'alternate', 'coInterior'];
+                    return generateQuestion(); // Recursively get a valid question
+            }
+
+            return {
+                givenAngle,
+                answer,
+                hint,
+                questionText,
+                isParallel,
+                type: selectedType.type,
+                typeName: selectedType.name
+            };
+        }
+
+        function toRadians(deg) {
+            return deg * Math.PI / 180;
+        }
+
+        function drawIntersectingLines(givenAngle, highlightAngles = {}) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const lineLength = 180;
+            const angle = givenAngle;
+
+            // Draw lines
+            // Line m (horizontal)
+            ctx.beginPath();
+            ctx.moveTo(centerX - lineLength, centerY);
+            ctx.lineTo(centerX + lineLength, centerY);
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 16px Segoe UI';
+            ctx.fillText('m', centerX + lineLength + 10, centerY + 5);
+
+            // Line l (angled)
+            ctx.beginPath();
+            ctx.moveTo(centerX - lineLength * Math.cos(toRadians(angle)), centerY + lineLength * Math.sin(toRadians(angle)));
+            ctx.lineTo(centerX + lineLength * Math.cos(toRadians(angle)), centerY - lineLength * Math.sin(toRadians(angle)));
+            ctx.strokeStyle = '#8e44ad';
+            ctx.stroke();
+            ctx.fillStyle = '#8e44ad';
+            ctx.fillText('l', centerX + lineLength * Math.cos(toRadians(angle)) + 10, centerY - lineLength * Math.sin(toRadians(angle)));
+
+            // Draw angles
+            const arcRadius = 40;
+            const colors = {
+                a: highlightAngles.a ? '#e74c3c' : '#999',
+                b: highlightAngles.b ? '#3498db' : '#999',
+                c: highlightAngles.c ? '#e74c3c' : '#999',
+                d: highlightAngles.d ? '#3498db' : '#999'
+            };
+
+            // Angle a
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, arcRadius, toRadians(-angle), 0);
+            ctx.strokeStyle = colors.a;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = colors.a;
+            ctx.font = 'bold 14px Segoe UI';
+            ctx.fillText('∠a', centerX + 50, centerY - 20);
+
+            // Angle b
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, arcRadius + 15, toRadians(180), toRadians(360 - angle));
+            ctx.strokeStyle = colors.b;
+            ctx.stroke();
+            ctx.fillStyle = colors.b;
+            ctx.fillText('∠b', centerX - 70, centerY - 20);
+
+            // Angle c
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, arcRadius, toRadians(180 - angle), toRadians(180));
+            ctx.strokeStyle = colors.c;
+            ctx.stroke();
+            ctx.fillStyle = colors.c;
+            ctx.fillText('∠c', centerX - 70, centerY + 35);
+
+            // Angle d
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, arcRadius + 15, 0, toRadians(180 - angle));
+            ctx.strokeStyle = colors.d;
+            ctx.stroke();
+            ctx.fillStyle = colors.d;
+            ctx.fillText('∠d', centerX + 50, centerY + 35);
+
+            // Intersection point
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#333';
+            ctx.fill();
+        }
+
+        function drawParallelLines(givenAngle, highlightAngles = {}) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const lineLength = 200;
+            const gap = 120;
+
+            // Line l
+            ctx.beginPath();
+            ctx.moveTo(80, centerY - gap / 2);
+            ctx.lineTo(canvas.width - 80, centerY - gap / 2);
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = '#3498db';
+            ctx.font = 'bold 16px Segoe UI';
+            ctx.fillText('l', canvas.width - 70, centerY - gap / 2 - 10);
+
+            // Line m
+            ctx.beginPath();
+            ctx.moveTo(80, centerY + gap / 2);
+            ctx.lineTo(canvas.width - 80, centerY + gap / 2);
+            ctx.strokeStyle = '#27ae60';
+            ctx.stroke();
+            ctx.fillStyle = '#27ae60';
+            ctx.fillText('m', canvas.width - 70, centerY + gap / 2 - 10);
+
+            // Parallel marks
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(200, centerY - gap / 2 - 8);
+            ctx.lineTo(210, centerY - gap / 2 - 8);
+            ctx.moveTo(200, centerY - gap / 2 - 3);
+            ctx.lineTo(210, centerY - gap / 2 - 3);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(200, centerY + gap / 2 - 8);
+            ctx.lineTo(210, centerY + gap / 2 - 8);
+            ctx.moveTo(200, centerY + gap / 2 - 3);
+            ctx.lineTo(210, centerY + gap / 2 - 3);
+            ctx.stroke();
+
+            // Transversal
+            const tAngle = toRadians(givenAngle);
+            const intL_y = centerY - gap / 2;
+            const intM_y = centerY + gap / 2;
+            const intL_x = centerX;
+            const intM_x = centerX + gap / Math.tan(tAngle);
+
+            ctx.beginPath();
+            ctx.moveTo(intL_x - 100 * Math.cos(tAngle), intL_y + 100 * Math.sin(tAngle));
+            ctx.lineTo(intM_x + 100 * Math.cos(tAngle), intM_y - 100 * Math.sin(tAngle));
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText('t', intM_x + 100 * Math.cos(tAngle) + 5, intM_y - 100 * Math.sin(tAngle));
+
+            // Draw angle labels
+            const arcRadius = 25;
+            const labels = ['1', '2', '3', '4', '5', '6', '7', '8'];
+            const positions = [
+                { x: intL_x + 40, y: intL_y - 25 },
+                { x: intL_x - 55, y: intL_y - 25 },
+                { x: intL_x - 55, y: intL_y + 30 },
+                { x: intL_x + 40, y: intL_y + 30 },
+                { x: intM_x + 40, y: intM_y - 25 },
+                { x: intM_x - 55, y: intM_y - 25 },
+                { x: intM_x - 55, y: intM_y + 30 },
+                { x: intM_x + 40, y: intM_y + 30 }
+            ];
+
+            positions.forEach((pos, i) => {
+                const highlight = highlightAngles[labels[i]];
+                ctx.fillStyle = highlight ? '#e74c3c' : '#666';
+                ctx.font = highlight ? 'bold 14px Segoe UI' : '12px Segoe UI';
+                ctx.fillText(`∠${labels[i]}`, pos.x, pos.y);
+            });
+
+            // Intersection points
+            ctx.beginPath();
+            ctx.arc(intL_x, intL_y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#333';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(intM_x, intM_y, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function loadQuestion() {
+            currentQuestion = generateQuestion();
+            answered = false;
+
+            document.getElementById('question').textContent = currentQuestion.questionText;
+            document.getElementById('hint').textContent = 'Hint: ' + currentQuestion.hint;
+            document.getElementById('questionNum').textContent = questionNumber;
+            
+            const typeIndicator = document.getElementById('typeIndicator');
+            if (currentQuestion.isParallel) {
+                typeIndicator.textContent = 'Parallel Lines';
+                typeIndicator.className = 'type-indicator parallel';
+            } else {
+                typeIndicator.textContent = 'Intersecting Lines';
+                typeIndicator.className = 'type-indicator intersecting';
+            }
+
+            answerInput.value = '';
+            answerInput.className = '';
+            answerInput.disabled = false;
+            submitBtn.disabled = false;
+            feedback.className = 'feedback';
+            nextBtn.classList.remove('show');
+
+            // Draw diagram
+            if (currentQuestion.isParallel) {
+                let highlights = {};
+                if (currentQuestion.type === 'corresponding') highlights = { '1': true, '5': true };
+                else if (currentQuestion.type === 'alternate') highlights = { '3': true, '6': true };
+                else if (currentQuestion.type === 'coInterior') highlights = { '3': true, '5': true };
+                drawParallelLines(currentQuestion.givenAngle, highlights);
+            } else {
+                let highlights = {};
+                if (currentQuestion.type === 'verticallyOpposite') highlights = { a: true, c: true };
+                else if (currentQuestion.type === 'linearPair') highlights = { a: true, b: true };
+                drawIntersectingLines(currentQuestion.givenAngle, highlights);
+            }
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+            
+            const userAnswer = parseFloat(answerInput.value);
+            
+            if (isNaN(userAnswer)) {
+                feedback.textContent = 'Please enter a valid number';
+                feedback.className = 'feedback wrong';
+                return;
+            }
+
+            answered = true;
+            answerInput.disabled = true;
+            submitBtn.disabled = true;
+
+            if (Math.abs(userAnswer - currentQuestion.answer) < 0.5) {
+                correctCount++;
+                document.getElementById('correctScore').textContent = correctCount;
+                answerInput.classList.add('correct');
+                feedback.textContent = '🎉 Correct! Great job!';
+                feedback.className = 'feedback correct';
+            } else {
+                wrongCount++;
+                document.getElementById('wrongScore').textContent = wrongCount;
+                answerInput.classList.add('wrong');
+                feedback.textContent = `❌ Incorrect. The answer is ${currentQuestion.answer}°`;
+                feedback.className = 'feedback wrong';
+            }
+
+            nextBtn.classList.add('show');
+        }
+
+        // Event listeners
+        submitBtn.addEventListener('click', checkAnswer);
+
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            questionNumber++;
+            loadQuestion();
+        });
+
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                difficultyBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                difficulty = btn.dataset.level;
+                questionNumber = 1;
+                correctCount = 0;
+                wrongCount = 0;
+                document.getElementById('correctScore').textContent = '0';
+                document.getElementById('wrongScore').textContent = '0';
+                loadQuestion();
+            });
+        });
+
+        // Initialize
+        loadQuestion();
+    </script>
+</body>
+</html>
