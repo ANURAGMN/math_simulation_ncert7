@@ -1,737 +1,400 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drawing Parallel Lines - Using Set Square Method</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#3498db">
+<title>Drawing Parallel Lines</title>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
 
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 10px;
-            font-size: 2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-        .subtitle {
-            text-align: center;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-        }
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 20px;
-        }
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 12px;
+}
 
-        @media (max-width: 900px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
+.header h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 12px; opacity: 0.95; }
 
-        .canvas-container {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  margin-bottom: 12px;
+}
 
-        canvas {
-            display: block;
-            margin: 0 auto;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-        }
+.visual {
+  position: relative;
+  height: 42vh;
+  min-height: 300px;
+  background: linear-gradient(145deg, #ecf0f1 0%, #bdc3c7 100%);
+  border-radius: 12px;
+  overflow: hidden;
+}
 
-        .controls {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
+svg { width: 100%; height: 100%; display: block; }
 
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
 
-        .step-dot {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: white;
-            background: #ddd;
-            transition: all 0.3s;
-        }
+.step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: white;
+  background: #bdc3c7;
+  transition: all 0.3s;
+}
 
-        .step-dot.active {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            transform: scale(1.2);
-        }
+.step-dot.active {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  transform: scale(1.15);
+}
 
-        .step-dot.completed {
-            background: #27ae60;
-        }
+.step-dot.completed {
+  background: #27ae60;
+}
 
-        .step-content {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            min-height: 150px;
-        }
+.step-content {
+  background: #ecf0f1;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 12px;
+  min-height: 80px;
+}
 
-        .step-content h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+.step-content h3 {
+  font-size: 14px;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-        .step-content p {
-            color: #555;
-            line-height: 1.6;
-            font-size: 0.95rem;
-        }
+.step-content p {
+  font-size: 12px;
+  color: #555;
+  line-height: 1.5;
+}
 
-        .step-content .highlight {
-            background: rgba(79, 172, 254, 0.2);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-        }
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-        }
+.nav-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
 
-        .nav-button {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+.nav-btn.prev {
+  background: #ecf0f1;
+  color: #666;
+}
 
-        .nav-button.prev {
-            background: #f5f5f5;
-            color: #666;
-        }
+.nav-btn.next {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
 
-        .nav-button.prev:hover:not(:disabled) {
-            background: #e0e0e0;
-        }
+.nav-btn:disabled { opacity: 0.4; }
+.nav-btn:active { transform: scale(0.98); }
 
-        .nav-button.next {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
+.tools-bar {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px;
+  background: #ecf0f1;
+  border-radius: 10px;
+  margin-top: 12px;
+}
 
-        .nav-button.next:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(79, 172, 254, 0.4);
-        }
+.tool-item {
+  text-align: center;
+  opacity: 0.4;
+  transition: all 0.3s;
+}
 
-        .nav-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+.tool-item.active {
+  opacity: 1;
+  transform: scale(1.1);
+}
 
-        .reset-button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 15px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+.tool-item .icon { font-size: 28px; }
+.tool-item .label { font-size: 10px; color: #555; margin-top: 4px; }
 
-        .reset-button:hover {
-            background: #c0392b;
-        }
+.insight-box {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d4e8f7 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-left: 4px solid #3498db;
+}
 
-        .concept-box {
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            border-left: 4px solid #27ae60;
-            padding: 15px;
-            border-radius: 0 10px 10px 0;
-            margin-top: 20px;
-        }
+.insight-title { font-weight: 600; color: #2980b9; margin-bottom: 6px; }
 
-        .concept-box h4 {
-            color: #1e8449;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
+.reset-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #e74c3c;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
 
-        .concept-box p {
-            color: #555;
-            font-size: 0.85rem;
-            line-height: 1.5;
-        }
-
-        .tools-display {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 10px;
-        }
-
-        .tool-item {
-            text-align: center;
-        }
-
-        .tool-item .icon {
-            font-size: 2rem;
-            margin-bottom: 5px;
-        }
-
-        .tool-item .label {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        .tool-item.active .icon {
-            animation: bounce 0.5s ease infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        .instructions {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            color: white;
-        }
-
-        .instructions h4 {
-            margin-bottom: 10px;
-        }
-
-        .instructions ul {
-            padding-left: 20px;
-            font-size: 0.9rem;
-            line-height: 1.8;
-        }
-
-        .nav-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 25px;
-            background: white;
-            color: #4facfe;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .nav-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-        }
-
-        .animation-speed {
-            margin-top: 15px;
-        }
-
-        .animation-speed label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 0.9rem;
-        }
-
-        .speed-slider {
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: linear-gradient(90deg, #4facfe, #00f2fe);
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .speed-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: white;
-            border: 3px solid #4facfe;
-            cursor: pointer;
-        }
-    </style>
+.reset-btn:active { transform: scale(0.98); }
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Drawing Parallel Lines</h1>
-        <p class="subtitle">Step-by-step guide using Set Square and Ruler</p>
+<div id="app">
 
-        <div class="main-content">
-            <div class="canvas-container">
-                <canvas id="canvas" width="650" height="500"></canvas>
-                
-                <div class="tools-display">
-                    <div class="tool-item" id="rulerTool">
-                        <div class="icon">📏</div>
-                        <div class="label">Ruler</div>
-                    </div>
-                    <div class="tool-item" id="setSquareTool">
-                        <div class="icon">📐</div>
-                        <div class="label">Set Square</div>
-                    </div>
-                    <div class="tool-item" id="pencilTool">
-                        <div class="icon">✏️</div>
-                        <div class="label">Pencil</div>
-                    </div>
-                </div>
-            </div>
+<div class="header">
+  <h1>📐 Drawing Parallel Lines</h1>
+  <p>Step-by-step using Set Square & Ruler</p>
+</div>
 
-            <div class="controls">
-                <div class="step-indicator">
-                    <div class="step-dot active" id="dot1">1</div>
-                    <div class="step-dot" id="dot2">2</div>
-                    <div class="step-dot" id="dot3">3</div>
-                    <div class="step-dot" id="dot4">4</div>
-                </div>
+<div class="sim-card">
+  <div class="visual">
+    <svg viewBox="0 0 400 300" id="svg"></svg>
+  </div>
+  
+  <div class="tools-bar">
+    <div class="tool-item" id="tool-ruler"><div class="icon">📏</div><div class="label">Ruler</div></div>
+    <div class="tool-item" id="tool-setSquare"><div class="icon">📐</div><div class="label">Set Square</div></div>
+    <div class="tool-item" id="tool-pencil"><div class="icon">✏️</div><div class="label">Pencil</div></div>
+  </div>
+  
+  <div class="step-indicator">
+    <div class="step-dot active" id="dot1">1</div>
+    <div class="step-dot" id="dot2">2</div>
+    <div class="step-dot" id="dot3">3</div>
+    <div class="step-dot" id="dot4">4</div>
+  </div>
+  
+  <div class="step-content">
+    <h3><span id="stepIcon">📏</span> <span id="stepTitle">Step 1: Draw Base Line</span></h3>
+    <p id="stepDesc">Draw a horizontal line using your ruler. This is line 'l' — our reference line.</p>
+  </div>
+  
+  <div class="nav-buttons">
+    <button class="nav-btn prev" id="prevBtn" disabled>← Back</button>
+    <button class="nav-btn next" id="nextBtn">Next →</button>
+  </div>
+  
+  <button class="reset-btn" id="resetBtn">🔄 Start Over</button>
+</div>
 
-                <div class="step-content" id="stepContent">
-                    <h3><span class="step-icon">📏</span> <span id="stepTitle">Step 1: Draw the Base Line</span></h3>
-                    <p id="stepDescription">Start by drawing a horizontal line using your ruler. This will be our reference line 'l' to which we want to draw a parallel line.</p>
-                </div>
+<div class="insight-box">
+  <div class="insight-title">💡 Why does this work?</div>
+  Both lines are perpendicular to the ruler edge (90°). Since corresponding angles are equal, the lines must be <strong>parallel</strong>! This is the mathematical proof behind the construction.
+</div>
 
-                <div class="button-group">
-                    <button class="nav-button prev" id="prevBtn" disabled>← Previous</button>
-                    <button class="nav-button next" id="nextBtn">Next →</button>
-                </div>
+</div>
 
-                <button class="reset-button" id="resetBtn">🔄 Reset Animation</button>
+<script>
+const svg = document.getElementById('svg');
+let currentStep = 1;
+let animProgress = 0;
+let animId = null;
 
-                <div class="animation-speed">
-                    <label>Animation Speed</label>
-                    <input type="range" class="speed-slider" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
-                </div>
+const steps = [
+  { title: "Step 1: Draw Base Line", desc: "Draw a horizontal line using your ruler. This is line 'l' — our reference line.", icon: "📏", tools: ['ruler', 'pencil'] },
+  { title: "Step 2: Place Set Square", desc: "Place the set square with one edge along line 'l'. Keep the ruler against the other edge.", icon: "📐", tools: ['setSquare', 'ruler'] },
+  { title: "Step 3: Slide Set Square Up", desc: "Slide the set square along the ruler to where you want the parallel line. Mark point A.", icon: "📐", tools: ['setSquare'] },
+  { title: "Step 4: Draw Parallel Line", desc: "Draw line 'm' along the set square edge. It's parallel to 'l' because both make 90° with the ruler!", icon: "✏️", tools: ['pencil', 'setSquare'] }
+];
 
-                <div class="concept-box">
-                    <h4>💡 Why This Works</h4>
-                    <p>Since both lines are perpendicular to the same transversal (the set square edge), the corresponding angles are equal (90°). When corresponding angles are equal, the lines must be parallel!</p>
-                </div>
-            </div>
-        </div>
+const lineY1 = 220, lineY2 = 100;
 
-        <div class="instructions">
-            <h4>🎯 Understanding the Method</h4>
-            <ul>
-                <li>We use the property that <strong>corresponding angles are equal</strong> for parallel lines</li>
-                <li>The set square ensures both lines make the same angle with the ruler</li>
-                <li>By sliding the set square along the ruler, we maintain the same angle</li>
-                <li>This guarantees the new line is parallel to the original line</li>
-            </ul>
-        </div>
+function updateUI() {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.classList.remove('active', 'completed');
+    if (i < currentStep) dot.classList.add('completed');
+    else if (i === currentStep) dot.classList.add('active');
+  }
+  
+  const step = steps[currentStep - 1];
+  document.getElementById('stepTitle').textContent = step.title;
+  document.getElementById('stepDesc').textContent = step.desc;
+  document.getElementById('stepIcon').textContent = step.icon;
+  
+  document.getElementById('prevBtn').disabled = currentStep === 1;
+  document.getElementById('nextBtn').textContent = currentStep === 4 ? '✓ Done' : 'Next →';
+  
+  ['ruler', 'setSquare', 'pencil'].forEach(t => {
+    document.getElementById('tool-' + t).classList.toggle('active', step.tools.includes(t));
+  });
+}
 
-        <a href="index.html" class="nav-link">← Back to All Simulations</a>
-    </div>
+function drawSetSquare(x, y, opacity) {
+  const size = 60;
+  return `
+    <g opacity="${opacity}">
+      <polygon points="${x},${y} ${x + size},${y} ${x},${y - size}" fill="rgba(255,200,100,0.8)" stroke="#d68910" stroke-width="2"/>
+      <path d="M ${x + 12} ${y} L ${x + 12} ${y - 12} L ${x} ${y - 12}" stroke="#666" stroke-width="1" fill="none"/>
+    </g>
+  `;
+}
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const speedSlider = document.getElementById('speedSlider');
+function drawRuler(x, y, height, opacity) {
+  let marks = '';
+  for (let i = 0; i < height; i += 8) {
+    const w = i % 40 === 0 ? 12 : (i % 16 === 0 ? 8 : 4);
+    marks += `<line x1="${x}" y1="${y + i}" x2="${x + w}" y2="${y + i}" stroke="#666" stroke-width="1"/>`;
+  }
+  return `
+    <g opacity="${opacity}">
+      <rect x="${x}" y="${y}" width="25" height="${height}" fill="rgba(200,220,240,0.9)" stroke="#3498db" stroke-width="2" rx="2"/>
+      ${marks}
+    </g>
+  `;
+}
 
-        let currentStep = 1;
-        let animationProgress = 0;
-        let animationId = null;
-        let speed = 1;
+function render() {
+  let content = '';
+  
+  // Grid background
+  for (let i = 0; i < 400; i += 20) {
+    content += `<line x1="${i}" y1="0" x2="${i}" y2="300" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>`;
+    content += `<line x1="0" y1="${i}" x2="400" y2="${i}" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>`;
+  }
+  
+  // Step 1: Base line
+  if (currentStep >= 1) {
+    const p = currentStep === 1 ? animProgress : 1;
+    content += `<line x1="60" y1="${lineY1}" x2="${60 + 280 * p}" y2="${lineY1}" stroke="#2c3e50" stroke-width="3"/>`;
+    if (p > 0.9) content += `<text x="350" y="${lineY1 + 5}" font-size="16" fill="#2c3e50" font-weight="600">l</text>`;
+  }
+  
+  // Step 2: Set square + ruler at bottom
+  if (currentStep >= 2) {
+    const p = currentStep === 2 ? animProgress : 1;
+    content += drawRuler(140, lineY1 - 160, 160, p);
+    content += drawSetSquare(165, lineY1, p);
+    if (p > 0.8) content += `<text x="180" y="${lineY1 + 25}" font-size="11" fill="#666">Set square on l</text>`;
+  }
+  
+  // Step 3: Slide up
+  if (currentStep >= 3) {
+    const p = currentStep === 3 ? animProgress : 1;
+    content += drawRuler(140, lineY1 - 160, 160, 1);
+    
+    const curY = lineY1 - (lineY1 - lineY2) * p;
+    if (p < 1) content += drawSetSquare(165, lineY1, 0.3);
+    content += drawSetSquare(165, curY, 1);
+    
+    if (p > 0.5) {
+      content += `<circle cx="280" cy="${lineY2}" r="6" fill="#e74c3c"/>`;
+      content += `<text x="290" y="${lineY2 + 5}" font-size="14" fill="#e74c3c" font-weight="600">A</text>`;
+    }
+    
+    if (p > 0 && p < 1) {
+      content += `<line x1="195" y1="${lineY1 - 20}" x2="195" y2="${curY + 20}" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5" opacity="0.5"/>`;
+    }
+  }
+  
+  // Step 4: Draw parallel line
+  if (currentStep >= 4) {
+    const p = currentStep === 4 ? animProgress : 1;
+    content += drawSetSquare(165, lineY2, 1);
+    content += `<line x1="60" y1="${lineY2}" x2="${60 + 280 * p}" y2="${lineY2}" stroke="#27ae60" stroke-width="3"/>`;
+    
+    if (p > 0.9) {
+      content += `<text x="350" y="${lineY2 + 5}" font-size="16" fill="#27ae60" font-weight="600">m</text>`;
+      
+      // Parallel marks
+      content += `<path d="M 280 ${lineY1 - 6} L 288 ${lineY1 - 6} M 280 ${lineY1 - 2} L 288 ${lineY1 - 2}" stroke="#666" stroke-width="2"/>`;
+      content += `<path d="M 280 ${lineY2 - 6} L 288 ${lineY2 - 6} M 280 ${lineY2 - 2} L 288 ${lineY2 - 2}" stroke="#666" stroke-width="2"/>`;
+      
+      content += `<text x="200" y="50" font-size="18" fill="#27ae60" font-weight="700" text-anchor="middle">✓ l ∥ m (Parallel!)</text>`;
+    }
+    
+    content += `<circle cx="280" cy="${lineY2}" r="6" fill="#e74c3c"/>`;
+  }
+  
+  svg.innerHTML = content;
+}
 
-        const steps = [
-            {
-                title: "Step 1: Draw the Base Line",
-                description: "Start by drawing a horizontal line using your ruler. This will be our reference line 'l' to which we want to draw a parallel line.",
-                icon: "📏",
-                tools: ["ruler", "pencil"]
-            },
-            {
-                title: "Step 2: Place the Set Square",
-                description: "Place the set square with one side along line 'l'. Hold the ruler firmly against the other side of the set square.",
-                icon: "📐",
-                tools: ["setSquare", "ruler"]
-            },
-            {
-                title: "Step 3: Slide the Set Square",
-                description: "While keeping the ruler fixed, slide the set square up to where you want to draw the parallel line. Mark point 'A' where you want the line to pass.",
-                icon: "📐",
-                tools: ["setSquare"]
-            },
-            {
-                title: "Step 4: Draw the Parallel Line",
-                description: "Draw a line along the edge of the set square. This new line 'm' is parallel to line 'l' because they both make the same angle (90°) with the ruler!",
-                icon: "✏️",
-                tools: ["pencil", "setSquare"]
-            }
-        ];
+function animate() {
+  if (animProgress < 1) {
+    animProgress += 0.03;
+    if (animProgress > 1) animProgress = 1;
+    render();
+    animId = requestAnimationFrame(animate);
+  }
+}
 
-        function updateUI() {
-            // Update step dots
-            for (let i = 1; i <= 4; i++) {
-                const dot = document.getElementById('dot' + i);
-                dot.classList.remove('active', 'completed');
-                if (i < currentStep) {
-                    dot.classList.add('completed');
-                } else if (i === currentStep) {
-                    dot.classList.add('active');
-                }
-            }
+function startAnim() {
+  if (animId) cancelAnimationFrame(animId);
+  animProgress = 0;
+  animate();
+}
 
-            // Update step content
-            const step = steps[currentStep - 1];
-            document.getElementById('stepTitle').textContent = step.title;
-            document.getElementById('stepDescription').textContent = step.description;
-            document.querySelector('.step-icon').textContent = step.icon;
+document.getElementById('prevBtn').onclick = () => {
+  if (currentStep > 1) { currentStep--; updateUI(); startAnim(); }
+};
 
-            // Update buttons
-            prevBtn.disabled = currentStep === 1;
-            nextBtn.textContent = currentStep === 4 ? 'Complete ✓' : 'Next →';
+document.getElementById('nextBtn').onclick = () => {
+  if (currentStep < 4) { currentStep++; updateUI(); startAnim(); }
+};
 
-            // Update tool highlights
-            ['rulerTool', 'setSquareTool', 'pencilTool'].forEach(tool => {
-                document.getElementById(tool).classList.remove('active');
-            });
-            step.tools.forEach(tool => {
-                const toolId = tool + 'Tool';
-                if (document.getElementById(toolId)) {
-                    document.getElementById(toolId).classList.add('active');
-                }
-            });
-        }
+document.getElementById('resetBtn').onclick = () => {
+  currentStep = 1;
+  updateUI();
+  startAnim();
+};
 
-        function drawSetSquare(x, y, rotation, opacity) {
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(rotation);
-            ctx.globalAlpha = opacity;
-
-            const size = 80;
-            
-            // Draw set square shape
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(size, 0);
-            ctx.lineTo(0, -size);
-            ctx.closePath();
-            
-            ctx.fillStyle = 'rgba(255, 200, 100, 0.7)';
-            ctx.fill();
-            ctx.strokeStyle = '#d68910';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Draw right angle marker
-            ctx.beginPath();
-            ctx.moveTo(15, 0);
-            ctx.lineTo(15, -15);
-            ctx.lineTo(0, -15);
-            ctx.strokeStyle = '#666';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            ctx.restore();
-        }
-
-        function drawRuler(x, y, width, opacity) {
-            ctx.save();
-            ctx.globalAlpha = opacity;
-
-            ctx.fillStyle = 'rgba(200, 220, 240, 0.9)';
-            ctx.fillRect(x, y, width, 30);
-            ctx.strokeStyle = '#3498db';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x, y, width, 30);
-
-            // Draw ruler marks
-            ctx.strokeStyle = '#666';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < width; i += 10) {
-                const markHeight = i % 50 === 0 ? 15 : (i % 20 === 0 ? 10 : 5);
-                ctx.beginPath();
-                ctx.moveTo(x + i, y);
-                ctx.lineTo(x + i, y + markHeight);
-                ctx.stroke();
-            }
-
-            ctx.restore();
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw grid background
-            ctx.strokeStyle = 'rgba(0,0,0,0.05)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < canvas.width; i += 20) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            for (let i = 0; i < canvas.height; i += 20) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
-
-            const lineY1 = 350; // Base line
-            const lineY2 = 150; // Parallel line position
-            const pointA_x = 400;
-
-            // Step 1: Draw base line
-            if (currentStep >= 1) {
-                const progress = currentStep === 1 ? animationProgress : 1;
-                ctx.beginPath();
-                ctx.moveTo(100, lineY1);
-                ctx.lineTo(100 + 450 * progress, lineY1);
-                ctx.strokeStyle = '#2c3e50';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-
-                if (progress > 0.9) {
-                    ctx.fillStyle = '#2c3e50';
-                    ctx.font = 'bold 18px Segoe UI';
-                    ctx.fillText('l', 560, lineY1 + 5);
-                }
-            }
-
-            // Step 2: Place set square and ruler
-            if (currentStep >= 2) {
-                const progress = currentStep === 2 ? animationProgress : 1;
-                
-                // Draw ruler (vertical, along set square)
-                drawRuler(180, lineY1 - 250, 30, progress);
-                ctx.save();
-                ctx.translate(180, lineY1 - 250);
-                ctx.rotate(Math.PI / 2);
-                drawRuler(0, -30, 250, progress);
-                ctx.restore();
-
-                // Draw set square at base line
-                drawSetSquare(250, lineY1, 0, progress);
-
-                // Add label
-                if (progress > 0.8) {
-                    ctx.fillStyle = '#666';
-                    ctx.font = '14px Segoe UI';
-                    ctx.fillText('Set square on line l', 260, lineY1 + 40);
-                }
-            }
-
-            // Step 3: Slide set square up
-            if (currentStep >= 3) {
-                const progress = currentStep === 3 ? animationProgress : 1;
-                
-                // Keep ruler visible
-                ctx.save();
-                ctx.translate(180, lineY1 - 250);
-                ctx.rotate(Math.PI / 2);
-                drawRuler(0, -30, 250, 1);
-                ctx.restore();
-
-                // Animated set square moving up
-                const startY = lineY1;
-                const endY = lineY2;
-                const currentY = startY - (startY - endY) * progress;
-
-                // Show ghost of original position
-                if (progress < 1) {
-                    drawSetSquare(250, lineY1, 0, 0.3);
-                }
-
-                // Moving set square
-                drawSetSquare(250, currentY, 0, 1);
-
-                // Point A
-                if (progress > 0.5) {
-                    ctx.beginPath();
-                    ctx.arc(pointA_x, lineY2, 8, 0, Math.PI * 2);
-                    ctx.fillStyle = '#e74c3c';
-                    ctx.fill();
-                    ctx.fillStyle = '#e74c3c';
-                    ctx.font = 'bold 16px Segoe UI';
-                    ctx.fillText('A', pointA_x + 15, lineY2 + 5);
-                }
-
-                // Arrow showing movement
-                if (progress < 1 && progress > 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(290, startY - 30);
-                    ctx.lineTo(290, currentY + 30);
-                    ctx.strokeStyle = 'rgba(231, 76, 60, 0.5)';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 5]);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-
-                    // Arrow head
-                    ctx.beginPath();
-                    ctx.moveTo(285, currentY + 40);
-                    ctx.lineTo(290, currentY + 30);
-                    ctx.lineTo(295, currentY + 40);
-                    ctx.stroke();
-                }
-            }
-
-            // Step 4: Draw parallel line
-            if (currentStep >= 4) {
-                const progress = currentStep === 4 ? animationProgress : 1;
-
-                // Keep set square visible
-                drawSetSquare(250, lineY2, 0, 1);
-
-                // Draw the parallel line
-                ctx.beginPath();
-                ctx.moveTo(100, lineY2);
-                ctx.lineTo(100 + 450 * progress, lineY2);
-                ctx.strokeStyle = '#27ae60';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-
-                if (progress > 0.9) {
-                    ctx.fillStyle = '#27ae60';
-                    ctx.font = 'bold 18px Segoe UI';
-                    ctx.fillText('m', 560, lineY2 + 5);
-
-                    // Draw parallel marks
-                    ctx.strokeStyle = '#666';
-                    ctx.lineWidth = 2;
-                    
-                    // On line l
-                    ctx.beginPath();
-                    ctx.moveTo(400, lineY1 - 5);
-                    ctx.lineTo(410, lineY1 - 5);
-                    ctx.moveTo(400, lineY1);
-                    ctx.lineTo(410, lineY1);
-                    ctx.stroke();
-
-                    // On line m
-                    ctx.beginPath();
-                    ctx.moveTo(400, lineY2 - 5);
-                    ctx.lineTo(410, lineY2 - 5);
-                    ctx.moveTo(400, lineY2);
-                    ctx.lineTo(410, lineY2);
-                    ctx.stroke();
-
-                    // Success message
-                    ctx.fillStyle = '#27ae60';
-                    ctx.font = 'bold 20px Segoe UI';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('✓ Line m is parallel to line l !', canvas.width / 2, 80);
-                    ctx.font = '16px Segoe UI';
-                    ctx.fillText('(l ∥ m)', canvas.width / 2, 105);
-                    ctx.textAlign = 'left';
-                }
-
-                // Point A
-                ctx.beginPath();
-                ctx.arc(pointA_x, lineY2, 8, 0, Math.PI * 2);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fill();
-            }
-        }
-
-        function animate() {
-            if (animationProgress < 1) {
-                animationProgress += 0.02 * speed;
-                if (animationProgress > 1) animationProgress = 1;
-                draw();
-                animationId = requestAnimationFrame(animate);
-            }
-        }
-
-        function startAnimation() {
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-            animationProgress = 0;
-            animate();
-        }
-
-        prevBtn.addEventListener('click', () => {
-            if (currentStep > 1) {
-                currentStep--;
-                updateUI();
-                startAnimation();
-            }
-        });
-
-        nextBtn.addEventListener('click', () => {
-            if (currentStep < 4) {
-                currentStep++;
-                updateUI();
-                startAnimation();
-            }
-        });
-
-        resetBtn.addEventListener('click', () => {
-            currentStep = 1;
-            animationProgress = 0;
-            updateUI();
-            startAnimation();
-        });
-
-        speedSlider.addEventListener('input', (e) => {
-            speed = parseFloat(e.target.value);
-        });
-
-        // Initial setup
-        updateUI();
-        startAnimation();
-    </script>
+updateUI();
+startAnim();
+</script>
 </body>
 </html>

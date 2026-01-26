@@ -1,279 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCERT Grade 7 Math - Interactive Simulations</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#667eea">
+<title>Math Simulations - NCERT Grade 7</title>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f3460 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
 
-        header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-        .logo {
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
 
-        h1 {
-            color: white;
-            font-size: 3rem;
-            margin-bottom: 15px;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 20px 10px;
+}
 
-        .subtitle {
-            color: rgba(255,255,255,0.7);
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
+.header .icon { font-size: 48px; margin-bottom: 12px; }
+.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.header p { font-size: 13px; opacity: 0.9; }
 
-        .chapter-grid {
-            display: grid;
-            gap: 30px;
-            margin-top: 40px;
-        }
+.chapter-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
 
-        .chapter-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px;
-            padding: 40px;
-            text-decoration: none;
-            color: white;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 30px;
-            align-items: center;
-        }
+.chapter-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
 
-        .chapter-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.2);
-            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
-        }
+.chapter-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
 
-        .chapter-icon {
-            width: 100px;
-            height: 100px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
+.chapter-icon.ch5 { background: linear-gradient(135deg, #667eea20, #764ba220); }
+.chapter-icon.ch7 { background: linear-gradient(135deg, #ff6b6b20, #feca5720); }
 
-        .chapter-5 .chapter-icon {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+.chapter-title { font-size: 15px; font-weight: 700; color: #333; }
+.chapter-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
 
-        .chapter-7 .chapter-icon {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
+.sim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-        .chapter-content h2 {
-            font-size: 1.6rem;
-            margin-bottom: 10px;
-            color: white;
-        }
+.sim-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
 
-        .chapter-content .chapter-num {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.5);
-            margin-bottom: 5px;
-        }
+.sim-item:active {
+  transform: scale(0.98);
+  background: #f0f0f0;
+}
 
-        .chapter-content p {
-            color: rgba(255,255,255,0.7);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
+.sim-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
 
-        .simulation-count {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            font-size: 0.85rem;
-        }
+.sim-icon.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+.sim-icon.green { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.sim-icon.pink { background: linear-gradient(135deg, #e91e63, #f06292); }
+.sim-icon.orange { background: linear-gradient(135deg, #f39c12, #e74c3c); }
+.sim-icon.blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+.sim-icon.red { background: linear-gradient(135deg, #ff6b6b, #feca57); }
+.sim-icon.violet { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+.sim-icon.indigo { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
 
-        .topics-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-        }
+.sim-info { flex: 1; }
+.sim-name { font-size: 13px; font-weight: 600; color: #333; }
+.sim-desc { font-size: 10px; color: #888; margin-top: 2px; }
 
-        .topic-tag {
-            padding: 5px 12px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.8);
-        }
+.sim-arrow {
+  color: #ccc;
+  font-size: 18px;
+}
 
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 60px;
-        }
-
-        .feature {
-            text-align: center;
-            padding: 30px 20px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-        }
-
-        .feature h3 {
-            color: white;
-            font-size: 1rem;
-            margin-bottom: 8px;
-        }
-
-        .feature p {
-            color: rgba(255,255,255,0.6);
-            font-size: 0.85rem;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 80px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.4);
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 700px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            .chapter-card {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .chapter-icon {
-                margin: 0 auto;
-            }
-        }
-    </style>
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">📐</div>
-            <h1>Math Simulations</h1>
-            <p class="subtitle">Interactive visual learning for NCERT Grade 7 Mathematics. Explore geometric concepts through hands-on simulations.</p>
-        </header>
+<div id="app">
 
-        <div class="chapter-grid">
-            <a href="chapter5/index.html" class="chapter-card chapter-5">
-                <div class="chapter-icon">📏</div>
-                <div class="chapter-content">
-                    <div class="chapter-num">Chapter 5</div>
-                    <h2>Parallel and Intersecting Lines</h2>
-                    <p>Explore how lines interact on a plane - from intersecting lines and their angles to parallel lines cut by transversals.</p>
-                    <div class="simulation-count">
-                        <span>🎯</span>
-                        <span>5 Interactive Simulations</span>
-                    </div>
-                    <div class="topics-list">
-                        <span class="topic-tag">Vertically Opposite Angles</span>
-                        <span class="topic-tag">Linear Pairs</span>
-                        <span class="topic-tag">Perpendicular Lines</span>
-                        <span class="topic-tag">Transversals</span>
-                        <span class="topic-tag">Corresponding Angles</span>
-                        <span class="topic-tag">Alternate Angles</span>
-                    </div>
-                </div>
-            </a>
+<div class="header">
+  <div class="icon">📐</div>
+  <h1>Math Simulations</h1>
+  <p>NCERT Grade 7 - Interactive Learning</p>
+</div>
 
-            <a href="chapter7/index.html" class="chapter-card chapter-7">
-                <div class="chapter-icon">🔺</div>
-                <div class="chapter-content">
-                    <div class="chapter-num">Chapter 7</div>
-                    <h2>A Tale of Three Intersecting Lines</h2>
-                    <p>Discover the world of triangles - their construction, the triangle inequality, and the beautiful angle sum property.</p>
-                    <div class="simulation-count">
-                        <span>🎯</span>
-                        <span>3 Interactive Simulations</span>
-                    </div>
-                    <div class="topics-list">
-                        <span class="topic-tag">Triangle Construction (SSS)</span>
-                        <span class="topic-tag">Triangle Inequality</span>
-                        <span class="topic-tag">Angle Sum Property</span>
-                        <span class="topic-tag">Types of Triangles</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">🖱️</div>
-                <h3>Interactive</h3>
-                <p>Drag, slide, and manipulate geometric objects to see concepts in action</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">📱</div>
-                <h3>Mobile Friendly</h3>
-                <p>Works on tablets and phones with touch support</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🎨</div>
-                <h3>Visual Learning</h3>
-                <p>Colorful animations and clear diagrams make concepts easy to understand</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">✅</div>
-                <h3>Practice Quizzes</h3>
-                <p>Test your understanding with interactive practice problems</p>
-            </div>
-        </div>
-
-        <footer>
-            <p>Interactive Math Simulations for NCERT Grade 7</p>
-            <p style="margin-top: 10px; opacity: 0.7;">Built with HTML5 Canvas</p>
-        </footer>
+<div class="chapter-card">
+  <div class="chapter-header">
+    <div class="chapter-icon ch5">📐</div>
+    <div>
+      <div class="chapter-title">Chapter 5: Lines & Angles</div>
+      <div class="chapter-subtitle">5 Interactive Simulations</div>
     </div>
+  </div>
+  
+  <div class="sim-list">
+    <a href="chapter5/intersecting-lines.html" class="sim-item">
+      <div class="sim-icon purple">📐</div>
+      <div class="sim-info">
+        <div class="sim-name">Intersecting Lines</div>
+        <div class="sim-desc">Vertically opposite & linear pairs</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter5/perpendicular-lines.html" class="sim-item">
+      <div class="sim-icon green">📐</div>
+      <div class="sim-info">
+        <div class="sim-name">Perpendicular Lines</div>
+        <div class="sim-desc">Find the perfect 90° angle</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter5/parallel-transversal.html" class="sim-item">
+      <div class="sim-icon pink">〰️</div>
+      <div class="sim-info">
+        <div class="sim-name">Parallel Lines & Transversal</div>
+        <div class="sim-desc">8 angles and their relationships</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter5/drawing-parallel-lines.html" class="sim-item">
+      <div class="sim-icon blue">📏</div>
+      <div class="sim-info">
+        <div class="sim-name">Drawing Parallel Lines</div>
+        <div class="sim-desc">Step-by-step construction</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter5/angle-practice.html" class="sim-item">
+      <div class="sim-icon orange">📝</div>
+      <div class="sim-info">
+        <div class="sim-name">Angle Practice Quiz</div>
+        <div class="sim-desc">Test your skills</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+  </div>
+</div>
+
+<div class="chapter-card">
+  <div class="chapter-header">
+    <div class="chapter-icon ch7">🔺</div>
+    <div>
+      <div class="chapter-title">Chapter 7: Triangles</div>
+      <div class="chapter-subtitle">3 Interactive Simulations</div>
+    </div>
+  </div>
+  
+  <div class="sim-list">
+    <a href="chapter7/triangle-inequality.html" class="sim-item">
+      <div class="sim-icon red">🔺</div>
+      <div class="sim-info">
+        <div class="sim-name">Triangle Inequality</div>
+        <div class="sim-desc">When can 3 sides form a triangle?</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter7/angle-sum-property.html" class="sim-item">
+      <div class="sim-icon violet">🔺</div>
+      <div class="sim-info">
+        <div class="sim-name">Angle Sum Property</div>
+        <div class="sim-desc">Why angles always add to 180°</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter7/triangle-construction.html" class="sim-item">
+      <div class="sim-icon indigo">📐</div>
+      <div class="sim-info">
+        <div class="sim-name">Triangle Construction (SSS)</div>
+        <div class="sim-desc">Build from 3 side lengths</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Mobile-optimized for gesture-first learning<br>
+  Drag, explore, discover!
+</div>
+
+</div>
 </body>
 </html>

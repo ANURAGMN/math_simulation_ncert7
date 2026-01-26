@@ -1,602 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chapter 5: Parallel and Intersecting Lines - Interactive Simulations</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#667eea">
+<title>Chapter 5: Lines & Angles</title>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-        header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
 
-        .badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
 
-        h1 {
-            color: white;
-            font-size: 2.8rem;
-            margin-bottom: 15px;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 16px 10px;
+}
 
-        .subtitle {
-            color: rgba(255,255,255,0.8);
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
+.header .icon { font-size: 48px; margin-bottom: 10px; }
+.header h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.header p { font-size: 12px; opacity: 0.9; }
 
-        .chapter-info {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 30px;
-        }
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
 
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: rgba(255,255,255,0.7);
-            font-size: 0.9rem;
-        }
+.sim-card a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s;
+}
 
-        .info-item .icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
+.sim-card a:active { background: #f5f5f5; }
 
-        .simulation-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
-            margin-top: 40px;
-        }
+.sim-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
 
-        .simulation-card {
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-        }
+.sim-icon.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+.sim-icon.green { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.sim-icon.pink { background: linear-gradient(135deg, #e91e63, #f06292); }
+.sim-icon.blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+.sim-icon.orange { background: linear-gradient(135deg, #f39c12, #e74c3c); }
 
-        .simulation-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 60px rgba(233, 69, 96, 0.3);
-        }
+.sim-info { flex: 1; }
+.sim-name { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px; }
+.sim-desc { font-size: 11px; color: #888; line-height: 1.4; }
 
-        .card-preview {
-            height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
+.sim-arrow { color: #ccc; font-size: 20px; }
 
-        .card-preview canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
+.concepts-box {
+  background: rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 16px;
+  color: white;
+}
 
-        .card-preview .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.05) 100%);
-        }
-
-        .card-number {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .card-content {
-            padding: 25px;
-        }
-
-        .card-content h3 {
-            font-size: 1.2rem;
-            color: #1a1a2e;
-            margin-bottom: 10px;
-        }
-
-        .card-content p {
-            color: #666;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
-        .card-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .tag {
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .tag.concept {
-            background: rgba(52, 152, 219, 0.15);
-            color: #2980b9;
-        }
-
-        .tag.interactive {
-            background: rgba(46, 204, 113, 0.15);
-            color: #27ae60;
-        }
-
-        .tag.practice {
-            background: rgba(155, 89, 182, 0.15);
-            color: #8e44ad;
-        }
-
-        .learning-objectives {
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 50px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .learning-objectives h2 {
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .objectives-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .objective-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-        }
-
-        .objective-item .check {
-            width: 24px;
-            height: 24px;
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-        }
-
-        .objective-item p {
-            color: rgba(255,255,255,0.8);
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 60px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.5);
-            font-size: 0.9rem;
-        }
-
-        footer a {
-            color: #e94560;
-            text-decoration: none;
-        }
-
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            .chapter-info {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .simulation-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Card preview animations */
-        .preview-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .preview-2 { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-        .preview-3 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .preview-4 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .preview-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-    </style>
+.concepts-box h3 { font-size: 13px; margin-bottom: 10px; }
+.concepts-box ul { padding-left: 18px; font-size: 11px; line-height: 1.8; opacity: 0.9; }
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <div class="badge">NCERT Grade 7 Mathematics</div>
-            <h1>Parallel and Intersecting Lines</h1>
-            <p class="subtitle">Master the concepts of lines, angles, and their relationships through interactive visual simulations</p>
-            
-            <div class="chapter-info">
-                <div class="info-item">
-                    <div class="icon">📚</div>
-                    <span>Chapter 5</span>
-                </div>
-                <div class="info-item">
-                    <div class="icon">🎯</div>
-                    <span>5 Simulations</span>
-                </div>
-                <div class="info-item">
-                    <div class="icon">⏱️</div>
-                    <span>Self-paced Learning</span>
-                </div>
-            </div>
-        </header>
+<div id="app">
 
-        <div class="simulation-grid">
-            <a href="intersecting-lines.html" class="simulation-card">
-                <div class="card-preview preview-1">
-                    <canvas id="preview1" width="350" height="180"></canvas>
-                    <div class="overlay"></div>
-                    <div class="card-number">1</div>
-                </div>
-                <div class="card-content">
-                    <h3>Intersecting Lines</h3>
-                    <p>Explore how two lines intersect and discover the properties of vertically opposite angles and linear pairs.</p>
-                    <div class="card-tags">
-                        <span class="tag concept">Vertically Opposite</span>
-                        <span class="tag concept">Linear Pairs</span>
-                        <span class="tag interactive">Interactive</span>
-                    </div>
-                </div>
-            </a>
+<a href="../index.html" class="back-link">← All Chapters</a>
 
-            <a href="perpendicular-lines.html" class="simulation-card">
-                <div class="card-preview preview-2">
-                    <canvas id="preview2" width="350" height="180"></canvas>
-                    <div class="overlay"></div>
-                    <div class="card-number">2</div>
-                </div>
-                <div class="card-content">
-                    <h3>Perpendicular Lines</h3>
-                    <p>Understand what happens when two lines meet at right angles (90°) and learn to identify perpendicular lines.</p>
-                    <div class="card-tags">
-                        <span class="tag concept">Right Angles</span>
-                        <span class="tag concept">90° Property</span>
-                        <span class="tag interactive">Interactive</span>
-                    </div>
-                </div>
-            </a>
+<div class="header">
+  <div class="icon">📐</div>
+  <h1>Chapter 5: Lines & Angles</h1>
+  <p>Explore relationships between lines and angles</p>
+</div>
 
-            <a href="parallel-transversal.html" class="simulation-card">
-                <div class="card-preview preview-3">
-                    <canvas id="preview3" width="350" height="180"></canvas>
-                    <div class="overlay"></div>
-                    <div class="card-number">3</div>
-                </div>
-                <div class="card-content">
-                    <h3>Parallel Lines & Transversal</h3>
-                    <p>Discover corresponding angles, alternate angles, and co-interior angles when a transversal cuts parallel lines.</p>
-                    <div class="card-tags">
-                        <span class="tag concept">Corresponding</span>
-                        <span class="tag concept">Alternate</span>
-                        <span class="tag concept">Co-Interior</span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="drawing-parallel-lines.html" class="simulation-card">
-                <div class="card-preview preview-4">
-                    <canvas id="preview4" width="350" height="180"></canvas>
-                    <div class="overlay"></div>
-                    <div class="card-number">4</div>
-                </div>
-                <div class="card-content">
-                    <h3>Drawing Parallel Lines</h3>
-                    <p>Learn the step-by-step process of drawing parallel lines using a set square and ruler.</p>
-                    <div class="card-tags">
-                        <span class="tag concept">Construction</span>
-                        <span class="tag interactive">Step-by-Step</span>
-                        <span class="tag interactive">Animated</span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="angle-practice.html" class="simulation-card">
-                <div class="card-preview preview-5">
-                    <canvas id="preview5" width="350" height="180"></canvas>
-                    <div class="overlay"></div>
-                    <div class="card-number">5</div>
-                </div>
-                <div class="card-content">
-                    <h3>Practice Quiz</h3>
-                    <p>Test your understanding with interactive practice problems at different difficulty levels.</p>
-                    <div class="card-tags">
-                        <span class="tag practice">Easy</span>
-                        <span class="tag practice">Medium</span>
-                        <span class="tag practice">Hard</span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="learning-objectives">
-            <h2>📖 Learning Objectives</h2>
-            <div class="objectives-grid">
-                <div class="objective-item">
-                    <div class="check">✓</div>
-                    <p>Understand that when two lines intersect, vertically opposite angles are equal</p>
-                </div>
-                <div class="objective-item">
-                    <div class="check">✓</div>
-                    <p>Know that linear pairs of angles always add up to 180°</p>
-                </div>
-                <div class="objective-item">
-                    <div class="check">✓</div>
-                    <p>Identify perpendicular lines and understand that they form 90° angles</p>
-                </div>
-                <div class="objective-item">
-                    <div class="check">✓</div>
-                    <p>Recognize parallel lines and understand they never intersect</p>
-                </div>
-                <div class="objective-item">
-                    <div class="check">✓</div>
-                    <p>Understand the concept of transversals and the angles they form</p>
-                </div>
-                <div class="objective-item">
-                    <div class="check">✓</div>
-                    <p>Know that corresponding angles are equal when a transversal crosses parallel lines</p>
-                </div>
-                <div class="objective-item">
-                    <div class="check">✓</div>
-                    <p>Understand that alternate angles are equal for parallel lines</p>
-                </div>
-                <div class="objective-item">
-                    <div class="check">✓</div>
-                    <p>Learn that co-interior angles add up to 180° for parallel lines</p>
-                </div>
-            </div>
-        </div>
-
-        <footer>
-            <p>Interactive Math Simulations for NCERT Grade 7</p>
-            <p style="margin-top: 10px;">Based on <a href="#">GEGP105 - Parallel and Intersecting Lines</a></p>
-        </footer>
+<div class="sim-card">
+  <a href="intersecting-lines.html">
+    <div class="sim-icon purple">📐</div>
+    <div class="sim-info">
+      <div class="sim-name">Intersecting Lines</div>
+      <div class="sim-desc">Discover vertically opposite angles and linear pairs. Drag to see how angles relate!</div>
     </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
 
-    <script>
-        // Draw preview animations for each card
-        function drawPreview1() {
-            const canvas = document.getElementById('preview1');
-            const ctx = canvas.getContext('2d');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
+<div class="sim-card">
+  <a href="perpendicular-lines.html">
+    <div class="sim-icon green">📐</div>
+    <div class="sim-info">
+      <div class="sim-name">Perpendicular Lines</div>
+      <div class="sim-desc">Find the perfect 90° angle. Watch for the □ symbol when lines are perpendicular!</div>
+    </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+<div class="sim-card">
+  <a href="parallel-transversal.html">
+    <div class="sim-icon pink">〰️</div>
+    <div class="sim-info">
+      <div class="sim-name">Parallel Lines & Transversal</div>
+      <div class="sim-desc">Explore the 8 angles formed. Highlight corresponding, alternate & co-interior pairs!</div>
+    </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
 
-            // Draw intersecting lines
-            ctx.beginPath();
-            ctx.moveTo(50, centerY);
-            ctx.lineTo(300, centerY);
-            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-            ctx.lineWidth = 3;
-            ctx.stroke();
+<div class="sim-card">
+  <a href="drawing-parallel-lines.html">
+    <div class="sim-icon blue">📏</div>
+    <div class="sim-info">
+      <div class="sim-name">Drawing Parallel Lines</div>
+      <div class="sim-desc">Step-by-step construction using set square and ruler method.</div>
+    </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
 
-            ctx.beginPath();
-            ctx.moveTo(100, 30);
-            ctx.lineTo(250, 150);
-            ctx.stroke();
+<div class="sim-card">
+  <a href="angle-practice.html">
+    <div class="sim-icon orange">📝</div>
+    <div class="sim-info">
+      <div class="sim-name">Angle Practice Quiz</div>
+      <div class="sim-desc">Test your understanding! Find missing angles using the rules you learned.</div>
+    </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
 
-            // Draw angle arcs
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 30, Math.PI, Math.PI * 1.35);
-            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-            ctx.stroke();
+<div class="concepts-box">
+  <h3>📖 Key Concepts</h3>
+  <ul>
+    <li>Vertically opposite angles are <strong>equal</strong></li>
+    <li>Linear pairs add up to <strong>180°</strong></li>
+    <li>Perpendicular lines make <strong>90°</strong> angles</li>
+    <li>Corresponding angles are <strong>equal</strong> (parallel lines)</li>
+    <li>Alternate angles are <strong>equal</strong> (parallel lines)</li>
+    <li>Co-interior angles sum to <strong>180°</strong></li>
+  </ul>
+</div>
 
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 30, 0, Math.PI * 0.35);
-            ctx.stroke();
-        }
-
-        function drawPreview2() {
-            const canvas = document.getElementById('preview2');
-            const ctx = canvas.getContext('2d');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw perpendicular lines
-            ctx.beginPath();
-            ctx.moveTo(80, centerY);
-            ctx.lineTo(270, centerY);
-            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(centerX, 30);
-            ctx.lineTo(centerX, 150);
-            ctx.stroke();
-
-            // Right angle symbol
-            ctx.beginPath();
-            ctx.moveTo(centerX + 15, centerY);
-            ctx.lineTo(centerX + 15, centerY - 15);
-            ctx.lineTo(centerX, centerY - 15);
-            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-
-        function drawPreview3() {
-            const canvas = document.getElementById('preview3');
-            const ctx = canvas.getContext('2d');
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Parallel lines
-            ctx.beginPath();
-            ctx.moveTo(50, 60);
-            ctx.lineTo(300, 60);
-            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(50, 120);
-            ctx.lineTo(300, 120);
-            ctx.stroke();
-
-            // Transversal
-            ctx.beginPath();
-            ctx.moveTo(100, 30);
-            ctx.lineTo(250, 150);
-            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-            ctx.stroke();
-
-            // Parallel marks
-            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(200, 55);
-            ctx.lineTo(210, 55);
-            ctx.moveTo(200, 60);
-            ctx.lineTo(210, 60);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(200, 115);
-            ctx.lineTo(210, 115);
-            ctx.moveTo(200, 120);
-            ctx.lineTo(210, 120);
-            ctx.stroke();
-        }
-
-        function drawPreview4() {
-            const canvas = document.getElementById('preview4');
-            const ctx = canvas.getContext('2d');
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Base line
-            ctx.beginPath();
-            ctx.moveTo(50, 130);
-            ctx.lineTo(300, 130);
-            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            // Parallel line (dashed)
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(50, 60);
-            ctx.lineTo(300, 60);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            // Set square shape
-            ctx.beginPath();
-            ctx.moveTo(150, 130);
-            ctx.lineTo(200, 130);
-            ctx.lineTo(150, 80);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(255,255,255,0.3)';
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-            ctx.stroke();
-        }
-
-        function drawPreview5() {
-            const canvas = document.getElementById('preview5');
-            const ctx = canvas.getContext('2d');
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Question marks and check marks
-            ctx.font = 'bold 40px Segoe UI';
-            ctx.fillStyle = 'rgba(255,255,255,0.3)';
-            ctx.fillText('?', 80, 100);
-            ctx.fillText('?', 200, 80);
-            ctx.fillText('?', 260, 120);
-
-            ctx.fillStyle = 'rgba(255,255,255,0.6)';
-            ctx.font = 'bold 50px Segoe UI';
-            ctx.fillText('✓', 130, 120);
-        }
-
-        // Initialize previews
-        drawPreview1();
-        drawPreview2();
-        drawPreview3();
-        drawPreview4();
-        drawPreview5();
-    </script>
+</div>
 </body>
 </html>

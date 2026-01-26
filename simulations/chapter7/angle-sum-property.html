@@ -180,6 +180,8 @@ svg { width: 100%; height: 100%; display: block; }
 
 .triangle-edge { stroke: #333; stroke-width: 3; fill: none; }
 .triangle-fill { fill: #9b59b620; }
+.drag-handle { cursor: grab; }
+.drag-handle:active { cursor: grabbing; }
 </style>
 </head>
 
@@ -219,6 +221,7 @@ let A = {x: 200, y: 60};
 let B = {x: 80, y: 250};
 let C = {x: 320, y: 250};
 let hasInteracted = false;
+let dragHandlePos = {x: C.x, y: C.y};
 
 function calcAngles() {
   const ab = Math.sqrt((B.x-A.x)**2 + (B.y-A.y)**2);
@@ -233,7 +236,7 @@ function calcAngles() {
 }
 
 container.innerHTML = `
-<div class="visual">
+<div class="visual" id="visual">
   <div class="static-hint" id="hint">👆 Drag point C</div>
   <div class="sum-badge">
     <div class="label">∠A + ∠B + ∠C</div>
@@ -269,6 +272,7 @@ container.innerHTML = `
 </div>`;
 
 const svg = document.getElementById('svg');
+const visual = document.getElementById('visual');
 
 function arcPath(vertex, p1, p2, radius) {
   const angle1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
@@ -292,6 +296,9 @@ function arcPath(vertex, p1, p2, radius) {
 function render() {
   const ang = calcAngles();
   const sum = ang.a + ang.b + ang.c;
+  
+  // Update handle position
+  dragHandlePos = {x: C.x, y: C.y};
   
   // Update displays
   document.getElementById('angA').textContent = ang.a.toFixed(1) + '°';
@@ -325,22 +332,31 @@ function render() {
     <circle cx="${B.x}" cy="${B.y}" r="10" fill="#3498db" stroke="white" stroke-width="2"/>
     <text x="${B.x - 18}" y="${B.y + 5}" text-anchor="middle" font-size="14" fill="#2980b9" font-weight="600">B</text>
     
-    <!-- Vertex C (draggable) -->
-    <circle cx="${C.x}" cy="${C.y}" r="20" fill="#27ae60" stroke="white" stroke-width="3" id="dragC" style="cursor:grab"/>
+    <!-- Vertex C (draggable) - larger for touch -->
+    <circle cx="${C.x}" cy="${C.y}" r="24" fill="#27ae60" stroke="white" stroke-width="3" class="drag-handle"/>
     <text x="${C.x}" y="${C.y + 5}" text-anchor="middle" font-size="12" fill="white" font-weight="600" pointer-events="none">C</text>
-    <text x="${C.x + 25}" y="${C.y + 5}" font-size="14" fill="#27ae60" font-weight="600">drag!</text>
   `;
 }
 
 render();
 
-// Drag handling
-let dragging = false;
-
-function updateC(clientX, clientY) {
+// Convert screen to SVG coordinates
+function screenToSVG(clientX, clientY) {
   const rect = svg.getBoundingClientRect();
-  C.x = Math.max(60, Math.min(340, (clientX - rect.left) / rect.width * 400));
-  C.y = Math.max(40, Math.min(280, (clientY - rect.top) / rect.height * 320));
+  return {
+    x: (clientX - rect.left) / rect.width * 400,
+    y: (clientY - rect.top) / rect.height * 320
+  };
+}
+
+function isNearHandle(svgX, svgY) {
+  const dist = Math.hypot(svgX - dragHandlePos.x, svgY - dragHandlePos.y);
+  return dist < 50; // tolerance in SVG units
+}
+
+function updateC(svgX, svgY) {
+  C.x = Math.max(60, Math.min(340, svgX));
+  C.y = Math.max(40, Math.min(280, svgY));
   render();
   
   if (!hasInteracted) {
@@ -354,31 +370,47 @@ function updateC(clientX, clientY) {
   }
 }
 
-svg.addEventListener('touchstart', (e) => {
+// Drag handling
+let dragging = false;
+
+// Touch events
+visual.addEventListener('touchstart', (e) => {
   const touch = e.touches[0];
-  const handle = document.getElementById('dragC');
-  const rect = handle.getBoundingClientRect();
-  if (Math.hypot(touch.clientX - rect.left - 20, touch.clientY - rect.top - 20) < 50) {
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
     dragging = true;
     e.preventDefault();
   }
 }, {passive: false});
 
-svg.addEventListener('touchmove', (e) => {
+visual.addEventListener('touchmove', (e) => {
   if (!dragging) return;
   e.preventDefault();
-  updateC(e.touches[0].clientX, e.touches[0].clientY);
+  
+  const touch = e.touches[0];
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  updateC(svgCoords.x, svgCoords.y);
 }, {passive: false});
 
-svg.addEventListener('touchend', () => { dragging = false; });
+visual.addEventListener('touchend', () => { dragging = false; });
+visual.addEventListener('touchcancel', () => { dragging = false; });
 
-svg.addEventListener('mousedown', (e) => {
-  if (e.target.id === 'dragC') dragging = true;
+// Mouse events
+visual.addEventListener('mousedown', (e) => {
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
+    dragging = true;
+    e.preventDefault();
+  }
 });
 
 document.addEventListener('mousemove', (e) => {
   if (!dragging) return;
-  updateC(e.clientX, e.clientY);
+  
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  updateC(svgCoords.x, svgCoords.y);
 });
 
 document.addEventListener('mouseup', () => { dragging = false; });
