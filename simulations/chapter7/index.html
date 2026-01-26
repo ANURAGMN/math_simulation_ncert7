@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 7: A Tale of Three Intersecting Lines - Triangle Simulations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .chapter-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+        }
+
+        .info-item .icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .simulation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .simulation-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .simulation-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(240, 147, 251, 0.3);
+        }
+
+        .card-preview {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-preview canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .card-preview .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.05) 100%);
+        }
+
+        .card-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .card-content {
+            padding: 25px;
+        }
+
+        .card-content h3 {
+            font-size: 1.2rem;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+        }
+
+        .card-content p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tag.concept {
+            background: rgba(155, 89, 182, 0.15);
+            color: #8e44ad;
+        }
+
+        .tag.interactive {
+            background: rgba(46, 204, 113, 0.15);
+            color: #27ae60;
+        }
+
+        .tag.proof {
+            background: rgba(52, 152, 219, 0.15);
+            color: #2980b9;
+        }
+
+        .learning-objectives {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .learning-objectives h2 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .objectives-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .objective-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+        }
+
+        .objective-item .check {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .objective-item p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 40px;
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(-5px);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #f093fb;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .chapter-info {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .simulation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card preview backgrounds */
+        .preview-1 { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
+        .preview-2 { background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); }
+        .preview-3 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="badge">NCERT Grade 7 Mathematics</div>
+            <h1>A Tale of Three Intersecting Lines</h1>
+            <p class="subtitle">Explore triangles - their construction, properties, and the fascinating angle sum property through interactive simulations</p>
+            
+            <div class="chapter-info">
+                <div class="info-item">
+                    <div class="icon">📚</div>
+                    <span>Chapter 7</span>
+                </div>
+                <div class="info-item">
+                    <div class="icon">🔺</div>
+                    <span>3 Simulations</span>
+                </div>
+                <div class="info-item">
+                    <div class="icon">🎯</div>
+                    <span>Interactive Learning</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="simulation-grid">
+            <a href="triangle-construction.html" class="simulation-card">
+                <div class="card-preview preview-1">
+                    <canvas id="preview1" width="350" height="180"></canvas>
+                    <div class="overlay"></div>
+                    <div class="card-number">1</div>
+                </div>
+                <div class="card-content">
+                    <h3>Triangle Construction (SSS)</h3>
+                    <p>Learn to construct triangles when all three side lengths are given using compass and ruler. Watch the step-by-step process!</p>
+                    <div class="card-tags">
+                        <span class="tag concept">Compass Method</span>
+                        <span class="tag interactive">Step-by-Step</span>
+                        <span class="tag interactive">Animated</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="triangle-inequality.html" class="simulation-card">
+                <div class="card-preview preview-2">
+                    <canvas id="preview2" width="350" height="180"></canvas>
+                    <div class="overlay"></div>
+                    <div class="card-number">2</div>
+                </div>
+                <div class="card-content">
+                    <h3>Triangle Inequality</h3>
+                    <p>Discover when three lengths can form a triangle. Explore why some combinations work and others don't!</p>
+                    <div class="card-tags">
+                        <span class="tag concept">Inequality Rule</span>
+                        <span class="tag proof">Visual Proof</span>
+                        <span class="tag interactive">Interactive</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="angle-sum-property.html" class="simulation-card">
+                <div class="card-preview preview-3">
+                    <canvas id="preview3" width="350" height="180"></canvas>
+                    <div class="overlay"></div>
+                    <div class="card-number">3</div>
+                </div>
+                <div class="card-content">
+                    <h3>Angle Sum Property</h3>
+                    <p>Prove that the angles of a triangle always sum to 180°. See it with parallel lines and paper folding!</p>
+                    <div class="card-tags">
+                        <span class="tag concept">180° Sum</span>
+                        <span class="tag proof">Multiple Proofs</span>
+                        <span class="tag interactive">Draggable</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="learning-objectives">
+            <h2>📖 Learning Objectives</h2>
+            <div class="objectives-grid">
+                <div class="objective-item">
+                    <div class="check">✓</div>
+                    <p>Construct triangles using compass when three side lengths are given (SSS method)</p>
+                </div>
+                <div class="objective-item">
+                    <div class="check">✓</div>
+                    <p>Understand and apply the triangle inequality theorem</p>
+                </div>
+                <div class="objective-item">
+                    <div class="check">✓</div>
+                    <p>Determine if a triangle can be formed with given side lengths</p>
+                </div>
+                <div class="objective-item">
+                    <div class="check">✓</div>
+                    <p>Classify triangles as equilateral, isosceles, or scalene based on sides</p>
+                </div>
+                <div class="objective-item">
+                    <div class="check">✓</div>
+                    <p>Prove that the sum of angles in a triangle is always 180°</p>
+                </div>
+                <div class="objective-item">
+                    <div class="check">✓</div>
+                    <p>Find the third angle when two angles of a triangle are known</p>
+                </div>
+            </div>
+        </div>
+
+        <a href="../chapter5/index.html" class="back-link">
+            ← Back to Chapter 5: Parallel Lines
+        </a>
+
+        <footer>
+            <p>Interactive Math Simulations for NCERT Grade 7</p>
+            <p style="margin-top: 10px;">Based on <a href="#">GEGP107 - A Tale of Three Intersecting Lines</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Draw preview canvases
+        function drawPreview1() {
+            const canvas = document.getElementById('preview1');
+            const ctx = canvas.getContext('2d');
+
+            // Draw triangle
+            ctx.beginPath();
+            ctx.moveTo(175, 40);
+            ctx.lineTo(80, 140);
+            ctx.lineTo(270, 140);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Draw construction arcs
+            ctx.beginPath();
+            ctx.arc(80, 140, 100, -Math.PI/2, -Math.PI/4);
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(270, 140, 120, -Math.PI * 0.75, -Math.PI / 2);
+            ctx.stroke();
+        }
+
+        function drawPreview2() {
+            const canvas = document.getElementById('preview2');
+            const ctx = canvas.getContext('2d');
+
+            // Valid triangle
+            ctx.beginPath();
+            ctx.moveTo(100, 50);
+            ctx.lineTo(50, 130);
+            ctx.lineTo(150, 130);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Segoe UI';
+            ctx.fillText('✓', 95, 100);
+
+            // Invalid - separate sticks
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            
+            ctx.beginPath();
+            ctx.moveTo(200, 130);
+            ctx.lineTo(300, 130);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(200, 130);
+            ctx.lineTo(230, 60);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(300, 130);
+            ctx.lineTo(280, 70);
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Segoe UI';
+            ctx.fillText('✗', 255, 90);
+        }
+
+        function drawPreview3() {
+            const canvas = document.getElementById('preview3');
+            const ctx = canvas.getContext('2d');
+
+            // Draw triangle
+            ctx.beginPath();
+            ctx.moveTo(175, 40);
+            ctx.lineTo(80, 140);
+            ctx.lineTo(270, 140);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Angle arcs
+            ctx.beginPath();
+            ctx.arc(175, 40, 25, Math.PI * 0.15, Math.PI * 0.85);
+            ctx.strokeStyle = 'rgba(255, 100, 100, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(80, 140, 25, -Math.PI * 0.35, 0);
+            ctx.strokeStyle = 'rgba(100, 200, 255, 0.8)';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(270, 140, 25, -Math.PI, -Math.PI * 0.65);
+            ctx.strokeStyle = 'rgba(100, 255, 150, 0.8)';
+            ctx.stroke();
+
+            // 180° label
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 20px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText('= 180°', 175, 95);
+        }
+
+        // Initialize previews
+        drawPreview1();
+        drawPreview2();
+        drawPreview3();
+    </script>
+</body>
+</html>

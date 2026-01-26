@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triangle Inequality - Can These Sides Form a Triangle?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .result-box {
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .result-box.valid {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 3px solid #28a745;
+        }
+
+        .result-box.invalid {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 3px solid #dc3545;
+        }
+
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .result-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .result-box.valid .result-text { color: #155724; }
+        .result-box.invalid .result-text { color: #721c24; }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .input-group label span:last-child {
+            color: #ff758c;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #ff758c, #ff7eb3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #ff758c;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .inequality-checks {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .inequality-checks h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .check-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .check-item.pass {
+            background: rgba(40, 167, 69, 0.15);
+        }
+
+        .check-item.fail {
+            background: rgba(220, 53, 69, 0.15);
+        }
+
+        .check-expression {
+            font-family: monospace;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .check-item.pass .check-expression { color: #155724; }
+        .check-item.fail .check-expression { color: #721c24; }
+
+        .check-status {
+            font-size: 1.2rem;
+        }
+
+        .concept-section {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 15px;
+        }
+
+        .concept-section h4 {
+            color: #1e8449;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .concept-section p {
+            color: #555;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .analogy-section {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .analogy-section h4 {
+            color: #d68910;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .analogy-section p {
+            color: #555;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            padding: 8px 14px;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            border-color: #ff758c;
+            background: #fff5f7;
+        }
+
+        .preset-btn.valid {
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .preset-btn.invalid {
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: white;
+            color: #ff758c;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .path-explanation {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .path-explanation h4 {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Triangle Inequality</h1>
+        <p class="subtitle">When can three lengths form a triangle?</p>
+
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="canvas" width="600" height="480"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="result-box valid" id="resultBox">
+                    <div class="result-icon" id="resultIcon">✅</div>
+                    <div class="result-text" id="resultText">Triangle CAN be formed!</div>
+                </div>
+
+                <div class="preset-buttons">
+                    <span style="font-size: 0.8rem; color: #666; width: 100%; margin-bottom: 5px;">Try these examples:</span>
+                    <button class="preset-btn valid" onclick="setPreset(3, 4, 5)">3, 4, 5</button>
+                    <button class="preset-btn valid" onclick="setPreset(5, 5, 5)">5, 5, 5</button>
+                    <button class="preset-btn valid" onclick="setPreset(4, 5, 8)">4, 5, 8</button>
+                    <button class="preset-btn invalid" onclick="setPreset(1, 2, 5)">1, 2, 5</button>
+                    <button class="preset-btn invalid" onclick="setPreset(3, 4, 8)">3, 4, 8</button>
+                    <button class="preset-btn invalid" onclick="setPreset(10, 15, 30)">10, 15, 30</button>
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        <span>Side a</span>
+                        <span id="valueA">4 cm</span>
+                    </label>
+                    <input type="range" id="sideA" min="1" max="15" value="4" step="0.5">
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        <span>Side b</span>
+                        <span id="valueB">5 cm</span>
+                    </label>
+                    <input type="range" id="sideB" min="1" max="15" value="5" step="0.5">
+                </div>
+
+                <div class="input-group">
+                    <label>
+                        <span>Side c</span>
+                        <span id="valueC">6 cm</span>
+                    </label>
+                    <input type="range" id="sideC" min="1" max="15" value="6" step="0.5">
+                </div>
+
+                <div class="inequality-checks">
+                    <h3>📝 Triangle Inequality Check</h3>
+                    <div class="check-item pass" id="check1">
+                        <span class="check-expression" id="expr1">4 + 5 = 9 > 6</span>
+                        <span class="check-status">✓</span>
+                    </div>
+                    <div class="check-item pass" id="check2">
+                        <span class="check-expression" id="expr2">5 + 6 = 11 > 4</span>
+                        <span class="check-status">✓</span>
+                    </div>
+                    <div class="check-item pass" id="check3">
+                        <span class="check-expression" id="expr3">4 + 6 = 10 > 5</span>
+                        <span class="check-status">✓</span>
+                    </div>
+                </div>
+
+                <div class="concept-section">
+                    <h4>📐 The Rule</h4>
+                    <p>For any triangle, the sum of any two sides must be <strong>greater than</strong> the third side. If even one of the three checks fails, a triangle cannot be formed!</p>
+                </div>
+
+                <div class="analogy-section">
+                    <h4>🏃 The Shortcut Analogy</h4>
+                    <p>Think of it like paths: The direct path between two points (one side) must always be shorter than going via a third point (sum of other two sides). That's the shortest path principle!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="path-explanation">
+            <h4>🗺️ Visual Explanation</h4>
+            <p>Watch the canvas to see if the "sticks" can actually connect to form a closed triangle!</p>
+        </div>
+
+        <a href="index.html" class="nav-link">← Back to All Simulations</a>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const sideASlider = document.getElementById('sideA');
+        const sideBSlider = document.getElementById('sideB');
+        const sideCSlider = document.getElementById('sideC');
+
+        let sideA = 4, sideB = 5, sideC = 6;
+        const scale = 25;
+
+        function setPreset(a, b, c) {
+            sideA = a;
+            sideB = b;
+            sideC = c;
+            sideASlider.value = a;
+            sideBSlider.value = b;
+            sideCSlider.value = c;
+            updateDisplay();
+            draw();
+        }
+
+        function checkTriangleValidity(a, b, c) {
+            return (a + b > c) && (b + c > a) && (a + c > b);
+        }
+
+        function updateDisplay() {
+            document.getElementById('valueA').textContent = sideA + ' cm';
+            document.getElementById('valueB').textContent = sideB + ' cm';
+            document.getElementById('valueC').textContent = sideC + ' cm';
+
+            // Update inequality checks
+            const check1Pass = sideA + sideB > sideC;
+            const check2Pass = sideB + sideC > sideA;
+            const check3Pass = sideA + sideC > sideB;
+
+            const check1 = document.getElementById('check1');
+            const check2 = document.getElementById('check2');
+            const check3 = document.getElementById('check3');
+
+            check1.className = 'check-item ' + (check1Pass ? 'pass' : 'fail');
+            check2.className = 'check-item ' + (check2Pass ? 'pass' : 'fail');
+            check3.className = 'check-item ' + (check3Pass ? 'pass' : 'fail');
+
+            const sum1 = sideA + sideB;
+            const sum2 = sideB + sideC;
+            const sum3 = sideA + sideC;
+
+            document.getElementById('expr1').textContent = `${sideA} + ${sideB} = ${sum1} ${check1Pass ? '>' : '≤'} ${sideC}`;
+            document.getElementById('expr2').textContent = `${sideB} + ${sideC} = ${sum2} ${check2Pass ? '>' : '≤'} ${sideA}`;
+            document.getElementById('expr3').textContent = `${sideA} + ${sideC} = ${sum3} ${check3Pass ? '>' : '≤'} ${sideB}`;
+
+            check1.querySelector('.check-status').textContent = check1Pass ? '✓' : '✗';
+            check2.querySelector('.check-status').textContent = check2Pass ? '✓' : '✗';
+            check3.querySelector('.check-status').textContent = check3Pass ? '✓' : '✗';
+
+            // Update result box
+            const isValid = check1Pass && check2Pass && check3Pass;
+            const resultBox = document.getElementById('resultBox');
+            const resultIcon = document.getElementById('resultIcon');
+            const resultText = document.getElementById('resultText');
+
+            if (isValid) {
+                resultBox.className = 'result-box valid';
+                resultIcon.textContent = '✅';
+                resultText.textContent = 'Triangle CAN be formed!';
+            } else {
+                resultBox.className = 'result-box invalid';
+                resultIcon.textContent = '❌';
+                resultText.textContent = 'Triangle CANNOT be formed!';
+            }
+        }
+
+        function drawStick(x1, y1, x2, y2, color, label) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // End caps
+            ctx.beginPath();
+            ctx.arc(x1, y1, 6, 0, Math.PI * 2);
+            ctx.arc(x2, y2, 6, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            // Label
+            const midX = (x1 + x2) / 2;
+            const midY = (y1 + y2) / 2;
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Background for label
+            const labelWidth = ctx.measureText(label).width + 10;
+            ctx.fillStyle = color;
+            ctx.fillRect(midX - labelWidth / 2, midY - 10, labelWidth, 20);
+            ctx.fillStyle = 'white';
+            ctx.fillText(label, midX, midY);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const isValid = checkTriangleValidity(sideA, sideB, sideC);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Draw grid
+            ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+
+            if (isValid) {
+                // Calculate triangle vertices
+                const A = { x: centerX - sideC * scale / 2, y: centerY + 80 };
+                const B = { x: centerX + sideC * scale / 2, y: centerY + 80 };
+                
+                // Calculate C using intersection of circles
+                const x = (sideC * sideC + sideB * sideB - sideA * sideA) / (2 * sideC);
+                const ySquared = sideB * sideB - x * x;
+                const y = Math.sqrt(Math.max(0, ySquared));
+                
+                const C = { x: A.x + x * scale, y: A.y - y * scale };
+
+                // Fill triangle
+                ctx.beginPath();
+                ctx.moveTo(A.x, A.y);
+                ctx.lineTo(B.x, B.y);
+                ctx.lineTo(C.x, C.y);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(46, 204, 113, 0.15)';
+                ctx.fill();
+
+                // Draw sides
+                drawStick(A.x, A.y, B.x, B.y, '#3498db', 'c = ' + sideC);
+                drawStick(B.x, B.y, C.x, C.y, '#e74c3c', 'a = ' + sideA);
+                drawStick(A.x, A.y, C.x, C.y, '#27ae60', 'b = ' + sideB);
+
+                // Labels
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 20px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('A', A.x - 15, A.y + 25);
+                ctx.fillText('B', B.x + 15, B.y + 25);
+                ctx.fillText('C', C.x, C.y - 20);
+
+                // Success message
+                ctx.fillStyle = '#27ae60';
+                ctx.font = 'bold 24px Segoe UI';
+                ctx.fillText('Triangle Formed! ✓', centerX, 50);
+
+            } else {
+                // Show why triangle can't be formed
+                const baseY = centerY + 100;
+                
+                // Draw base (side c)
+                const baseStart = { x: centerX - sideC * scale / 2, y: baseY };
+                const baseEnd = { x: centerX + sideC * scale / 2, y: baseY };
+                
+                drawStick(baseStart.x, baseStart.y, baseEnd.x, baseEnd.y, '#3498db', 'c = ' + sideC);
+
+                // Draw the other two sides trying to connect
+                // Side b from A
+                const angleB = -Math.PI / 4;
+                const endB = {
+                    x: baseStart.x + sideB * scale * Math.cos(angleB),
+                    y: baseStart.y + sideB * scale * Math.sin(angleB)
+                };
+                drawStick(baseStart.x, baseStart.y, endB.x, endB.y, '#27ae60', 'b = ' + sideB);
+
+                // Side a from B
+                const angleA = Math.PI + Math.PI / 4;
+                const endA = {
+                    x: baseEnd.x + sideA * scale * Math.cos(angleA),
+                    y: baseEnd.y + sideA * scale * Math.sin(angleA)
+                };
+                drawStick(baseEnd.x, baseEnd.y, endA.x, endA.y, '#e74c3c', 'a = ' + sideA);
+
+                // Gap indicator
+                const gapMidX = (endA.x + endB.x) / 2;
+                const gapMidY = (endA.y + endB.y) / 2;
+                
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(endA.x, endA.y);
+                ctx.lineTo(endB.x, endB.y);
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Gap label
+                const gap = Math.sqrt((endA.x - endB.x) ** 2 + (endA.y - endB.y) ** 2) / scale;
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = 'bold 14px Segoe UI';
+                ctx.fillText('Gap!', gapMidX, gapMidY - 15);
+
+                // Labels
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 20px Segoe UI';
+                ctx.fillText('A', baseStart.x - 15, baseStart.y + 25);
+                ctx.fillText('B', baseEnd.x + 15, baseEnd.y + 25);
+
+                // Failure message
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = 'bold 24px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('Sides cannot meet! ✗', centerX, 50);
+
+                ctx.font = '16px Segoe UI';
+                ctx.fillStyle = '#666';
+                ctx.fillText('The sticks are too short to form a closed triangle', centerX, 85);
+            }
+        }
+
+        // Event listeners
+        [sideASlider, sideBSlider, sideCSlider].forEach(slider => {
+            slider.addEventListener('input', () => {
+                sideA = parseFloat(sideASlider.value);
+                sideB = parseFloat(sideBSlider.value);
+                sideC = parseFloat(sideCSlider.value);
+                updateDisplay();
+                draw();
+            });
+        });
+
+        // Initialize
+        updateDisplay();
+        draw();
+    </script>
+</body>
+</html>
