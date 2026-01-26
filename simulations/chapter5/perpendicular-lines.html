@@ -164,6 +164,8 @@ svg { width: 100%; height: 100%; display: block; }
 .line-l { stroke: #27ae60; stroke-width: 3; }
 .line-l.not-perp { stroke: #e74c3c; }
 .right-mark { stroke: #27ae60; stroke-width: 2; fill: none; }
+.drag-handle { cursor: grab; }
+.drag-handle:active { cursor: grabbing; }
 </style>
 </head>
 
@@ -175,7 +177,7 @@ svg { width: 100%; height: 100%; display: block; }
   <p>Find the perfect 90° angle!</p>
 </div>
 
-<div class="section-title">Drag the green line to make it perpendicular</div>
+<div class="section-title">Drag the circle to make it perpendicular</div>
 <div class="sim-card" id="sim"></div>
 
 <div class="challenge-box">
@@ -200,14 +202,15 @@ svg { width: 100%; height: 100%; display: block; }
 const container = document.getElementById('sim');
 let angle = 45;
 let foundPerpendicular = false;
+let dragHandlePos = {x: 0, y: 0};
 
 function isPerpendicular() {
   return Math.abs(angle - 90) < 2;
 }
 
 container.innerHTML = `
-<div class="visual">
-  <div class="static-hint" id="hint">👆 Drag to find 90°</div>
+<div class="visual" id="visual">
+  <div class="static-hint" id="hint">👆 Drag the circle to find 90°</div>
   <div class="status-badge no" id="status">✗ Not perpendicular</div>
   <svg viewBox="0 0 400 340" id="svg"></svg>
 </div>
@@ -222,6 +225,7 @@ container.innerHTML = `
 </div>`;
 
 const svg = document.getElementById('svg');
+const visual = document.getElementById('visual');
 const cx = 200, cy = 170, lineLen = 120;
 
 function toRad(d) { return d * Math.PI / 180; }
@@ -256,6 +260,9 @@ function render() {
   const l1 = {x: cx - lineLen * Math.cos(toRad(angle - 90)), y: cy + lineLen * Math.sin(toRad(angle - 90))};
   const l2 = {x: cx + lineLen * Math.cos(toRad(angle - 90)), y: cy - lineLen * Math.sin(toRad(angle - 90))};
   
+  // Store handle position for hit testing
+  dragHandlePos = {x: l2.x, y: l2.y};
+  
   const lineClass = isPerp ? 'line-l' : 'line-l not-perp';
   const handleColor = isPerp ? '#27ae60' : '#e74c3c';
   
@@ -283,8 +290,8 @@ function render() {
     <!-- Intersection -->
     <circle cx="${cx}" cy="${cy}" r="6" fill="#333"/>
     
-    <!-- Drag handle -->
-    <circle cx="${l2.x}" cy="${l2.y}" r="20" fill="${handleColor}" stroke="white" stroke-width="3" id="dragHandle" style="cursor:grab"/>
+    <!-- Drag handle - larger for touch -->
+    <circle cx="${l2.x}" cy="${l2.y}" r="24" fill="${handleColor}" stroke="white" stroke-width="3" class="drag-handle"/>
     <text x="${l2.x}" y="${l2.y + 4}" text-anchor="middle" font-size="12" fill="white" pointer-events="none">↻</text>
   `;
   
@@ -301,13 +308,21 @@ function render() {
 
 render();
 
-// Drag handling
-let dragging = false;
-
-function getAngleFromPoint(clientX, clientY) {
+// Convert screen to SVG coordinates
+function screenToSVG(clientX, clientY) {
   const rect = svg.getBoundingClientRect();
-  const svgX = (clientX - rect.left) / rect.width * 400;
-  const svgY = (clientY - rect.top) / rect.height * 340;
+  return {
+    x: (clientX - rect.left) / rect.width * 400,
+    y: (clientY - rect.top) / rect.height * 340
+  };
+}
+
+function isNearHandle(svgX, svgY) {
+  const dist = Math.hypot(svgX - dragHandlePos.x, svgY - dragHandlePos.y);
+  return dist < 50; // tolerance in SVG units
+}
+
+function getAngleFromPoint(svgX, svgY) {
   const dx = svgX - cx;
   const dy = cy - svgY;
   let a = Math.atan2(dy, dx) * 180 / Math.PI + 90;
@@ -318,32 +333,48 @@ function getAngleFromPoint(clientX, clientY) {
   return Math.max(20, Math.min(160, a));
 }
 
-svg.addEventListener('touchstart', (e) => {
+// Drag handling
+let dragging = false;
+
+// Touch events
+visual.addEventListener('touchstart', (e) => {
   const touch = e.touches[0];
-  const handle = document.getElementById('dragHandle');
-  const rect = handle.getBoundingClientRect();
-  if (Math.hypot(touch.clientX - rect.left - 20, touch.clientY - rect.top - 20) < 50) {
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
     dragging = true;
     e.preventDefault();
   }
 }, {passive: false});
 
-svg.addEventListener('touchmove', (e) => {
+visual.addEventListener('touchmove', (e) => {
   if (!dragging) return;
   e.preventDefault();
-  angle = getAngleFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+  
+  const touch = e.touches[0];
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  angle = getAngleFromPoint(svgCoords.x, svgCoords.y);
   render();
 }, {passive: false});
 
-svg.addEventListener('touchend', () => { dragging = false; });
+visual.addEventListener('touchend', () => { dragging = false; });
+visual.addEventListener('touchcancel', () => { dragging = false; });
 
-svg.addEventListener('mousedown', (e) => {
-  if (e.target.id === 'dragHandle') dragging = true;
+// Mouse events
+visual.addEventListener('mousedown', (e) => {
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
+    dragging = true;
+    e.preventDefault();
+  }
 });
 
 document.addEventListener('mousemove', (e) => {
   if (!dragging) return;
-  angle = getAngleFromPoint(e.clientX, e.clientY);
+  
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  angle = getAngleFromPoint(svgCoords.x, svgCoords.y);
   render();
 });
 

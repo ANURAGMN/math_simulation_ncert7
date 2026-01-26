@@ -206,6 +206,8 @@ svg { width: 100%; height: 100%; display: block; }
 .line-l { stroke: #3498db; stroke-width: 3; }
 .line-m { stroke: #27ae60; stroke-width: 3; }
 .line-t { stroke: #e74c3c; stroke-width: 3; }
+.drag-handle { cursor: grab; }
+.drag-handle:active { cursor: grabbing; }
 </style>
 </head>
 
@@ -217,7 +219,7 @@ svg { width: 100%; height: 100%; display: block; }
   <p>8 angles, amazing relationships!</p>
 </div>
 
-<div class="section-title">Drag the transversal & highlight angle pairs</div>
+<div class="section-title">Drag the red circle to rotate transversal</div>
 <div class="sim-card" id="sim"></div>
 
 <div class="legend">
@@ -248,10 +250,11 @@ const container = document.getElementById('sim');
 let angle = 60;
 let highlight = 'none';
 let hasInteracted = false;
+let dragHandlePos = {x: 0, y: 0};
 
 container.innerHTML = `
-<div class="visual">
-  <div class="static-hint" id="hint">👆 Drag red endpoint</div>
+<div class="visual" id="visual">
+  <div class="static-hint" id="hint">👆 Drag the red circle</div>
   <svg viewBox="0 0 400 300" id="svg"></svg>
 </div>
 
@@ -273,6 +276,7 @@ container.innerHTML = `
 </div>`;
 
 const svg = document.getElementById('svg');
+const visual = document.getElementById('visual');
 const gap = 80;
 const ly = 100, my = ly + gap;
 
@@ -314,6 +318,9 @@ function render() {
   const tLen = 70;
   const t1 = {x: intL.x - tLen * Math.cos(toRad(angle)), y: intL.y + tLen * Math.sin(toRad(angle))};
   const t2 = {x: intM.x + tLen * Math.cos(toRad(angle)), y: intM.y - tLen * Math.sin(toRad(angle))};
+  
+  // Store drag handle position for hit testing
+  dragHandlePos = {x: t1.x, y: t1.y};
   
   // Highlight colors
   function getHl(n) {
@@ -373,8 +380,9 @@ function render() {
     <circle cx="${intL.x}" cy="${intL.y}" r="4" fill="#333"/>
     <circle cx="${intM.x}" cy="${intM.y}" r="4" fill="#333"/>
     
-    <!-- Drag handle -->
-    <circle cx="${t2.x}" cy="${t2.y}" r="16" fill="#e74c3c" stroke="white" stroke-width="3" id="dragHandle" style="cursor:grab"/>
+    <!-- Drag handle at t1 (top-left end) - larger for easier touch -->
+    <circle cx="${t1.x}" cy="${t1.y}" r="22" fill="#e74c3c" stroke="white" stroke-width="3" class="drag-handle"/>
+    <text x="${t1.x}" y="${t1.y+4}" text-anchor="middle" font-size="10" fill="white" pointer-events="none">↻</text>
   `;
 }
 
@@ -383,15 +391,27 @@ render();
 // Event handlers
 let dragging = false;
 
-function getAngleFromPoint(clientX, clientY) {
+// Convert screen coordinates to SVG coordinates
+function screenToSVG(clientX, clientY) {
   const rect = svg.getBoundingClientRect();
-  const svgX = (clientX - rect.left) / rect.width * 400;
-  const svgY = (clientY - rect.top) / rect.height * 300;
+  return {
+    x: (clientX - rect.left) / rect.width * 400,
+    y: (clientY - rect.top) / rect.height * 300
+  };
+}
+
+function getAngleFromPoint(svgX, svgY) {
+  // Calculate angle from the center point (line l intersection)
   const dx = svgX - 200;
   const dy = ly - svgY;
   let a = Math.atan2(dy, dx) * 180 / Math.PI;
   if (a < 0) a += 180;
   return Math.max(30, Math.min(150, a));
+}
+
+function isNearHandle(svgX, svgY) {
+  const dist = Math.hypot(svgX - dragHandlePos.x, svgY - dragHandlePos.y);
+  return dist < 40; // 40 SVG units tolerance
 }
 
 function showTakeaway() {
@@ -415,33 +435,46 @@ function showTakeaway() {
   takeaway.classList.add('show');
 }
 
-svg.addEventListener('touchstart', (e) => {
+// Touch events
+visual.addEventListener('touchstart', (e) => {
   const touch = e.touches[0];
-  const handle = document.getElementById('dragHandle');
-  const rect = handle.getBoundingClientRect();
-  if (Math.hypot(touch.clientX - rect.left - 16, touch.clientY - rect.top - 16) < 50) {
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
     dragging = true;
     e.preventDefault();
   }
 }, {passive: false});
 
-svg.addEventListener('touchmove', (e) => {
+visual.addEventListener('touchmove', (e) => {
   if (!dragging) return;
   e.preventDefault();
-  angle = getAngleFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+  
+  const touch = e.touches[0];
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  angle = getAngleFromPoint(svgCoords.x, svgCoords.y);
   render();
   showTakeaway();
 }, {passive: false});
 
-svg.addEventListener('touchend', () => { dragging = false; });
+visual.addEventListener('touchend', () => { dragging = false; });
+visual.addEventListener('touchcancel', () => { dragging = false; });
 
-svg.addEventListener('mousedown', (e) => {
-  if (e.target.id === 'dragHandle') dragging = true;
+// Mouse events
+visual.addEventListener('mousedown', (e) => {
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
+    dragging = true;
+    e.preventDefault();
+  }
 });
 
 document.addEventListener('mousemove', (e) => {
   if (!dragging) return;
-  angle = getAngleFromPoint(e.clientX, e.clientY);
+  
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  angle = getAngleFromPoint(svgCoords.x, svgCoords.y);
   render();
   showTakeaway();
 });
