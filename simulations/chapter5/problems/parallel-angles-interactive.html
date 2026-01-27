@@ -70,7 +70,7 @@ body {
 .diagram-area {
   background: #fafafa;
   border-radius: 12px;
-  padding: 10px;
+  padding: 8px;
   margin-bottom: 14px;
   touch-action: none;
   user-select: none;
@@ -83,85 +83,9 @@ svg {
   display: block;
 }
 
-/* Transversal line - make it look draggable */
-.transversal-line {
-  cursor: grab;
-  transition: stroke-width 0.15s;
-}
-
-.transversal-line:hover,
-.transversal-line.dragging {
-  stroke-width: 6;
-}
-
 .transversal-hitarea {
   cursor: grab;
 }
-
-/* Angle Display */
-.angle-display {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-.angle-pill {
-  background: #f0f0f0;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.angle-pill .label { color: #666; }
-.angle-pill .val { color: #333; margin-left: 4px; }
-
-/* Angles Panel */
-.angles-panel {
-  background: #f8f9fa;
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 14px;
-}
-
-.angles-panel h4 {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-.angles-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-}
-
-.angle-chip {
-  text-align: center;
-  padding: 6px 4px;
-  background: white;
-  border-radius: 8px;
-  border: 2px solid #eee;
-}
-
-.angle-chip .name {
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.angle-chip .value {
-  font-size: 14px;
-  font-weight: 700;
-  color: #333;
-}
-
-.angle-chip.red .name { color: #e74c3c; }
-.angle-chip.blue .name { color: #3498db; }
-.angle-chip.green .name { color: #27ae60; }
-.angle-chip.orange .name { color: #f39c12; }
 
 /* Drag hint */
 .drag-hint {
@@ -181,10 +105,10 @@ svg {
 }
 
 .rel-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  color: #666;
-  margin-bottom: 8px;
+  color: #333;
+  margin-bottom: 10px;
 }
 
 .rel-cards {
@@ -197,14 +121,14 @@ svg {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   background: #f8f9fa;
   border-radius: 8px;
   border-left: 3px solid #3498db;
   font-size: 12px;
 }
 
-.rel-card .pair { font-weight: 700; color: #2c3e50; min-width: 60px; }
+.rel-card .pair { font-weight: 700; color: #2c3e50; min-width: 65px; }
 .rel-card .type { color: #666; flex: 1; }
 .rel-card .result { background: #27ae60; color: white; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
 
@@ -289,7 +213,7 @@ svg {
 
 <div class="header">
   <h1>📐 Parallel Lines & Transversal</h1>
-  <p>Drag the purple line to change its angle</p>
+  <p>Drag the purple line to explore angle relationships</p>
 </div>
 
 <div class="main-card">
@@ -301,36 +225,17 @@ svg {
   <!-- EXPLORE -->
   <div id="explorePhase">
     <div class="diagram-area" id="diagramArea">
-      <svg viewBox="0 0 320 240" id="diagram"></svg>
+      <svg viewBox="0 0 320 280" id="diagram"></svg>
     </div>
     
-    <div class="drag-hint">👆 Drag the purple transversal line to rotate it</div>
-    
-    <div class="angle-display">
-      <div class="angle-pill"><span class="label">Acute:</span><span class="val" id="acuteVal">60°</span></div>
-      <div class="angle-pill"><span class="label">Obtuse:</span><span class="val" id="obtuseVal">120°</span></div>
-    </div>
-    
-    <div class="angles-panel">
-      <h4>All 8 Angles</h4>
-      <div class="angles-grid">
-        <div class="angle-chip red"><div class="name">∠1</div><div class="value" id="v1">60°</div></div>
-        <div class="angle-chip blue"><div class="name">∠2</div><div class="value" id="v2">120°</div></div>
-        <div class="angle-chip green"><div class="name">∠3</div><div class="value" id="v3">120°</div></div>
-        <div class="angle-chip orange"><div class="name">∠4</div><div class="value" id="v4">60°</div></div>
-        <div class="angle-chip red"><div class="name">∠5</div><div class="value" id="v5">60°</div></div>
-        <div class="angle-chip blue"><div class="name">∠6</div><div class="value" id="v6">120°</div></div>
-        <div class="angle-chip green"><div class="name">∠7</div><div class="value" id="v7">120°</div></div>
-        <div class="angle-chip orange"><div class="name">∠8</div><div class="value" id="v8">60°</div></div>
-      </div>
-    </div>
+    <div class="drag-hint">👆 Drag the purple line to rotate it and see angles change</div>
     
     <div class="rel-section">
-      <div class="rel-title">Angle Relationships (always hold!):</div>
+      <div class="rel-title">Angle Relationships (always true!):</div>
       <div class="rel-cards">
         <div class="rel-card"><span class="pair">∠1 = ∠5</span><span class="type">Corresponding</span><span class="result">Equal</span></div>
         <div class="rel-card"><span class="pair">∠3 = ∠5</span><span class="type">Alternate interior</span><span class="result">Equal</span></div>
-        <div class="rel-card"><span class="pair">∠3 + ∠6</span><span class="type">Co-interior</span><span class="result">180°</span></div>
+        <div class="rel-card"><span class="pair">∠3 + ∠6</span><span class="type">Co-interior</span><span class="result">= 180°</span></div>
       </div>
     </div>
   </div>
@@ -338,7 +243,7 @@ svg {
   <!-- QUIZ -->
   <div id="quizPhase" class="quiz-section">
     <div class="diagram-area">
-      <svg viewBox="0 0 320 240" id="quizDiagram"></svg>
+      <svg viewBox="0 0 320 280" id="quizDiagram"></svg>
     </div>
     
     <div class="question-box">
@@ -366,13 +271,13 @@ svg {
 </div>
 
 <script>
-let angle = 60; // transversal angle (acute angle)
+let angle = 60;
 let isDragging = false;
 let phase = 'explore';
 let quizQ = 0, quizScore = 0;
 
-const LINE1_Y = 70;
-const LINE2_Y = 170;
+const LINE1_Y = 90;
+const LINE2_Y = 190;
 const CENTER_X = 160;
 
 function getAngles() {
@@ -383,12 +288,8 @@ function getAngles() {
 
 function getTransversalPoints() {
   const rad = angle * Math.PI / 180;
-  // Calculate where transversal intersects the parallel lines
-  // Line goes through center, at the given angle
   const midY = (LINE1_Y + LINE2_Y) / 2;
-  
-  // Extend line well beyond the parallel lines
-  const length = 150;
+  const length = 160;
   const dx = length * Math.cos(rad);
   const dy = length * Math.sin(rad);
   
@@ -396,19 +297,20 @@ function getTransversalPoints() {
     x1: CENTER_X - dx,
     y1: midY + dy,
     x2: CENTER_X + dx,
-    y2: midY - dy,
-    int1: { x: CENTER_X, y: LINE1_Y },
-    int2: { x: CENTER_X, y: LINE2_Y }
+    y2: midY - dy
   };
 }
 
 function renderDiagram(svgId = 'diagram', interactive = true) {
   const svg = document.getElementById(svgId);
   const t = getTransversalPoints();
+  const angles = getAngles();
+  const acute = angles[1];
+  const obtuse = angles[2];
   
-  // Arc indicator (just a small curve to show angle)
+  // Small arc indicator
   function arc(cx, cy, startDeg, endDeg, color) {
-    const r = 22;
+    const r = 20;
     const s = startDeg * Math.PI / 180;
     const e = endDeg * Math.PI / 180;
     const x1 = cx + r * Math.cos(s);
@@ -416,78 +318,82 @@ function renderDiagram(svgId = 'diagram', interactive = true) {
     const x2 = cx + r * Math.cos(e);
     const y2 = cy + r * Math.sin(e);
     return `<path d="M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}" 
-            fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>`;
+            fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>`;
+  }
+  
+  // Angle label with value - positioned in the angle region
+  function angleLabel(cx, cy, position, num, value, color) {
+    let dx, dy;
+    const offset = 38;
+    switch(position) {
+      case 'tr': dx = offset; dy = -offset + 5; break;  // top-right
+      case 'tl': dx = -offset; dy = -offset + 5; break; // top-left
+      case 'bl': dx = -offset; dy = offset; break;      // bottom-left
+      case 'br': dx = offset; dy = offset; break;       // bottom-right
+    }
+    return `
+      <text x="${cx + dx}" y="${cy + dy}" text-anchor="middle" font-size="13" font-weight="700" fill="${color}">
+        <tspan>∠${num}</tspan>
+        <tspan x="${cx + dx}" dy="14" font-size="12">${value}°</tspan>
+      </text>
+    `;
   }
   
   svg.innerHTML = `
-    <!-- Parallel line 1 -->
-    <line x1="20" y1="${LINE1_Y}" x2="300" y2="${LINE1_Y}" stroke="#2c3e50" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Parallel line 1 (l) -->
+    <line x1="15" y1="${LINE1_Y}" x2="305" y2="${LINE1_Y}" stroke="#2c3e50" stroke-width="3" stroke-linecap="round"/>
     
-    <!-- Parallel line 2 -->
-    <line x1="20" y1="${LINE2_Y}" x2="300" y2="${LINE2_Y}" stroke="#2c3e50" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Parallel line 2 (m) -->
+    <line x1="15" y1="${LINE2_Y}" x2="305" y2="${LINE2_Y}" stroke="#2c3e50" stroke-width="3" stroke-linecap="round"/>
     
     <!-- Parallel markers -->
-    <path d="M 55 ${LINE1_Y-8} l 5 8 l -5 8" fill="none" stroke="#2c3e50" stroke-width="2"/>
-    <path d="M 62 ${LINE1_Y-8} l 5 8 l -5 8" fill="none" stroke="#2c3e50" stroke-width="2"/>
-    <path d="M 55 ${LINE2_Y-8} l 5 8 l -5 8" fill="none" stroke="#2c3e50" stroke-width="2"/>
-    <path d="M 62 ${LINE2_Y-8} l 5 8 l -5 8" fill="none" stroke="#2c3e50" stroke-width="2"/>
+    <path d="M 45 ${LINE1_Y-7} l 5 7 l -5 7" fill="none" stroke="#2c3e50" stroke-width="1.5"/>
+    <path d="M 51 ${LINE1_Y-7} l 5 7 l -5 7" fill="none" stroke="#2c3e50" stroke-width="1.5"/>
+    <path d="M 45 ${LINE2_Y-7} l 5 7 l -5 7" fill="none" stroke="#2c3e50" stroke-width="1.5"/>
+    <path d="M 51 ${LINE2_Y-7} l 5 7 l -5 7" fill="none" stroke="#2c3e50" stroke-width="1.5"/>
     
-    <!-- Transversal (the draggable line) -->
+    <!-- Transversal (draggable) -->
     ${interactive ? `
       <line x1="${t.x1}" y1="${t.y1}" x2="${t.x2}" y2="${t.y2}" 
-            stroke="#8e44ad" stroke-width="14" stroke-linecap="round" 
-            opacity="0" class="transversal-hitarea" id="transversalHit"/>
+            stroke="#8e44ad" stroke-width="20" stroke-linecap="round" 
+            opacity="0" class="transversal-hitarea" id="transversalHit" style="cursor:grab"/>
     ` : ''}
     <line x1="${t.x1}" y1="${t.y1}" x2="${t.x2}" y2="${t.y2}" 
-          stroke="#8e44ad" stroke-width="4" stroke-linecap="round" 
-          class="transversal-line ${isDragging ? 'dragging' : ''}" id="transversalLine"/>
+          stroke="#8e44ad" stroke-width="4" stroke-linecap="round" id="transversalLine"/>
     
     <!-- Angle arcs at intersection 1 -->
-    ${arc(t.int1.x, t.int1.y, -angle, 0, '#e74c3c')}
-    ${arc(t.int1.x, t.int1.y, 180, 360-angle, '#3498db')}
-    ${arc(t.int1.x, t.int1.y, 180-angle, 180, '#27ae60')}
-    ${arc(t.int1.x, t.int1.y, 0, 180-angle, '#f39c12')}
+    ${arc(CENTER_X, LINE1_Y, -angle, 0, '#e74c3c')}
+    ${arc(CENTER_X, LINE1_Y, 180, 360-angle, '#3498db')}
+    ${arc(CENTER_X, LINE1_Y, 180-angle, 180, '#27ae60')}
+    ${arc(CENTER_X, LINE1_Y, 0, 180-angle, '#f39c12')}
     
     <!-- Angle arcs at intersection 2 -->
-    ${arc(t.int2.x, t.int2.y, -angle, 0, '#e74c3c')}
-    ${arc(t.int2.x, t.int2.y, 180, 360-angle, '#3498db')}
-    ${arc(t.int2.x, t.int2.y, 180-angle, 180, '#27ae60')}
-    ${arc(t.int2.x, t.int2.y, 0, 180-angle, '#f39c12')}
+    ${arc(CENTER_X, LINE2_Y, -angle, 0, '#e74c3c')}
+    ${arc(CENTER_X, LINE2_Y, 180, 360-angle, '#3498db')}
+    ${arc(CENTER_X, LINE2_Y, 180-angle, 180, '#27ae60')}
+    ${arc(CENTER_X, LINE2_Y, 0, 180-angle, '#f39c12')}
     
     <!-- Intersection points -->
-    <circle cx="${t.int1.x}" cy="${t.int1.y}" r="5" fill="#333"/>
-    <circle cx="${t.int2.x}" cy="${t.int2.y}" r="5" fill="#333"/>
+    <circle cx="${CENTER_X}" cy="${LINE1_Y}" r="4" fill="#333"/>
+    <circle cx="${CENTER_X}" cy="${LINE2_Y}" r="4" fill="#333"/>
     
-    <!-- Angle labels at intersection 1 -->
-    <text x="${t.int1.x + 30}" y="${t.int1.y - 12}" font-size="14" font-weight="700" fill="#e74c3c">1</text>
-    <text x="${t.int1.x - 40}" y="${t.int1.y - 12}" font-size="14" font-weight="700" fill="#3498db">2</text>
-    <text x="${t.int1.x - 40}" y="${t.int1.y + 24}" font-size="14" font-weight="700" fill="#27ae60">3</text>
-    <text x="${t.int1.x + 30}" y="${t.int1.y + 24}" font-size="14" font-weight="700" fill="#f39c12">4</text>
+    <!-- Angle labels with values at intersection 1 -->
+    ${angleLabel(CENTER_X, LINE1_Y, 'tr', 1, acute, '#e74c3c')}
+    ${angleLabel(CENTER_X, LINE1_Y, 'tl', 2, obtuse, '#3498db')}
+    ${angleLabel(CENTER_X, LINE1_Y, 'bl', 3, obtuse, '#27ae60')}
+    ${angleLabel(CENTER_X, LINE1_Y, 'br', 4, acute, '#f39c12')}
     
-    <!-- Angle labels at intersection 2 -->
-    <text x="${t.int2.x + 30}" y="${t.int2.y - 12}" font-size="14" font-weight="700" fill="#e74c3c">5</text>
-    <text x="${t.int2.x - 40}" y="${t.int2.y - 12}" font-size="14" font-weight="700" fill="#3498db">6</text>
-    <text x="${t.int2.x - 40}" y="${t.int2.y + 24}" font-size="14" font-weight="700" fill="#27ae60">7</text>
-    <text x="${t.int2.x + 30}" y="${t.int2.y + 24}" font-size="14" font-weight="700" fill="#f39c12">8</text>
+    <!-- Angle labels with values at intersection 2 -->
+    ${angleLabel(CENTER_X, LINE2_Y, 'tr', 5, acute, '#e74c3c')}
+    ${angleLabel(CENTER_X, LINE2_Y, 'tl', 6, obtuse, '#3498db')}
+    ${angleLabel(CENTER_X, LINE2_Y, 'bl', 7, obtuse, '#27ae60')}
+    ${angleLabel(CENTER_X, LINE2_Y, 'br', 8, acute, '#f39c12')}
     
     <!-- Line labels -->
-    <text x="305" y="${LINE1_Y + 5}" font-size="15" font-weight="600" fill="#2c3e50">l</text>
-    <text x="305" y="${LINE2_Y + 5}" font-size="15" font-weight="600" fill="#2c3e50">m</text>
-    <text x="${t.x2 + 8}" y="${t.y2 - 5}" font-size="15" font-weight="600" fill="#8e44ad">t</text>
+    <text x="312" y="${LINE1_Y + 5}" font-size="16" font-weight="600" fill="#2c3e50">l</text>
+    <text x="312" y="${LINE2_Y + 5}" font-size="16" font-weight="600" fill="#2c3e50">m</text>
+    <text x="${t.x2 + 8}" y="${t.y2 - 5}" font-size="16" font-weight="600" fill="#8e44ad">t</text>
   `;
-}
-
-function updateDisplay() {
-  const angles = getAngles();
-  const acute = Math.min(angles[1], angles[2]);
-  const obtuse = Math.max(angles[1], angles[2]);
-  
-  document.getElementById('acuteVal').textContent = acute + '°';
-  document.getElementById('obtuseVal').textContent = obtuse + '°';
-  
-  for (let i = 1; i <= 8; i++) {
-    document.getElementById('v' + i).textContent = angles[i] + '°';
-  }
 }
 
 // Touch/Mouse handling
@@ -506,7 +412,6 @@ function handleStart(e) {
   if (target.id === 'transversalHit' || target.id === 'transversalLine') {
     isDragging = true;
     e.preventDefault();
-    document.body.style.cursor = 'grabbing';
   }
 }
 
@@ -520,27 +425,17 @@ function handleMove(e) {
   const pt = screenToSVG(clientX, clientY);
   const midY = (LINE1_Y + LINE2_Y) / 2;
   
-  // Calculate angle from center point to touch point
   let newAngle = Math.atan2(midY - pt.y, pt.x - CENTER_X) * 180 / Math.PI;
-  
-  // Normalize to 0-180 range (we only care about the acute angle)
   if (newAngle < 0) newAngle += 180;
   if (newAngle > 180) newAngle -= 180;
-  
-  // Clamp to reasonable range
-  newAngle = Math.max(20, Math.min(160, newAngle));
+  newAngle = Math.max(25, Math.min(155, newAngle));
   
   angle = newAngle;
   renderDiagram();
-  updateDisplay();
 }
 
 function handleEnd() {
-  if (isDragging) {
-    isDragging = false;
-    document.body.style.cursor = '';
-    renderDiagram();
-  }
+  isDragging = false;
 }
 
 // Quiz
@@ -549,7 +444,7 @@ const quizQuestions = [
   { q: 'If ∠3 = 120°, what is ∠5?', options: ['60°', '120°', '180°', '90°'], correct: 1, setup: 60 },
   { q: 'If ∠3 = 80°, what is ∠6?', options: ['80°', '180°', '100°', '90°'], correct: 2, setup: 100 },
   { q: 'Which are corresponding angles?', options: ['∠3 & ∠5', '∠1 & ∠5', '∠3 & ∠6', '∠2 & ∠5'], correct: 1, setup: 55 },
-  { q: 'Which are co-interior (sum = 180°)?', options: ['∠1 & ∠5', '∠3 & ∠5', '∠4 & ∠5', '∠2 & ∠6'], correct: 2, setup: 65 }
+  { q: 'Which are co-interior (sum=180°)?', options: ['∠1 & ∠5', '∠3 & ∠5', '∠4 & ∠5', '∠2 & ∠6'], correct: 2, setup: 65 }
 ];
 
 function showQuestion() {
@@ -622,7 +517,6 @@ document.getElementById('nextBtn').onclick = () => { quizQ++; showQuestion(); };
 
 // Init
 renderDiagram();
-updateDisplay();
 </script>
 </body>
 </html>
