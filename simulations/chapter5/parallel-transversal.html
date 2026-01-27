@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#e91e63">
+<title>Parallel Lines & Transversal</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #e91e63 0%, #f06292 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 12px;
+}
+
+.header h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 12px; opacity: 0.95; }
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 4px;
+  color: #fff;
+}
+
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  margin-bottom: 12px;
+}
+
+.visual {
+  position: relative;
+  height: 38vh;
+  min-height: 280px;
+  background: linear-gradient(145deg, #fce4ec 0%, #f8bbd9 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+}
+
+svg { width: 100%; height: 100%; display: block; }
+
+.static-hint {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  color: #e91e63;
+  font-weight: 500;
+  z-index: 10;
+}
+
+.metrics {
+  background: #fce4ec;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.metrics-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.angles-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.angle-chip {
+  flex: 1;
+  padding: 6px 2px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.angle-chip.type-a { background: #e74c3c20; color: #c0392b; }
+.angle-chip.type-b { background: #3498db20; color: #2980b9; }
+.angle-chip.highlighted { transform: scale(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+.control-panel {
+  background: #fce4ec;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.control-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.highlight-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.highlight-btn {
+  flex: 1;
+  min-width: 45%;
+  padding: 10px 6px;
+  border-radius: 8px;
+  border: 2px solid #f8bbd9;
+  font-size: 10px;
+  font-weight: 600;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.highlight-btn:active { transform: scale(0.95); }
+.highlight-btn.active { border-color: #e91e63; background: #fce4ec; }
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 10px;
+  margin-top: 12px;
+  font-size: 10px;
+}
+
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-line { width: 20px; height: 3px; border-radius: 2px; }
+.legend-line.l { background: #3498db; }
+.legend-line.m { background: #27ae60; }
+.legend-line.t { background: #e74c3c; }
+
+.insight-box {
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.5;
+  border-left: 4px solid #e91e63;
+}
+
+.insight-title { font-weight: 600; color: #c2185b; margin-bottom: 6px; }
+
+.rule-box {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 8px;
+  font-size: 11px;
+}
+
+.rule-item { margin-bottom: 6px; }
+.rule-item:last-child { margin-bottom: 0; }
+.rule-item strong { color: #e91e63; }
+
+.takeaway {
+  background: linear-gradient(135deg, #f8bbd9 0%, #f48fb1 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  display: none;
+}
+
+.takeaway.show { display: block; }
+.takeaway-title { font-weight: 600; color: #880e4f; margin-bottom: 6px; }
+
+.line-l { stroke: #3498db; stroke-width: 3; }
+.line-m { stroke: #27ae60; stroke-width: 3; }
+.line-t { stroke: #e74c3c; stroke-width: 3; }
+.drag-handle { cursor: grab; }
+.drag-handle:active { cursor: grabbing; }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="header">
+  <h1>〰️ Parallel Lines & Transversal</h1>
+  <p>8 angles, amazing relationships!</p>
+</div>
+
+<div class="section-title">Drag the red circle to rotate transversal</div>
+<div class="sim-card" id="sim"></div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-line l"></div> Line l</div>
+  <div class="legend-item"><div class="legend-line m"></div> Line m</div>
+  <div class="legend-item"><div class="legend-line t"></div> Transversal t</div>
+  <div class="legend-item">l ∥ m (parallel)</div>
+</div>
+
+<div class="insight-box">
+  <div class="insight-title">🔑 The 3 Rules</div>
+  <div class="rule-box">
+    <div class="rule-item"><strong>Corresponding:</strong> ∠1=∠5, ∠2=∠6... (same position = equal)</div>
+    <div class="rule-item"><strong>Alternate:</strong> ∠3=∠6, ∠4=∠5 (Z-pattern = equal)</div>
+    <div class="rule-item"><strong>Co-interior:</strong> ∠3+∠5=180°, ∠4+∠6=180° (C-pattern = 180°)</div>
+  </div>
+</div>
+
+<div class="takeaway" id="takeaway">
+  <div class="takeaway-title">💡 What you discovered</div>
+  <span id="takeaway-text"></span>
+</div>
+
+</div>
+
+<script>
+const container = document.getElementById('sim');
+let angle = 60;
+let highlight = 'none';
+let hasInteracted = false;
+let dragHandlePos = {x: 0, y: 0};
+
+container.innerHTML = `
+<div class="visual" id="visual">
+  <div class="static-hint" id="hint">👆 Drag the red circle</div>
+  <svg viewBox="0 0 400 300" id="svg"></svg>
+</div>
+
+<div class="metrics">
+  <div class="metrics-title">At line l:</div>
+  <div class="angles-row" id="row-l"></div>
+  <div class="metrics-title">At line m:</div>
+  <div class="angles-row" id="row-m"></div>
+</div>
+
+<div class="control-panel">
+  <div class="control-label">Highlight angle pairs:</div>
+  <div class="highlight-btns">
+    <button class="highlight-btn active" data-type="none">None</button>
+    <button class="highlight-btn" data-type="corresponding">Corresponding</button>
+    <button class="highlight-btn" data-type="alternate">Alternate</button>
+    <button class="highlight-btn" data-type="cointerior">Co-interior</button>
+  </div>
+</div>`;
+
+const svg = document.getElementById('svg');
+const visual = document.getElementById('visual');
+const gap = 80;
+const ly = 100, my = ly + gap;
+
+function toRad(d) { return d * Math.PI / 180; }
+
+function getHighlightedAngles() {
+  if (highlight === 'corresponding') return [1,5,2,6,3,7,4,8];
+  if (highlight === 'alternate') return [3,6,4,5];
+  if (highlight === 'cointerior') return [3,5,4,6];
+  return [];
+}
+
+function render() {
+  const a = angle, b = 180 - angle;
+  const highlighted = getHighlightedAngles();
+  
+  // Update metrics
+  const rowL = document.getElementById('row-l');
+  const rowM = document.getElementById('row-m');
+  
+  rowL.innerHTML = [1,2,3,4].map(n => {
+    const val = (n % 2 === 1) ? a : b;
+    const type = (n % 2 === 1) ? 'type-a' : 'type-b';
+    const hl = highlighted.includes(n) ? 'highlighted' : '';
+    return `<div class="angle-chip ${type} ${hl}">∠${n}=${val.toFixed(0)}°</div>`;
+  }).join('');
+  
+  rowM.innerHTML = [5,6,7,8].map(n => {
+    const val = (n % 2 === 1) ? a : b;
+    const type = (n % 2 === 1) ? 'type-a' : 'type-b';
+    const hl = highlighted.includes(n) ? 'highlighted' : '';
+    return `<div class="angle-chip ${type} ${hl}">∠${n}=${val.toFixed(0)}°</div>`;
+  }).join('');
+  
+  // Transversal points
+  const intL = {x: 200, y: ly};
+  const intM = {x: 200 + gap / Math.tan(toRad(angle)), y: my};
+  
+  const tLen = 70;
+  const t1 = {x: intL.x - tLen * Math.cos(toRad(angle)), y: intL.y + tLen * Math.sin(toRad(angle))};
+  const t2 = {x: intM.x + tLen * Math.cos(toRad(angle)), y: intM.y - tLen * Math.sin(toRad(angle))};
+  
+  // Store drag handle position for hit testing
+  dragHandlePos = {x: t1.x, y: t1.y};
+  
+  // Highlight colors
+  function getHl(n) {
+    if (!highlighted.includes(n)) return 'transparent';
+    if (highlight === 'corresponding') return (n % 2 === 1) ? '#e74c3c' : '#3498db';
+    if (highlight === 'alternate') return '#9b59b6';
+    if (highlight === 'cointerior') return '#f39c12';
+    return 'transparent';
+  }
+  
+  const arcR = 18;
+  function arcPath(cx, cy, startAng, endAng) {
+    const s = toRad(startAng), e = toRad(endAng);
+    const x1 = cx + arcR * Math.cos(s), y1 = cy + arcR * Math.sin(s);
+    const x2 = cx + arcR * Math.cos(e), y2 = cy + arcR * Math.sin(e);
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${arcR} ${arcR} 0 0 1 ${x2} ${y2} Z`;
+  }
+  
+  svg.innerHTML = `
+    <!-- Angle arcs at l -->
+    <path d="${arcPath(intL.x, intL.y, -angle, 0)}" fill="${getHl(1)}" opacity="0.5"/>
+    <path d="${arcPath(intL.x, intL.y, 180, 360-angle)}" fill="${getHl(2)}" opacity="0.5"/>
+    <path d="${arcPath(intL.x, intL.y, 180-angle, 180)}" fill="${getHl(3)}" opacity="0.5"/>
+    <path d="${arcPath(intL.x, intL.y, 0, 180-angle)}" fill="${getHl(4)}" opacity="0.5"/>
+    
+    <!-- Angle arcs at m -->
+    <path d="${arcPath(intM.x, intM.y, -angle, 0)}" fill="${getHl(5)}" opacity="0.5"/>
+    <path d="${arcPath(intM.x, intM.y, 180, 360-angle)}" fill="${getHl(6)}" opacity="0.5"/>
+    <path d="${arcPath(intM.x, intM.y, 180-angle, 180)}" fill="${getHl(7)}" opacity="0.5"/>
+    <path d="${arcPath(intM.x, intM.y, 0, 180-angle)}" fill="${getHl(8)}" opacity="0.5"/>
+    
+    <!-- Lines -->
+    <line x1="40" y1="${ly}" x2="360" y2="${ly}" class="line-l"/>
+    <line x1="40" y1="${my}" x2="360" y2="${my}" class="line-m"/>
+    <line x1="${t1.x}" y1="${t1.y}" x2="${t2.x}" y2="${t2.y}" class="line-t"/>
+    
+    <!-- Parallel marks -->
+    <path d="M 100 ${ly-5} L 108 ${ly-5} M 100 ${ly-1} L 108 ${ly-1}" stroke="#666" stroke-width="2" fill="none"/>
+    <path d="M 100 ${my-5} L 108 ${my-5} M 100 ${my-1} L 108 ${my-1}" stroke="#666" stroke-width="2" fill="none"/>
+    
+    <!-- Labels -->
+    <text x="365" y="${ly+4}" font-size="14" fill="#3498db" font-weight="600">l</text>
+    <text x="365" y="${my+4}" font-size="14" fill="#27ae60" font-weight="600">m</text>
+    <text x="${t2.x+5}" y="${t2.y-5}" font-size="14" fill="#e74c3c" font-weight="600">t</text>
+    
+    <!-- Angle numbers -->
+    <text x="${intL.x+22}" y="${intL.y-6}" font-size="9" fill="#c0392b">1</text>
+    <text x="${intL.x-28}" y="${intL.y-6}" font-size="9" fill="#2980b9">2</text>
+    <text x="${intL.x-28}" y="${intL.y+12}" font-size="9" fill="#c0392b">3</text>
+    <text x="${intL.x+22}" y="${intL.y+12}" font-size="9" fill="#2980b9">4</text>
+    <text x="${intM.x+22}" y="${intM.y-6}" font-size="9" fill="#c0392b">5</text>
+    <text x="${intM.x-28}" y="${intM.y-6}" font-size="9" fill="#2980b9">6</text>
+    <text x="${intM.x-28}" y="${intM.y+12}" font-size="9" fill="#c0392b">7</text>
+    <text x="${intM.x+22}" y="${intM.y+12}" font-size="9" fill="#2980b9">8</text>
+    
+    <!-- Intersection points -->
+    <circle cx="${intL.x}" cy="${intL.y}" r="4" fill="#333"/>
+    <circle cx="${intM.x}" cy="${intM.y}" r="4" fill="#333"/>
+    
+    <!-- Drag handle at t1 (top-left end) - larger for easier touch -->
+    <circle cx="${t1.x}" cy="${t1.y}" r="22" fill="#e74c3c" stroke="white" stroke-width="3" class="drag-handle"/>
+    <text x="${t1.x}" y="${t1.y+4}" text-anchor="middle" font-size="10" fill="white" pointer-events="none">↻</text>
+  `;
+}
+
+render();
+
+// Event handlers
+let dragging = false;
+
+// Convert screen coordinates to SVG coordinates
+function screenToSVG(clientX, clientY) {
+  const rect = svg.getBoundingClientRect();
+  return {
+    x: (clientX - rect.left) / rect.width * 400,
+    y: (clientY - rect.top) / rect.height * 300
+  };
+}
+
+function getAngleFromPoint(svgX, svgY) {
+  // Calculate angle from the center point (line l intersection)
+  const dx = svgX - 200;
+  const dy = ly - svgY;
+  let a = Math.atan2(dy, dx) * 180 / Math.PI;
+  if (a < 0) a += 180;
+  return Math.max(30, Math.min(150, a));
+}
+
+function isNearHandle(svgX, svgY) {
+  const dist = Math.hypot(svgX - dragHandlePos.x, svgY - dragHandlePos.y);
+  return dist < 40; // 40 SVG units tolerance
+}
+
+function showTakeaway() {
+  if (!hasInteracted) {
+    hasInteracted = true;
+    document.getElementById('hint')?.remove();
+  }
+  
+  const takeaway = document.getElementById('takeaway');
+  const takeawayText = document.getElementById('takeaway-text');
+  
+  if (highlight === 'corresponding') {
+    takeawayText.innerHTML = `Corresponding angles (same position) are <strong>always equal</strong> when lines are parallel: ∠1=∠5, ∠2=∠6, etc.`;
+  } else if (highlight === 'alternate') {
+    takeawayText.innerHTML = `Alternate angles (Z-shape) are <strong>always equal</strong>: ∠3=∠6 and ∠4=∠5.`;
+  } else if (highlight === 'cointerior') {
+    takeawayText.innerHTML = `Co-interior angles (C-shape) <strong>always add to 180°</strong>: ∠3+∠5=180° and ∠4+∠6=180°.`;
+  } else {
+    takeawayText.innerHTML = `Change the angle and watch how the 8 angles relate. Try the highlight buttons to see patterns!`;
+  }
+  takeaway.classList.add('show');
+}
+
+// Touch events
+visual.addEventListener('touchstart', (e) => {
+  const touch = e.touches[0];
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
+    dragging = true;
+    e.preventDefault();
+  }
+}, {passive: false});
+
+visual.addEventListener('touchmove', (e) => {
+  if (!dragging) return;
+  e.preventDefault();
+  
+  const touch = e.touches[0];
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  angle = getAngleFromPoint(svgCoords.x, svgCoords.y);
+  render();
+  showTakeaway();
+}, {passive: false});
+
+visual.addEventListener('touchend', () => { dragging = false; });
+visual.addEventListener('touchcancel', () => { dragging = false; });
+
+// Mouse events
+visual.addEventListener('mousedown', (e) => {
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
+    dragging = true;
+    e.preventDefault();
+  }
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  angle = getAngleFromPoint(svgCoords.x, svgCoords.y);
+  render();
+  showTakeaway();
+});
+
+document.addEventListener('mouseup', () => { dragging = false; });
+
+// Highlight buttons
+container.querySelectorAll('.highlight-btn').forEach(btn => {
+  btn.onclick = () => {
+    container.querySelectorAll('.highlight-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    highlight = btn.dataset.type;
+    render();
+    showTakeaway();
+  };
+});
+</script>
+</body>
+</html>

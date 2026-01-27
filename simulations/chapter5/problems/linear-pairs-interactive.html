@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#9b59b6">
+<title>Find the Pairs</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 10px;
+}
+
+.header h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 12px; opacity: 0.9; }
+
+.main-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+/* Mode Tabs */
+.mode-tabs {
+  display: flex;
+  background: #f0f0f0;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 12px 8px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-tab.active {
+  background: #9b59b6;
+  color: white;
+  box-shadow: 0 2px 8px rgba(155, 89, 182, 0.4);
+}
+
+/* Task + Progress */
+.task-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.task-badge {
+  background: #9b59b6;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: #666;
+}
+.progress-text span { font-weight: 700; color: #27ae60; }
+
+/* Diagram - Clean & Simple */
+.diagram-area {
+  background: #fafafa;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 2px solid #eee;
+}
+
+svg { width: 100%; height: auto; display: block; }
+
+/* Angle Selection Grid */
+.selection-label {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 12px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.angle-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.angle-btn {
+  padding: 16px 8px;
+  border-radius: 12px;
+  border: 3px solid #e0e0e0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.angle-btn .symbol {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.angle-btn .degree {
+  font-size: 11px;
+  color: #888;
+}
+
+.angle-btn.a { color: #e74c3c; }
+.angle-btn.b { color: #3498db; }
+.angle-btn.c { color: #27ae60; }
+.angle-btn.d { color: #f39c12; }
+
+.angle-btn.selected {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.angle-btn.selected.a { border-color: #e74c3c; background: #fef0ef; }
+.angle-btn.selected.b { border-color: #3498db; background: #eff6fc; }
+.angle-btn.selected.c { border-color: #27ae60; background: #effcf4; }
+.angle-btn.selected.d { border-color: #f39c12; background: #fef9ef; }
+
+/* Hint Box */
+.hint-box {
+  background: #f8f4ff;
+  border: 2px solid #9b59b6;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+  text-align: center;
+  display: none;
+}
+
+.hint-box.show { display: block; }
+
+.hint-box .type {
+  font-size: 14px;
+  font-weight: 700;
+  color: #9b59b6;
+  margin-bottom: 4px;
+}
+
+.hint-box .explain {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Buttons */
+.btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.clear-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #f0f0f0;
+  color: #666;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.check-btn {
+  flex: 2;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: #27ae60;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.check-btn:disabled { opacity: 0.5; }
+
+/* Found Pairs */
+.found-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.found-title {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.found-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.found-item {
+  background: #d5f4e6;
+  border: 2px solid #27ae60;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e8449;
+}
+
+.found-item.empty {
+  background: #fff;
+  border: 2px dashed #ccc;
+  color: #999;
+}
+
+/* Success Banner */
+.success-banner {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  color: white;
+  margin-top: 14px;
+  display: none;
+}
+
+.success-banner.show { display: block; }
+.success-banner h3 { font-size: 18px; margin-bottom: 6px; }
+.success-banner p { font-size: 13px; opacity: 0.9; }
+
+/* Tip Box */
+.tip-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.tip-box h4 { font-size: 13px; color: #9b59b6; margin-bottom: 8px; }
+.tip-box p { font-size: 11px; color: #555; line-height: 1.6; }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="header">
+  <h1>👆 Find Angle Pairs</h1>
+  <p>Select two angles that form a special pair</p>
+</div>
+
+<div class="main-card">
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="linear">Linear Pairs</button>
+    <button class="mode-tab" data-mode="vertical">Vertically Opposite</button>
+  </div>
+  
+  <div class="task-bar">
+    <span class="task-badge" id="taskBadge">Find Linear Pairs</span>
+    <span class="progress-text">Found: <span id="foundCount">0</span>/<span id="totalCount">4</span></span>
+  </div>
+  
+  <div class="diagram-area">
+    <svg viewBox="0 0 280 180" id="diagram"></svg>
+  </div>
+  
+  <div class="selection-label">Tap two angles to select:</div>
+  
+  <div class="angle-grid">
+    <button class="angle-btn a" data-angle="a">
+      <span class="symbol">∠a</span>
+      <span class="degree" id="degA">55°</span>
+    </button>
+    <button class="angle-btn b" data-angle="b">
+      <span class="symbol">∠b</span>
+      <span class="degree" id="degB">125°</span>
+    </button>
+    <button class="angle-btn c" data-angle="c">
+      <span class="symbol">∠c</span>
+      <span class="degree" id="degC">55°</span>
+    </button>
+    <button class="angle-btn d" data-angle="d">
+      <span class="symbol">∠d</span>
+      <span class="degree" id="degD">125°</span>
+    </button>
+  </div>
+  
+  <div class="hint-box" id="hintBox">
+    <div class="type" id="hintType"></div>
+    <div class="explain" id="hintExplain"></div>
+  </div>
+  
+  <div class="btn-row">
+    <button class="clear-btn" id="clearBtn">Clear</button>
+    <button class="check-btn" id="checkBtn" disabled>Check Pair</button>
+  </div>
+  
+  <div class="found-section">
+    <div class="found-title">✓ Pairs you found:</div>
+    <div class="found-list" id="foundList">
+      <span class="found-item empty">None yet</span>
+    </div>
+  </div>
+  
+  <div class="success-banner" id="successBanner">
+    <h3>🎉 All Pairs Found!</h3>
+    <p id="successMsg">Great job!</p>
+  </div>
+</div>
+
+<div class="tip-box">
+  <h4>💡 Remember</h4>
+  <p><strong>Linear pair:</strong> Two adjacent angles on a straight line → add to 180°<br>
+  <strong>Vertically opposite:</strong> Angles across the intersection → always equal</p>
+</div>
+
+</div>
+
+<script>
+const linearPairs = [['a', 'b'], ['b', 'c'], ['c', 'd'], ['d', 'a']];
+const verticalPairs = [['a', 'c'], ['b', 'd']];
+
+let mode = 'linear';
+let selected = [];
+let foundPairs = { linear: [], vertical: [] };
+const angle = 55;
+
+function renderDiagram() {
+  const cx = 140, cy = 90, len = 100;
+  const rad = angle * Math.PI / 180;
+  
+  const l1x = cx - len * Math.cos(rad);
+  const l1y = cy + len * Math.sin(rad);
+  const l2x = cx + len * Math.cos(rad);
+  const l2y = cy - len * Math.sin(rad);
+  
+  // Small arc for angle markers
+  const arcR = 28;
+  function smallArc(startAng, endAng, color) {
+    const s = startAng * Math.PI / 180;
+    const e = endAng * Math.PI / 180;
+    const x1 = cx + arcR * Math.cos(s), y1 = cy + arcR * Math.sin(s);
+    const x2 = cx + arcR * Math.cos(e), y2 = cy + arcR * Math.sin(e);
+    return `<path d="M ${x1} ${y1} A ${arcR} ${arcR} 0 0 1 ${x2} ${y2}" 
+            fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  
+  // Highlight selected angles
+  const selSet = new Set(selected);
+  
+  document.getElementById('diagram').innerHTML = `
+    <!-- Lines -->
+    <line x1="${cx - len - 10}" y1="${cy}" x2="${cx + len + 10}" y2="${cy}" 
+          stroke="#2c3e50" stroke-width="4" stroke-linecap="round"/>
+    <line x1="${l1x - 8 * Math.cos(rad)}" y1="${l1y + 8 * Math.sin(rad)}" 
+          x2="${l2x + 8 * Math.cos(rad)}" y2="${l2y - 8 * Math.sin(rad)}" 
+          stroke="#8e44ad" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Angle arcs (small, clean) -->
+    ${smallArc(-angle, 0, selSet.has('a') ? '#e74c3c' : '#ffcdd2')}
+    ${smallArc(180, 360 - angle, selSet.has('b') ? '#3498db' : '#bbdefb')}
+    ${smallArc(180 - angle, 180, selSet.has('c') ? '#27ae60' : '#c8e6c9')}
+    ${smallArc(0, 180 - angle, selSet.has('d') ? '#f39c12' : '#ffe0b2')}
+    
+    <!-- Center point -->
+    <circle cx="${cx}" cy="${cy}" r="6" fill="#333"/>
+    
+    <!-- Angle labels - positioned clearly -->
+    <text x="${cx + 48}" y="${cy - 20}" font-size="18" font-weight="700" fill="#e74c3c">a</text>
+    <text x="${cx - 58}" y="${cy - 20}" font-size="18" font-weight="700" fill="#3498db">b</text>
+    <text x="${cx - 58}" y="${cy + 32}" font-size="18" font-weight="700" fill="#27ae60">c</text>
+    <text x="${cx + 48}" y="${cy + 32}" font-size="18" font-weight="700" fill="#f39c12">d</text>
+    
+    <!-- Line labels -->
+    <text x="${cx + len + 16}" y="${cy + 5}" font-size="16" fill="#2c3e50" font-weight="600">m</text>
+    <text x="${l2x + 10}" y="${l2y - 10}" font-size="16" fill="#8e44ad" font-weight="600">l</text>
+  `;
+}
+
+function updateUI() {
+  // Update button states
+  document.querySelectorAll('.angle-btn').forEach(btn => {
+    btn.classList.toggle('selected', selected.includes(btn.dataset.angle));
+  });
+  
+  // Update hint box
+  const hintBox = document.getElementById('hintBox');
+  if (selected.length === 2) {
+    const [a, b] = selected.sort();
+    const isLinear = linearPairs.some(p => p.sort().join() === [a, b].join());
+    const isVertical = verticalPairs.some(p => p.sort().join() === [a, b].join());
+    
+    hintBox.classList.add('show');
+    
+    if (isLinear) {
+      document.getElementById('hintType').textContent = '→ Linear Pair';
+      document.getElementById('hintExplain').textContent = 
+        `∠${selected[0]} and ∠${selected[1]} are adjacent and form a straight line. They add to 180°!`;
+    } else if (isVertical) {
+      document.getElementById('hintType').textContent = '→ Vertically Opposite';
+      document.getElementById('hintExplain').textContent = 
+        `∠${selected[0]} and ∠${selected[1]} are across from each other. They are equal!`;
+    }
+  } else {
+    hintBox.classList.remove('show');
+  }
+  
+  // Enable check button
+  document.getElementById('checkBtn').disabled = selected.length !== 2;
+  
+  // Update diagram highlights
+  renderDiagram();
+}
+
+function updateFoundList() {
+  const pairs = foundPairs[mode];
+  const targetPairs = mode === 'linear' ? linearPairs : verticalPairs;
+  const list = document.getElementById('foundList');
+  
+  document.getElementById('foundCount').textContent = pairs.length;
+  document.getElementById('totalCount').textContent = targetPairs.length;
+  
+  if (pairs.length === 0) {
+    list.innerHTML = '<span class="found-item empty">None yet</span>';
+  } else {
+    list.innerHTML = pairs.map(p => 
+      `<span class="found-item">∠${p[0]} + ∠${p[1]}</span>`
+    ).join('');
+  }
+  
+  // Show success banner
+  const banner = document.getElementById('successBanner');
+  if (pairs.length === targetPairs.length) {
+    banner.classList.add('show');
+    document.getElementById('successMsg').textContent = 
+      mode === 'linear' ? "All 4 linear pairs found! Try 'Vertically Opposite' next." : "Both pairs found!";
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+function selectAngle(angle) {
+  if (selected.includes(angle)) {
+    selected = selected.filter(a => a !== angle);
+  } else if (selected.length < 2) {
+    selected.push(angle);
+  } else {
+    selected = [selected[1], angle];
+  }
+  updateUI();
+}
+
+function clearSelection() {
+  selected = [];
+  updateUI();
+}
+
+function checkPair() {
+  if (selected.length !== 2) return;
+  
+  const [a, b] = selected.sort();
+  const targetPairs = mode === 'linear' ? linearPairs : verticalPairs;
+  const isValid = targetPairs.some(p => p.sort().join() === [a, b].join());
+  
+  const btn = document.getElementById('checkBtn');
+  
+  if (isValid) {
+    const alreadyFound = foundPairs[mode].some(p => p.sort().join() === [a, b].join());
+    if (!alreadyFound) {
+      foundPairs[mode].push([a, b]);
+      updateFoundList();
+    }
+    
+    btn.textContent = '✓ Correct!';
+    btn.style.background = '#27ae60';
+    setTimeout(() => {
+      btn.textContent = 'Check Pair';
+      btn.style.background = '';
+      clearSelection();
+    }, 700);
+  } else {
+    btn.textContent = '✗ Not this type';
+    btn.style.background = '#e74c3c';
+    setTimeout(() => {
+      btn.textContent = 'Check Pair';
+      btn.style.background = '';
+    }, 900);
+  }
+}
+
+function switchMode(newMode) {
+  mode = newMode;
+  selected = [];
+  
+  document.querySelectorAll('.mode-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.mode === mode);
+  });
+  
+  document.getElementById('taskBadge').textContent = 
+    mode === 'linear' ? 'Find Linear Pairs' : 'Find Vertical Pairs';
+  
+  updateUI();
+  updateFoundList();
+}
+
+// Event listeners
+document.querySelectorAll('.angle-btn').forEach(btn => {
+  btn.onclick = () => selectAngle(btn.dataset.angle);
+});
+
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.onclick = () => switchMode(tab.dataset.mode);
+});
+
+document.getElementById('clearBtn').onclick = clearSelection;
+document.getElementById('checkBtn').onclick = checkPair;
+
+// Initialize
+renderDiagram();
+updateFoundList();
+</script>
+</body>
+</html>

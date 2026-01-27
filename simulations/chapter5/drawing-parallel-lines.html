@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#3498db">
+<title>Drawing Parallel Lines</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 12px;
+}
+
+.header h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 12px; opacity: 0.95; }
+
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  margin-bottom: 12px;
+}
+
+.visual {
+  position: relative;
+  height: 42vh;
+  min-height: 300px;
+  background: linear-gradient(145deg, #ecf0f1 0%, #bdc3c7 100%);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+svg { width: 100%; height: 100%; display: block; }
+
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: white;
+  background: #bdc3c7;
+  transition: all 0.3s;
+}
+
+.step-dot.active {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  transform: scale(1.15);
+}
+
+.step-dot.completed {
+  background: #27ae60;
+}
+
+.step-content {
+  background: #ecf0f1;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 12px;
+  min-height: 80px;
+}
+
+.step-content h3 {
+  font-size: 14px;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-content p {
+  font-size: 12px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.nav-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.nav-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-btn.prev {
+  background: #ecf0f1;
+  color: #666;
+}
+
+.nav-btn.next {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.nav-btn:disabled { opacity: 0.4; }
+.nav-btn:active { transform: scale(0.98); }
+
+.tools-bar {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px;
+  background: #ecf0f1;
+  border-radius: 10px;
+  margin-top: 12px;
+}
+
+.tool-item {
+  text-align: center;
+  opacity: 0.4;
+  transition: all 0.3s;
+}
+
+.tool-item.active {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.tool-item .icon { font-size: 28px; }
+.tool-item .label { font-size: 10px; color: #555; margin-top: 4px; }
+
+.insight-box {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d4e8f7 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-left: 4px solid #3498db;
+}
+
+.insight-title { font-weight: 600; color: #2980b9; margin-bottom: 6px; }
+
+.reset-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #e74c3c;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.reset-btn:active { transform: scale(0.98); }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="header">
+  <h1>📐 Drawing Parallel Lines</h1>
+  <p>Step-by-step using Set Square & Ruler</p>
+</div>
+
+<div class="sim-card">
+  <div class="visual">
+    <svg viewBox="0 0 400 300" id="svg"></svg>
+  </div>
+  
+  <div class="tools-bar">
+    <div class="tool-item" id="tool-ruler"><div class="icon">📏</div><div class="label">Ruler</div></div>
+    <div class="tool-item" id="tool-setSquare"><div class="icon">📐</div><div class="label">Set Square</div></div>
+    <div class="tool-item" id="tool-pencil"><div class="icon">✏️</div><div class="label">Pencil</div></div>
+  </div>
+  
+  <div class="step-indicator">
+    <div class="step-dot active" id="dot1">1</div>
+    <div class="step-dot" id="dot2">2</div>
+    <div class="step-dot" id="dot3">3</div>
+    <div class="step-dot" id="dot4">4</div>
+  </div>
+  
+  <div class="step-content">
+    <h3><span id="stepIcon">📏</span> <span id="stepTitle">Step 1: Draw Base Line</span></h3>
+    <p id="stepDesc">Draw a horizontal line using your ruler. This is line 'l' — our reference line.</p>
+  </div>
+  
+  <div class="nav-buttons">
+    <button class="nav-btn prev" id="prevBtn" disabled>← Back</button>
+    <button class="nav-btn next" id="nextBtn">Next →</button>
+  </div>
+  
+  <button class="reset-btn" id="resetBtn">🔄 Start Over</button>
+</div>
+
+<div class="insight-box">
+  <div class="insight-title">💡 Why does this work?</div>
+  Both lines are perpendicular to the ruler edge (90°). Since corresponding angles are equal, the lines must be <strong>parallel</strong>! This is the mathematical proof behind the construction.
+</div>
+
+</div>
+
+<script>
+const svg = document.getElementById('svg');
+let currentStep = 1;
+let animProgress = 0;
+let animId = null;
+
+const steps = [
+  { title: "Step 1: Draw Base Line", desc: "Draw a horizontal line using your ruler. This is line 'l' — our reference line.", icon: "📏", tools: ['ruler', 'pencil'] },
+  { title: "Step 2: Place Set Square", desc: "Place the set square with one edge along line 'l'. Keep the ruler against the other edge.", icon: "📐", tools: ['setSquare', 'ruler'] },
+  { title: "Step 3: Slide Set Square Up", desc: "Slide the set square along the ruler to where you want the parallel line. Mark point A.", icon: "📐", tools: ['setSquare'] },
+  { title: "Step 4: Draw Parallel Line", desc: "Draw line 'm' along the set square edge. It's parallel to 'l' because both make 90° with the ruler!", icon: "✏️", tools: ['pencil', 'setSquare'] }
+];
+
+const lineY1 = 220, lineY2 = 100;
+
+function updateUI() {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.classList.remove('active', 'completed');
+    if (i < currentStep) dot.classList.add('completed');
+    else if (i === currentStep) dot.classList.add('active');
+  }
+  
+  const step = steps[currentStep - 1];
+  document.getElementById('stepTitle').textContent = step.title;
+  document.getElementById('stepDesc').textContent = step.desc;
+  document.getElementById('stepIcon').textContent = step.icon;
+  
+  document.getElementById('prevBtn').disabled = currentStep === 1;
+  document.getElementById('nextBtn').textContent = currentStep === 4 ? '✓ Done' : 'Next →';
+  
+  ['ruler', 'setSquare', 'pencil'].forEach(t => {
+    document.getElementById('tool-' + t).classList.toggle('active', step.tools.includes(t));
+  });
+}
+
+function drawSetSquare(x, y, opacity) {
+  const size = 60;
+  return `
+    <g opacity="${opacity}">
+      <polygon points="${x},${y} ${x + size},${y} ${x},${y - size}" fill="rgba(255,200,100,0.8)" stroke="#d68910" stroke-width="2"/>
+      <path d="M ${x + 12} ${y} L ${x + 12} ${y - 12} L ${x} ${y - 12}" stroke="#666" stroke-width="1" fill="none"/>
+    </g>
+  `;
+}
+
+function drawRuler(x, y, height, opacity) {
+  let marks = '';
+  for (let i = 0; i < height; i += 8) {
+    const w = i % 40 === 0 ? 12 : (i % 16 === 0 ? 8 : 4);
+    marks += `<line x1="${x}" y1="${y + i}" x2="${x + w}" y2="${y + i}" stroke="#666" stroke-width="1"/>`;
+  }
+  return `
+    <g opacity="${opacity}">
+      <rect x="${x}" y="${y}" width="25" height="${height}" fill="rgba(200,220,240,0.9)" stroke="#3498db" stroke-width="2" rx="2"/>
+      ${marks}
+    </g>
+  `;
+}
+
+function render() {
+  let content = '';
+  
+  // Grid background
+  for (let i = 0; i < 400; i += 20) {
+    content += `<line x1="${i}" y1="0" x2="${i}" y2="300" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>`;
+    content += `<line x1="0" y1="${i}" x2="400" y2="${i}" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>`;
+  }
+  
+  // Step 1: Base line
+  if (currentStep >= 1) {
+    const p = currentStep === 1 ? animProgress : 1;
+    content += `<line x1="60" y1="${lineY1}" x2="${60 + 280 * p}" y2="${lineY1}" stroke="#2c3e50" stroke-width="3"/>`;
+    if (p > 0.9) content += `<text x="350" y="${lineY1 + 5}" font-size="16" fill="#2c3e50" font-weight="600">l</text>`;
+  }
+  
+  // Step 2: Set square + ruler at bottom
+  if (currentStep >= 2) {
+    const p = currentStep === 2 ? animProgress : 1;
+    content += drawRuler(140, lineY1 - 160, 160, p);
+    content += drawSetSquare(165, lineY1, p);
+    if (p > 0.8) content += `<text x="180" y="${lineY1 + 25}" font-size="11" fill="#666">Set square on l</text>`;
+  }
+  
+  // Step 3: Slide up
+  if (currentStep >= 3) {
+    const p = currentStep === 3 ? animProgress : 1;
+    content += drawRuler(140, lineY1 - 160, 160, 1);
+    
+    const curY = lineY1 - (lineY1 - lineY2) * p;
+    if (p < 1) content += drawSetSquare(165, lineY1, 0.3);
+    content += drawSetSquare(165, curY, 1);
+    
+    if (p > 0.5) {
+      content += `<circle cx="280" cy="${lineY2}" r="6" fill="#e74c3c"/>`;
+      content += `<text x="290" y="${lineY2 + 5}" font-size="14" fill="#e74c3c" font-weight="600">A</text>`;
+    }
+    
+    if (p > 0 && p < 1) {
+      content += `<line x1="195" y1="${lineY1 - 20}" x2="195" y2="${curY + 20}" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5" opacity="0.5"/>`;
+    }
+  }
+  
+  // Step 4: Draw parallel line
+  if (currentStep >= 4) {
+    const p = currentStep === 4 ? animProgress : 1;
+    content += drawSetSquare(165, lineY2, 1);
+    content += `<line x1="60" y1="${lineY2}" x2="${60 + 280 * p}" y2="${lineY2}" stroke="#27ae60" stroke-width="3"/>`;
+    
+    if (p > 0.9) {
+      content += `<text x="350" y="${lineY2 + 5}" font-size="16" fill="#27ae60" font-weight="600">m</text>`;
+      
+      // Parallel marks
+      content += `<path d="M 280 ${lineY1 - 6} L 288 ${lineY1 - 6} M 280 ${lineY1 - 2} L 288 ${lineY1 - 2}" stroke="#666" stroke-width="2"/>`;
+      content += `<path d="M 280 ${lineY2 - 6} L 288 ${lineY2 - 6} M 280 ${lineY2 - 2} L 288 ${lineY2 - 2}" stroke="#666" stroke-width="2"/>`;
+      
+      content += `<text x="200" y="50" font-size="18" fill="#27ae60" font-weight="700" text-anchor="middle">✓ l ∥ m (Parallel!)</text>`;
+    }
+    
+    content += `<circle cx="280" cy="${lineY2}" r="6" fill="#e74c3c"/>`;
+  }
+  
+  svg.innerHTML = content;
+}
+
+function animate() {
+  if (animProgress < 1) {
+    animProgress += 0.03;
+    if (animProgress > 1) animProgress = 1;
+    render();
+    animId = requestAnimationFrame(animate);
+  }
+}
+
+function startAnim() {
+  if (animId) cancelAnimationFrame(animId);
+  animProgress = 0;
+  animate();
+}
+
+document.getElementById('prevBtn').onclick = () => {
+  if (currentStep > 1) { currentStep--; updateUI(); startAnim(); }
+};
+
+document.getElementById('nextBtn').onclick = () => {
+  if (currentStep < 4) { currentStep++; updateUI(); startAnim(); }
+};
+
+document.getElementById('resetBtn').onclick = () => {
+  currentStep = 1;
+  updateUI();
+  startAnim();
+};
+
+updateUI();
+startAnim();
+</script>
+</body>
+</html>

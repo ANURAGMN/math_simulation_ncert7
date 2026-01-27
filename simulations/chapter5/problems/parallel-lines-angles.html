@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#3498db">
+<title>Problem: Parallel Lines Angles</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 12px;
+}
+
+.header h1 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 11px; opacity: 0.9; }
+
+.score-bar {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  color: white;
+  font-size: 12px;
+}
+
+.score-bar .val { font-weight: 700; }
+
+.problem-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  margin-bottom: 12px;
+}
+
+.visual {
+  height: 36vh;
+  min-height: 250px;
+  background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: 10px;
+  position: relative;
+}
+
+svg { width: 100%; height: 100%; }
+
+.question-box {
+  background: #e3f2fd;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.question-box .given { font-size: 13px; font-weight: 600; color: #1565c0; margin-bottom: 6px; }
+.question-box .find { font-size: 14px; font-weight: 700; color: #333; }
+.question-box .hint { font-size: 10px; color: #666; margin-top: 6px; }
+
+.answer-input {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
+.answer-input input {
+  width: 100px;
+  padding: 14px;
+  border: 2px solid #bbdefb;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+}
+
+.answer-input input:focus { border-color: #3498db; }
+.answer-input input.correct { border-color: #27ae60; background: #d5f4e6; }
+.answer-input input.wrong { border-color: #e74c3c; background: #fce4ec; }
+
+.answer-input .unit { font-size: 20px; font-weight: 600; color: #666; }
+
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.submit-btn:disabled { opacity: 0.5; }
+
+.feedback {
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 12px;
+  display: none;
+}
+
+.feedback.show { display: block; }
+.feedback.correct { background: #d5f4e6; color: #1e8449; }
+.feedback.wrong { background: #fce4ec; color: #c62828; }
+
+.next-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #27ae60;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: none;
+}
+
+.next-btn.show { display: block; }
+
+.explanation {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 11px;
+  display: none;
+}
+
+.explanation.show { display: block; }
+.explanation h4 { color: #3498db; margin-bottom: 8px; }
+.explanation .step { margin-bottom: 4px; color: #555; }
+.explanation .rule { background: #e3f2fd; padding: 6px 10px; border-radius: 6px; margin-top: 6px; color: #1565c0; font-weight: 600; }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="header">
+  <h1>📐 Parallel Lines Angle Problems</h1>
+  <p>l ∥ m with transversal t</p>
+</div>
+
+<div class="score-bar">
+  <span>Problem: <span class="val" id="probNum">1</span>/10</span>
+  <span>Correct: <span class="val" id="scoreNum">0</span></span>
+</div>
+
+<div class="problem-card" id="problemCard"></div>
+
+<div class="explanation" id="explanation">
+  <h4>💡 Solution</h4>
+  <div id="expContent"></div>
+</div>
+
+</div>
+
+<script>
+const problems = [
+  { given: '∠1', givenVal: 65, find: '∠5', rule: 'corresponding', answer: 65 },
+  { given: '∠2', givenVal: 115, find: '∠6', rule: 'corresponding', answer: 115 },
+  { given: '∠3', givenVal: 70, find: '∠6', rule: 'alternate', answer: 70 },
+  { given: '∠4', givenVal: 110, find: '∠5', rule: 'alternate', answer: 110 },
+  { given: '∠3', givenVal: 55, find: '∠5', rule: 'co-interior', answer: 125 },
+  { given: '∠4', givenVal: 120, find: '∠6', rule: 'co-interior', answer: 60 },
+  { given: '∠6', givenVal: 135, find: '∠2', rule: 'corresponding', answer: 135 },
+  { given: '∠5', givenVal: 45, find: '∠4', rule: 'alternate', answer: 45 },
+  { given: '∠1', givenVal: 78, find: '∠3', rule: 'vertically-opposite', answer: 78 },
+  { given: '∠6', givenVal: 100, find: '∠3', rule: 'alternate', answer: 100 }
+];
+
+let currentIdx = 0;
+let score = 0;
+let answered = false;
+
+function toRad(d) { return d * Math.PI / 180; }
+
+function renderProblem() {
+  const prob = problems[currentIdx];
+  answered = false;
+  
+  document.getElementById('probNum').textContent = currentIdx + 1;
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('explanation').classList.remove('show');
+  
+  // Calculate all 8 angles
+  const ang = prob.givenVal;
+  const angSupp = 180 - ang;
+  
+  // Standard angle positioning
+  const baseAng = 60; // transversal angle
+  const ly = 90, my = 180, gap = my - ly;
+  const cx = 200;
+  
+  const intL = { x: cx, y: ly };
+  const intM = { x: cx + gap / Math.tan(toRad(baseAng)), y: my };
+  
+  const tLen = 70;
+  const t1 = { x: intL.x - tLen * Math.cos(toRad(baseAng)), y: intL.y + tLen * Math.sin(toRad(baseAng)) };
+  const t2 = { x: intM.x + tLen * Math.cos(toRad(baseAng)), y: intM.y - tLen * Math.sin(toRad(baseAng)) };
+  
+  // Get the given angle number
+  const givenNum = parseInt(prob.given.replace('∠', ''));
+  const findNum = parseInt(prob.find.replace('∠', ''));
+  
+  document.getElementById('problemCard').innerHTML = `
+<div class="visual">
+  <svg viewBox="0 0 400 270">
+    <!-- Lines -->
+    <line x1="50" y1="${ly}" x2="350" y2="${ly}" stroke="#3498db" stroke-width="3"/>
+    <line x1="50" y1="${my}" x2="350" y2="${my}" stroke="#27ae60" stroke-width="3"/>
+    <line x1="${t1.x}" y1="${t1.y}" x2="${t2.x}" y2="${t2.y}" stroke="#e74c3c" stroke-width="3"/>
+    
+    <!-- Parallel marks -->
+    <path d="M 120 ${ly-5} L 128 ${ly-5} M 120 ${ly-1} L 128 ${ly-1}" stroke="#666" stroke-width="2"/>
+    <path d="M 120 ${my-5} L 128 ${my-5} M 120 ${my-1} L 128 ${my-1}" stroke="#666" stroke-width="2"/>
+    
+    <!-- Line labels -->
+    <text x="355" y="${ly+5}" font-size="14" fill="#3498db" font-weight="600">l</text>
+    <text x="355" y="${my+5}" font-size="14" fill="#27ae60" font-weight="600">m</text>
+    <text x="${t2.x+5}" y="${t2.y-5}" font-size="14" fill="#e74c3c" font-weight="600">t</text>
+    
+    <!-- Intersection points -->
+    <circle cx="${intL.x}" cy="${intL.y}" r="4" fill="#333"/>
+    <circle cx="${intM.x}" cy="${intM.y}" r="4" fill="#333"/>
+    
+    <!-- Angle labels at l (1,2,3,4) -->
+    <text x="${intL.x+22}" y="${intL.y-8}" font-size="14" fill="${givenNum===1 || findNum===1 ? '#e74c3c' : '#666'}" font-weight="${givenNum===1 || findNum===1 ? '700' : '400'}">1</text>
+    <text x="${intL.x-30}" y="${intL.y-8}" font-size="14" fill="${givenNum===2 || findNum===2 ? '#e74c3c' : '#666'}" font-weight="${givenNum===2 || findNum===2 ? '700' : '400'}">2</text>
+    <text x="${intL.x-30}" y="${intL.y+18}" font-size="14" fill="${givenNum===3 || findNum===3 ? '#e74c3c' : '#666'}" font-weight="${givenNum===3 || findNum===3 ? '700' : '400'}">3</text>
+    <text x="${intL.x+22}" y="${intL.y+18}" font-size="14" fill="${givenNum===4 || findNum===4 ? '#e74c3c' : '#666'}" font-weight="${givenNum===4 || findNum===4 ? '700' : '400'}">4</text>
+    
+    <!-- Angle labels at m (5,6,7,8) -->
+    <text x="${intM.x+22}" y="${intM.y-8}" font-size="14" fill="${givenNum===5 || findNum===5 ? '#e74c3c' : '#666'}" font-weight="${givenNum===5 || findNum===5 ? '700' : '400'}">5</text>
+    <text x="${intM.x-30}" y="${intM.y-8}" font-size="14" fill="${givenNum===6 || findNum===6 ? '#e74c3c' : '#666'}" font-weight="${givenNum===6 || findNum===6 ? '700' : '400'}">6</text>
+    <text x="${intM.x-30}" y="${intM.y+18}" font-size="14" fill="${givenNum===7 || findNum===7 ? '#e74c3c' : '#666'}" font-weight="${givenNum===7 || findNum===7 ? '700' : '400'}">7</text>
+    <text x="${intM.x+22}" y="${intM.y+18}" font-size="14" fill="${givenNum===8 || findNum===8 ? '#e74c3c' : '#666'}" font-weight="${givenNum===8 || findNum===8 ? '700' : '400'}">8</text>
+    
+    <!-- Given angle value -->
+    <text x="${intL.x + (givenNum<=4 ? (givenNum%2===1 ? 45 : -50) : 0)}" 
+          y="${(givenNum<=4 ? intL.y : intM.y) + (givenNum%4<=1 || givenNum%4===0 ? -20 : 30)}" 
+          font-size="13" fill="#1565c0" font-weight="600"
+          style="display: ${givenNum<=4 ? 'block' : 'none'}">${prob.givenVal}°</text>
+    <text x="${intM.x + (givenNum>4 ? ((givenNum-4)%2===1 ? 45 : -50) : 0)}" 
+          y="${intM.y + ((givenNum-4)%4<=1 ? -20 : 30)}" 
+          font-size="13" fill="#1565c0" font-weight="600"
+          style="display: ${givenNum>4 ? 'block' : 'none'}">${prob.givenVal}°</text>
+  </svg>
+</div>
+
+<div class="question-box">
+  <div class="given">Given: ${prob.given} = ${prob.givenVal}° (l ∥ m)</div>
+  <div class="find">Find ${prob.find}</div>
+  <div class="hint">Use properties of parallel lines</div>
+</div>
+
+<div class="answer-input">
+  <span>${prob.find} =</span>
+  <input type="number" id="answerInput" inputmode="numeric" placeholder="?">
+  <span class="unit">°</span>
+</div>
+
+<button class="submit-btn" id="submitBtn">Check Answer</button>
+<div class="feedback" id="feedback"></div>
+<button class="next-btn" id="nextBtn">${currentIdx < problems.length - 1 ? 'Next Problem →' : 'Complete! 🎉'}</button>`;
+
+  document.getElementById('submitBtn').onclick = checkAnswer;
+  document.getElementById('nextBtn').onclick = () => {
+    if (currentIdx < problems.length - 1) {
+      currentIdx++;
+      renderProblem();
+    }
+  };
+  
+  document.getElementById('answerInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') checkAnswer();
+  });
+}
+
+function checkAnswer() {
+  if (answered) return;
+  answered = true;
+  
+  const prob = problems[currentIdx];
+  const input = document.getElementById('answerInput');
+  const userVal = parseFloat(input.value);
+  const feedback = document.getElementById('feedback');
+  
+  if (Math.abs(userVal - prob.answer) < 0.5) {
+    score++;
+    input.classList.add('correct');
+    feedback.textContent = '🎉 Correct!';
+    feedback.className = 'feedback show correct';
+  } else {
+    input.classList.add('wrong');
+    input.value = prob.answer;
+    feedback.textContent = `Incorrect. The answer is ${prob.answer}°`;
+    feedback.className = 'feedback show wrong';
+  }
+  
+  document.getElementById('scoreNum').textContent = score;
+  
+  // Show explanation
+  let expHTML = '';
+  if (prob.rule === 'corresponding') {
+    expHTML = `<div class="step">${prob.given} and ${prob.find} are <strong>corresponding angles</strong></div>
+               <div class="rule">Corresponding angles are equal when l ∥ m</div>
+               <div class="step">∴ ${prob.find} = ${prob.given} = ${prob.answer}°</div>`;
+  } else if (prob.rule === 'alternate') {
+    expHTML = `<div class="step">${prob.given} and ${prob.find} are <strong>alternate angles</strong></div>
+               <div class="rule">Alternate angles are equal when l ∥ m</div>
+               <div class="step">∴ ${prob.find} = ${prob.given} = ${prob.answer}°</div>`;
+  } else if (prob.rule === 'co-interior') {
+    expHTML = `<div class="step">${prob.given} and ${prob.find} are <strong>co-interior angles</strong></div>
+               <div class="rule">Co-interior angles sum to 180° when l ∥ m</div>
+               <div class="step">∴ ${prob.find} = 180° - ${prob.givenVal}° = ${prob.answer}°</div>`;
+  } else if (prob.rule === 'vertically-opposite') {
+    expHTML = `<div class="step">${prob.given} and ${prob.find} are <strong>vertically opposite angles</strong></div>
+               <div class="rule">Vertically opposite angles are always equal</div>
+               <div class="step">∴ ${prob.find} = ${prob.given} = ${prob.answer}°</div>`;
+  }
+  
+  document.getElementById('expContent').innerHTML = expHTML;
+  document.getElementById('explanation').classList.add('show');
+  
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+renderProblem();
+</script>
+</body>
+</html>

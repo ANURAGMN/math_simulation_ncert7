@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#667eea">
+<title>Math Simulations - NCERT Grade 7</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 20px 10px;
+}
+
+.header .icon { font-size: 48px; margin-bottom: 12px; }
+.header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.header p { font-size: 13px; opacity: 0.9; }
+
+.chapter-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.chapter-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.chapter-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.chapter-icon.ch5 { background: linear-gradient(135deg, #667eea20, #764ba220); }
+.chapter-icon.ch7 { background: linear-gradient(135deg, #ff6b6b20, #feca5720); }
+
+.chapter-title { font-size: 15px; font-weight: 700; color: #333; }
+.chapter-subtitle { font-size: 11px; color: #888; margin-top: 2px; }
+
+.sim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sim-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
+
+.sim-item:active {
+  transform: scale(0.98);
+  background: #f0f0f0;
+}
+
+.sim-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.sim-icon.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+.sim-icon.green { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.sim-icon.pink { background: linear-gradient(135deg, #e91e63, #f06292); }
+.sim-icon.orange { background: linear-gradient(135deg, #f39c12, #e74c3c); }
+.sim-icon.blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+.sim-icon.red { background: linear-gradient(135deg, #ff6b6b, #feca57); }
+.sim-icon.violet { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+.sim-icon.indigo { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+
+.sim-info { flex: 1; }
+.sim-name { font-size: 13px; font-weight: 600; color: #333; }
+.sim-desc { font-size: 10px; color: #888; margin-top: 2px; }
+
+.sim-arrow {
+  color: #ccc;
+  font-size: 18px;
+}
+
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="header">
+  <div class="icon">📐</div>
+  <h1>Math Simulations</h1>
+  <p>NCERT Grade 7 - Interactive Learning</p>
+</div>
+
+<div class="chapter-card">
+  <div class="chapter-header">
+    <div class="chapter-icon ch5">📐</div>
+    <div>
+      <div class="chapter-title">Chapter 5: Lines & Angles</div>
+      <div class="chapter-subtitle">5 Interactive Simulations</div>
+    </div>
+  </div>
+  
+  <div class="sim-list">
+    <a href="chapter5/intersecting-lines.html" class="sim-item">
+      <div class="sim-icon purple">📐</div>
+      <div class="sim-info">
+        <div class="sim-name">Intersecting Lines</div>
+        <div class="sim-desc">Vertically opposite & linear pairs</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter5/perpendicular-lines.html" class="sim-item">
+      <div class="sim-icon green">📐</div>
+      <div class="sim-info">
+        <div class="sim-name">Perpendicular Lines</div>
+        <div class="sim-desc">Find the perfect 90° angle</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter5/parallel-transversal.html" class="sim-item">
+      <div class="sim-icon pink">〰️</div>
+      <div class="sim-info">
+        <div class="sim-name">Parallel Lines & Transversal</div>
+        <div class="sim-desc">8 angles and their relationships</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter5/drawing-parallel-lines.html" class="sim-item">
+      <div class="sim-icon blue">📏</div>
+      <div class="sim-info">
+        <div class="sim-name">Drawing Parallel Lines</div>
+        <div class="sim-desc">Step-by-step construction</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter5/angle-practice.html" class="sim-item">
+      <div class="sim-icon orange">📝</div>
+      <div class="sim-info">
+        <div class="sim-name">Angle Practice Quiz</div>
+        <div class="sim-desc">Test your skills</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+  </div>
+</div>
+
+<div class="chapter-card">
+  <div class="chapter-header">
+    <div class="chapter-icon ch7">🔺</div>
+    <div>
+      <div class="chapter-title">Chapter 7: Triangles</div>
+      <div class="chapter-subtitle">3 Interactive Simulations</div>
+    </div>
+  </div>
+  
+  <div class="sim-list">
+    <a href="chapter7/triangle-inequality.html" class="sim-item">
+      <div class="sim-icon red">🔺</div>
+      <div class="sim-info">
+        <div class="sim-name">Triangle Inequality</div>
+        <div class="sim-desc">When can 3 sides form a triangle?</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter7/angle-sum-property.html" class="sim-item">
+      <div class="sim-icon violet">🔺</div>
+      <div class="sim-info">
+        <div class="sim-name">Angle Sum Property</div>
+        <div class="sim-desc">Why angles always add to 180°</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+    
+    <a href="chapter7/triangle-construction.html" class="sim-item">
+      <div class="sim-icon indigo">📐</div>
+      <div class="sim-info">
+        <div class="sim-name">Triangle Construction (SSS)</div>
+        <div class="sim-desc">Build from 3 side lengths</div>
+      </div>
+      <div class="sim-arrow">›</div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  Mobile-optimized for gesture-first learning<br>
+  Drag, explore, discover!
+</div>
+
+</div>
+</body>
+</html>

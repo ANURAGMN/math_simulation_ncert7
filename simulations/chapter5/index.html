@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#667eea">
+<title>Chapter 5: Lines & Angles</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 16px 10px;
+}
+
+.header .icon { font-size: 48px; margin-bottom: 10px; }
+.header h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.header p { font-size: 12px; opacity: 0.9; }
+
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.sim-card a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s;
+}
+
+.sim-card a:active { background: #f5f5f5; }
+
+.sim-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.sim-icon.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+.sim-icon.green { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.sim-icon.pink { background: linear-gradient(135deg, #e91e63, #f06292); }
+.sim-icon.blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+.sim-icon.orange { background: linear-gradient(135deg, #f39c12, #e74c3c); }
+
+.sim-info { flex: 1; }
+.sim-name { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px; }
+.sim-desc { font-size: 11px; color: #888; line-height: 1.4; }
+
+.sim-arrow { color: #ccc; font-size: 20px; }
+
+.concepts-box {
+  background: rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 16px;
+  color: white;
+}
+
+.concepts-box h3 { font-size: 13px; margin-bottom: 10px; }
+.concepts-box ul { padding-left: 18px; font-size: 11px; line-height: 1.8; opacity: 0.9; }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<a href="../index.html" class="back-link">← All Chapters</a>
+
+<div class="header">
+  <div class="icon">📐</div>
+  <h1>Chapter 5: Lines & Angles</h1>
+  <p>Explore relationships between lines and angles</p>
+</div>
+
+<div class="sim-card">
+  <a href="intersecting-lines.html">
+    <div class="sim-icon purple">📐</div>
+    <div class="sim-info">
+      <div class="sim-name">Intersecting Lines</div>
+      <div class="sim-desc">Discover vertically opposite angles and linear pairs. Drag to see how angles relate!</div>
+    </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
+
+<div class="sim-card">
+  <a href="perpendicular-lines.html">
+    <div class="sim-icon green">📐</div>
+    <div class="sim-info">
+      <div class="sim-name">Perpendicular Lines</div>
+      <div class="sim-desc">Find the perfect 90° angle. Watch for the □ symbol when lines are perpendicular!</div>
+    </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
+
+<div class="sim-card">
+  <a href="parallel-transversal.html">
+    <div class="sim-icon pink">〰️</div>
+    <div class="sim-info">
+      <div class="sim-name">Parallel Lines & Transversal</div>
+      <div class="sim-desc">Explore the 8 angles formed. Highlight corresponding, alternate & co-interior pairs!</div>
+    </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
+
+<div class="sim-card">
+  <a href="drawing-parallel-lines.html">
+    <div class="sim-icon blue">📏</div>
+    <div class="sim-info">
+      <div class="sim-name">Drawing Parallel Lines</div>
+      <div class="sim-desc">Step-by-step construction using set square and ruler method.</div>
+    </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
+
+<div class="sim-card">
+  <a href="angle-practice.html">
+    <div class="sim-icon orange">📝</div>
+    <div class="sim-info">
+      <div class="sim-name">Angle Practice Quiz</div>
+      <div class="sim-desc">Test your understanding! Find missing angles using the rules you learned.</div>
+    </div>
+    <div class="sim-arrow">›</div>
+  </a>
+</div>
+
+<div class="sim-card" style="border: 2px solid #667eea;">
+  <a href="problems/index.html">
+    <div class="sim-icon purple" style="background: linear-gradient(135deg, #667eea, #764ba2);">📋</div>
+    <div class="sim-info">
+      <div class="sim-name" style="color: #667eea;">📚 Textbook Problems</div>
+      <div class="sim-desc">Solve problems from pages 108, 123-125 interactively!</div>
+    </div>
+    <div class="sim-arrow" style="color: #667eea;">›</div>
+  </a>
+</div>
+
+<div class="concepts-box">
+  <h3>📖 Key Concepts</h3>
+  <ul>
+    <li>Vertically opposite angles are <strong>equal</strong></li>
+    <li>Linear pairs add up to <strong>180°</strong></li>
+    <li>Perpendicular lines make <strong>90°</strong> angles</li>
+    <li>Corresponding angles are <strong>equal</strong> (parallel lines)</li>
+    <li>Alternate angles are <strong>equal</strong> (parallel lines)</li>
+    <li>Co-interior angles sum to <strong>180°</strong></li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>

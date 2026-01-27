@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#ff6b6b">
+<title>Triangle Inequality</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 12px;
+}
+
+.header h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 12px; opacity: 0.95; }
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 4px;
+  color: #fff;
+}
+
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  margin-bottom: 12px;
+}
+
+.visual {
+  position: relative;
+  height: 38vh;
+  min-height: 260px;
+  background: linear-gradient(145deg, #fff5f5 0%, #ffe8e8 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+svg { width: 100%; height: 100%; display: block; }
+
+.status-badge {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 10;
+}
+
+.status-badge.yes { background: #27ae60; color: white; }
+.status-badge.no { background: #e74c3c; color: white; }
+
+.metrics {
+  background: #fff5f5;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.checks-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.check-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.check-row.pass { background: #27ae6020; color: #1b5e20; }
+.check-row.fail { background: #e74c3c20; color: #c62828; }
+.check-row .icon { font-size: 16px; }
+
+.control-panel {
+  background: #fff5f5;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 10px;
+}
+
+.presets-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.preset-btn {
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 2px solid #ddd;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.preset-btn:active { transform: scale(0.95); }
+.preset-btn.valid { border-color: #27ae60; color: #27ae60; }
+.preset-btn.invalid { border-color: #e74c3c; color: #e74c3c; }
+
+.slider-group {
+  margin-bottom: 12px;
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.slider-label .name { color: #666; }
+.slider-label .value { font-weight: 700; }
+.slider-label .value.red { color: #e74c3c; }
+.slider-label .value.blue { color: #3498db; }
+.slider-label .value.green { color: #27ae60; }
+
+input[type="range"] {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e0e0e0;
+  -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ff6b6b;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.apply-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.insight-box {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-left: 4px solid #ff6b6b;
+}
+
+.insight-title { font-weight: 600; color: #d63031; margin-bottom: 6px; }
+
+.rule-highlight {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 8px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #d63031;
+}
+
+.takeaway {
+  background: linear-gradient(135deg, #ffe8e8 0%, #ffd5d5 100%);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 12px;
+  display: none;
+}
+
+.takeaway.show { display: block; }
+.takeaway-title { font-weight: 600; color: #d63031; margin-bottom: 6px; }
+
+.stick { stroke-linecap: round; stroke-width: 10; }
+.stick-a { stroke: #e74c3c; }
+.stick-b { stroke: #3498db; }
+.stick-c { stroke: #27ae60; }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="header">
+  <h1>🔺 Triangle Inequality</h1>
+  <p>When can 3 sticks form a triangle?</p>
+</div>
+
+<div class="section-title">Adjust the stick lengths</div>
+<div class="sim-card" id="sim"></div>
+
+<div class="insight-box">
+  <div class="insight-title">🔑 The Rule</div>
+  For 3 sticks to form a closed triangle, <strong>each stick</strong> must be shorter than the sum of the other two.
+  <div class="rule-highlight">a + b > c &nbsp;AND&nbsp; b + c > a &nbsp;AND&nbsp; a + c > b</div>
+</div>
+
+<div class="takeaway" id="takeaway">
+  <div class="takeaway-title">💡 What you discovered</div>
+  <span id="takeaway-text"></span>
+</div>
+
+</div>
+
+<script>
+const container = document.getElementById('sim');
+let a = 3, b = 4, c = 5;
+
+function isValid() {
+  return (a + b > c) && (b + c > a) && (a + c > b);
+}
+
+function getChecks() {
+  return [
+    { expr: `${a} + ${b} = ${a+b} ${a+b > c ? '>' : '≤'} ${c}`, pass: a + b > c },
+    { expr: `${b} + ${c} = ${b+c} ${b+c > a ? '>' : '≤'} ${a}`, pass: b + c > a },
+    { expr: `${a} + ${c} = ${a+c} ${a+c > b ? '>' : '≤'} ${b}`, pass: a + c > b }
+  ];
+}
+
+container.innerHTML = `
+<div class="visual">
+  <div class="status-badge yes" id="status">✓ Triangle possible</div>
+  <svg viewBox="0 0 400 260" id="svg"></svg>
+</div>
+
+<div class="metrics">
+  <div class="checks-grid" id="checks"></div>
+</div>
+
+<div class="control-panel">
+  <div class="presets-label">Try these examples:</div>
+  <div class="presets">
+    <button class="preset-btn valid" data-a="3" data-b="4" data-c="5">3, 4, 5 ✓</button>
+    <button class="preset-btn valid" data-a="5" data-b="5" data-c="5">5, 5, 5 ✓</button>
+    <button class="preset-btn invalid" data-a="1" data-b="2" data-c="5">1, 2, 5 ✗</button>
+    <button class="preset-btn invalid" data-a="3" data-b="4" data-c="8">3, 4, 8 ✗</button>
+  </div>
+  
+  <div class="slider-group">
+    <div class="slider-label"><span class="name">Side a (red)</span><span class="value red" id="val_a">${a}</span></div>
+    <input type="range" id="slider_a" min="1" max="10" value="${a}">
+  </div>
+  <div class="slider-group">
+    <div class="slider-label"><span class="name">Side b (blue)</span><span class="value blue" id="val_b">${b}</span></div>
+    <input type="range" id="slider_b" min="1" max="10" value="${b}">
+  </div>
+  <div class="slider-group">
+    <div class="slider-label"><span class="name">Side c (green)</span><span class="value green" id="val_c">${c}</span></div>
+    <input type="range" id="slider_c" min="1" max="10" value="${c}">
+  </div>
+  
+  <button class="apply-btn" id="applyBtn">Apply Changes</button>
+</div>`;
+
+const svg = document.getElementById('svg');
+const scale = 25;
+const cx = 200, baseY = 180;
+
+function render() {
+  const valid = isValid();
+  const checks = getChecks();
+  
+  // Status
+  const status = document.getElementById('status');
+  status.className = `status-badge ${valid ? 'yes' : 'no'}`;
+  status.textContent = valid ? '✓ Triangle possible!' : '✗ Cannot form triangle';
+  
+  // Checks
+  document.getElementById('checks').innerHTML = checks.map(ch => 
+    `<div class="check-row ${ch.pass ? 'pass' : 'fail'}">
+      <span>${ch.expr}</span>
+      <span class="icon">${ch.pass ? '✓' : '✗'}</span>
+    </div>`
+  ).join('');
+  
+  // SVG
+  if (valid) {
+    const A = {x: cx - c * scale / 2, y: baseY};
+    const B = {x: cx + c * scale / 2, y: baseY};
+    const x = (c * c + b * b - a * a) / (2 * c);
+    const yVal = Math.sqrt(Math.max(0.01, b * b - x * x));
+    const C = {x: A.x + x * scale, y: baseY - yVal * scale};
+    
+    svg.innerHTML = `
+      <polygon points="${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}" fill="#27ae6015" stroke="none"/>
+      <line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" class="stick stick-c"/>
+      <line x1="${B.x}" y1="${B.y}" x2="${C.x}" y2="${C.y}" class="stick stick-a"/>
+      <line x1="${A.x}" y1="${A.y}" x2="${C.x}" y2="${C.y}" class="stick stick-b"/>
+      <text x="${(A.x+B.x)/2}" y="${A.y+22}" font-size="12" fill="#27ae60" font-weight="600" text-anchor="middle">c = ${c}</text>
+      <text x="${(B.x+C.x)/2+15}" y="${(B.y+C.y)/2}" font-size="12" fill="#e74c3c" font-weight="600">a = ${a}</text>
+      <text x="${(A.x+C.x)/2-20}" y="${(A.y+C.y)/2}" font-size="12" fill="#3498db" font-weight="600">b = ${b}</text>
+      <circle cx="${A.x}" cy="${A.y}" r="6" fill="#333"/>
+      <circle cx="${B.x}" cy="${B.y}" r="6" fill="#333"/>
+      <circle cx="${C.x}" cy="${C.y}" r="6" fill="#333"/>
+    `;
+  } else {
+    const A = {x: cx - c * scale / 2, y: baseY};
+    const B = {x: cx + c * scale / 2, y: baseY};
+    const endB = {x: A.x + b * scale * 0.65, y: baseY - b * scale * 0.65};
+    const endA = {x: B.x - a * scale * 0.65, y: baseY - a * scale * 0.65};
+    
+    svg.innerHTML = `
+      <line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" class="stick stick-c"/>
+      <line x1="${A.x}" y1="${A.y}" x2="${endB.x}" y2="${endB.y}" class="stick stick-b"/>
+      <line x1="${B.x}" y1="${B.y}" x2="${endA.x}" y2="${endA.y}" class="stick stick-a"/>
+      <line x1="${endB.x}" y1="${endB.y}" x2="${endA.x}" y2="${endA.y}" stroke="#e74c3c" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="${(endB.x+endA.x)/2}" y="${(endB.y+endA.y)/2-12}" font-size="12" fill="#e74c3c" font-weight="600" text-anchor="middle">Gap! Can't close</text>
+      <text x="${(A.x+B.x)/2}" y="${A.y+22}" font-size="12" fill="#27ae60" font-weight="600" text-anchor="middle">c = ${c}</text>
+      <circle cx="${A.x}" cy="${A.y}" r="6" fill="#333"/>
+      <circle cx="${B.x}" cy="${B.y}" r="6" fill="#333"/>
+    `;
+  }
+  
+  // Takeaway
+  const takeaway = document.getElementById('takeaway');
+  const takeawayText = document.getElementById('takeaway-text');
+  
+  if (valid) {
+    takeawayText.innerHTML = `With sides ${a}, ${b}, ${c}: all checks pass! The sticks can connect to form a <strong>closed triangle</strong>.`;
+  } else {
+    const failCheck = checks.find(ch => !ch.pass);
+    takeawayText.innerHTML = `With sides ${a}, ${b}, ${c}: <strong>${failCheck.expr}</strong> fails! One stick is too long — they can't connect.`;
+  }
+  takeaway.classList.add('show');
+}
+
+render();
+
+// Event handlers
+const sliderA = document.getElementById('slider_a');
+const sliderB = document.getElementById('slider_b');
+const sliderC = document.getElementById('slider_c');
+const valA = document.getElementById('val_a');
+const valB = document.getElementById('val_b');
+const valC = document.getElementById('val_c');
+
+sliderA.oninput = () => { valA.textContent = sliderA.value; };
+sliderB.oninput = () => { valB.textContent = sliderB.value; };
+sliderC.oninput = () => { valC.textContent = sliderC.value; };
+
+document.getElementById('applyBtn').onclick = () => {
+  a = parseInt(sliderA.value);
+  b = parseInt(sliderB.value);
+  c = parseInt(sliderC.value);
+  render();
+};
+
+container.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.onclick = () => {
+    a = parseInt(btn.dataset.a);
+    b = parseInt(btn.dataset.b);
+    c = parseInt(btn.dataset.c);
+    sliderA.value = a; valA.textContent = a;
+    sliderB.value = b; valB.textContent = b;
+    sliderC.value = c; valC.textContent = c;
+    render();
+  };
+});
+</script>
+</body>
+</html>
