@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#3498db">
+<title>Parallel Lines - Interactive</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 10px;
+}
+
+.header h1 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 11px; opacity: 0.9; }
+
+.phase-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.phase-dot {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.2);
+  color: white;
+}
+
+.phase-dot.active {
+  background: white;
+  color: #3498db;
+}
+
+.main-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  margin-bottom: 12px;
+}
+
+.visual {
+  position: relative;
+  height: 42vh;
+  min-height: 300px;
+  background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: 12px;
+  touch-action: none;
+  overflow: hidden;
+}
+
+svg { width: 100%; height: 100%; }
+
+.drag-handle {
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.angle-badge {
+  position: absolute;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+  transition: all 0.15s;
+}
+
+.angle-badge.highlight {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.explore-panel {
+  background: #e3f2fd;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 10px;
+}
+
+.explore-panel .title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1565c0;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.angle-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.angle-btn {
+  padding: 10px 4px;
+  border-radius: 8px;
+  border: 2px solid #bbdefb;
+  background: white;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.angle-btn.selected {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.relationship-display {
+  background: white;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 10px;
+  text-align: center;
+  min-height: 80px;
+}
+
+.relationship-display .label {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.relationship-display .relationship {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1565c0;
+}
+
+.relationship-display .formula {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-top: 8px;
+}
+
+.problem-panel {
+  background: #e3f2fd;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 10px;
+  display: none;
+}
+
+.problem-panel.show { display: block; }
+
+.problem-panel .question {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.answer-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.answer-opt {
+  padding: 14px;
+  border-radius: 10px;
+  border: 2px solid #bbdefb;
+  background: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.answer-opt:active { transform: scale(0.98); }
+.answer-opt.correct { background: #d5f4e6; border-color: #27ae60; color: #1e8449; }
+.answer-opt.wrong { background: #fce4ec; border-color: #e74c3c; color: #c62828; }
+
+.phase-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.phase-btn:disabled { opacity: 0.5; }
+
+.feedback {
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+  display: none;
+}
+
+.feedback.show { display: block; }
+.feedback.correct { background: #d5f4e6; color: #1e8449; }
+.feedback.wrong { background: #fce4ec; color: #c62828; }
+
+.score-display {
+  text-align: center;
+  padding: 10px;
+  color: white;
+  font-size: 12px;
+}
+
+.score-display span { font-weight: 700; font-size: 16px; }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="header">
+  <h1>📐 Parallel Lines & Transversal</h1>
+  <p>Explore relationships, then solve problems</p>
+</div>
+
+<div class="phase-indicator">
+  <div class="phase-dot active" id="phase1">1. Explore</div>
+  <div class="phase-dot" id="phase2">2. Solve</div>
+</div>
+
+<div class="main-card">
+  <div class="visual" id="visual">
+    <svg viewBox="0 0 400 300" id="svg"></svg>
+  </div>
+  
+  <!-- Explore Phase -->
+  <div class="explore-panel" id="explorePanel">
+    <div class="title">👆 Drag the transversal, then tap angle pairs to see relationships</div>
+    <div class="angle-buttons" id="angleButtons"></div>
+  </div>
+  
+  <div class="relationship-display" id="relationshipDisplay">
+    <div class="label">Select two angles to see their relationship</div>
+    <div class="relationship" id="relType"></div>
+    <div class="formula" id="relFormula"></div>
+  </div>
+  
+  <!-- Problem Phase -->
+  <div class="problem-panel" id="problemPanel">
+    <div class="question" id="questionText">If ∠1 = 70°, find ∠5</div>
+    <div class="answer-options" id="answerOptions"></div>
+  </div>
+  
+  <div class="feedback" id="feedback"></div>
+  
+  <button class="phase-btn" id="phaseBtn">Start Solving Problems →</button>
+</div>
+
+<div class="score-display" id="scoreDisplay" style="display: none;">
+  Score: <span id="scoreVal">0</span>/5
+</div>
+
+</div>
+
+<script>
+let angle = 60;
+let selectedAngles = [];
+let phase = 'explore';
+let currentProblem = 0;
+let score = 0;
+let answered = false;
+let dragHandlePos = { x: 0, y: 0 };
+
+const ly = 100, my = 180, gap = my - ly;
+
+function toRad(d) { return d * Math.PI / 180; }
+
+function getAngles() {
+  const a = angle;
+  const b = 180 - angle;
+  return {
+    1: a, 2: b, 3: a, 4: b,
+    5: a, 6: b, 7: a, 8: b
+  };
+}
+
+function getRelationship(a1, a2) {
+  const pairs = {
+    corresponding: [[1,5], [2,6], [3,7], [4,8]],
+    alternate: [[3,6], [4,5]],
+    cointerior: [[3,5], [4,6]],
+    vertically: [[1,3], [2,4], [5,7], [6,8]],
+    linear: [[1,2], [2,3], [3,4], [4,1], [5,6], [6,7], [7,8], [8,5]]
+  };
+  
+  for (const [type, list] of Object.entries(pairs)) {
+    if (list.some(p => (p[0] === a1 && p[1] === a2) || (p[0] === a2 && p[1] === a1))) {
+      return type;
+    }
+  }
+  return null;
+}
+
+const problems = [
+  { given: 1, givenVal: 70, find: 5, relationship: 'corresponding' },
+  { given: 3, givenVal: 55, find: 6, relationship: 'alternate' },
+  { given: 3, givenVal: 65, find: 5, relationship: 'cointerior' },
+  { given: 2, givenVal: 120, find: 6, relationship: 'corresponding' },
+  { given: 4, givenVal: 45, find: 5, relationship: 'alternate' }
+];
+
+function render() {
+  const cx = 200;
+  const intL = { x: cx, y: ly };
+  const intM = { x: cx + gap / Math.tan(toRad(angle)), y: my };
+  
+  const tLen = 60;
+  const t1 = { x: intL.x - tLen * Math.cos(toRad(angle)), y: intL.y + tLen * Math.sin(toRad(angle)) };
+  const t2 = { x: intM.x + tLen * Math.cos(toRad(angle)), y: intM.y - tLen * Math.sin(toRad(angle)) };
+  
+  dragHandlePos = { x: t1.x, y: t1.y };
+  
+  const angles = getAngles();
+  const svg = document.getElementById('svg');
+  
+  // Highlight selected angles
+  const hl1 = selectedAngles[0];
+  const hl2 = selectedAngles[1];
+  
+  svg.innerHTML = `
+    <!-- Lines -->
+    <line x1="40" y1="${ly}" x2="360" y2="${ly}" stroke="#3498db" stroke-width="3"/>
+    <line x1="40" y1="${my}" x2="360" y2="${my}" stroke="#27ae60" stroke-width="3"/>
+    <line x1="${t1.x}" y1="${t1.y}" x2="${t2.x}" y2="${t2.y}" stroke="#e74c3c" stroke-width="3"/>
+    
+    <!-- Parallel marks -->
+    <path d="M 100 ${ly-5} L 108 ${ly-5} M 100 ${ly-1} L 108 ${ly-1}" stroke="#666" stroke-width="2"/>
+    <path d="M 100 ${my-5} L 108 ${my-5} M 100 ${my-1} L 108 ${my-1}" stroke="#666" stroke-width="2"/>
+    
+    <!-- Labels -->
+    <text x="365" y="${ly+5}" font-size="14" fill="#3498db" font-weight="600">l</text>
+    <text x="365" y="${my+5}" font-size="14" fill="#27ae60" font-weight="600">m</text>
+    
+    <!-- Intersection points -->
+    <circle cx="${intL.x}" cy="${intL.y}" r="4" fill="#333"/>
+    <circle cx="${intM.x}" cy="${intM.y}" r="4" fill="#333"/>
+    
+    <!-- Angle labels at l -->
+    <text x="${intL.x+18}" y="${intL.y-8}" font-size="12" fill="${hl1===1||hl2===1 ? '#e74c3c' : '#666'}" font-weight="${hl1===1||hl2===1 ? '700' : '400'}">1</text>
+    <text x="${intL.x-24}" y="${intL.y-8}" font-size="12" fill="${hl1===2||hl2===2 ? '#e74c3c' : '#666'}" font-weight="${hl1===2||hl2===2 ? '700' : '400'}">2</text>
+    <text x="${intL.x-24}" y="${intL.y+16}" font-size="12" fill="${hl1===3||hl2===3 ? '#e74c3c' : '#666'}" font-weight="${hl1===3||hl2===3 ? '700' : '400'}">3</text>
+    <text x="${intL.x+18}" y="${intL.y+16}" font-size="12" fill="${hl1===4||hl2===4 ? '#e74c3c' : '#666'}" font-weight="${hl1===4||hl2===4 ? '700' : '400'}">4</text>
+    
+    <!-- Angle labels at m -->
+    <text x="${intM.x+18}" y="${intM.y-8}" font-size="12" fill="${hl1===5||hl2===5 ? '#e74c3c' : '#666'}" font-weight="${hl1===5||hl2===5 ? '700' : '400'}">5</text>
+    <text x="${intM.x-24}" y="${intM.y-8}" font-size="12" fill="${hl1===6||hl2===6 ? '#e74c3c' : '#666'}" font-weight="${hl1===6||hl2===6 ? '700' : '400'}">6</text>
+    <text x="${intM.x-24}" y="${intM.y+16}" font-size="12" fill="${hl1===7||hl2===7 ? '#e74c3c' : '#666'}" font-weight="${hl1===7||hl2===7 ? '700' : '400'}">7</text>
+    <text x="${intM.x+18}" y="${intM.y+16}" font-size="12" fill="${hl1===8||hl2===8 ? '#e74c3c' : '#666'}" font-weight="${hl1===8||hl2===8 ? '700' : '400'}">8</text>
+    
+    <!-- Angle values display -->
+    <text x="${intL.x+35}" y="${intL.y-3}" font-size="11" fill="#3498db">${angles[1]}°</text>
+    <text x="${intM.x+35}" y="${intM.y-3}" font-size="11" fill="#27ae60">${angles[5]}°</text>
+    
+    <!-- Drag handle -->
+    <circle cx="${t1.x}" cy="${t1.y}" r="20" fill="#e74c3c" stroke="white" stroke-width="3" class="drag-handle"/>
+    <text x="${t1.x}" y="${t1.y+4}" text-anchor="middle" font-size="10" fill="white" pointer-events="none">↻</text>
+  `;
+  
+  renderAngleButtons();
+  updateRelationship();
+}
+
+function renderAngleButtons() {
+  const angles = getAngles();
+  const btns = document.getElementById('angleButtons');
+  
+  btns.innerHTML = [1,2,3,4,5,6,7,8].map(n => {
+    const isSelected = selectedAngles.includes(n);
+    return `<button class="angle-btn ${isSelected ? 'selected' : ''}" data-angle="${n}">∠${n}=${angles[n]}°</button>`;
+  }).join('');
+  
+  document.querySelectorAll('.angle-btn').forEach(btn => {
+    btn.onclick = () => toggleAngle(parseInt(btn.dataset.angle));
+  });
+}
+
+function toggleAngle(n) {
+  if (selectedAngles.includes(n)) {
+    selectedAngles = selectedAngles.filter(a => a !== n);
+  } else if (selectedAngles.length < 2) {
+    selectedAngles.push(n);
+  } else {
+    selectedAngles = [n];
+  }
+  render();
+}
+
+function updateRelationship() {
+  const display = document.getElementById('relationshipDisplay');
+  const relType = document.getElementById('relType');
+  const relFormula = document.getElementById('relFormula');
+  
+  if (selectedAngles.length !== 2) {
+    relType.textContent = '';
+    relFormula.textContent = '';
+    return;
+  }
+  
+  const [a1, a2] = selectedAngles;
+  const rel = getRelationship(a1, a2);
+  const angles = getAngles();
+  
+  const names = {
+    corresponding: 'Corresponding Angles',
+    alternate: 'Alternate Interior Angles',
+    cointerior: 'Co-interior Angles',
+    vertically: 'Vertically Opposite',
+    linear: 'Linear Pair'
+  };
+  
+  if (rel) {
+    relType.textContent = names[rel] || rel;
+    if (rel === 'cointerior' || rel === 'linear') {
+      relFormula.textContent = `∠${a1} + ∠${a2} = ${angles[a1]} + ${angles[a2]} = 180°`;
+    } else {
+      relFormula.textContent = `∠${a1} = ∠${a2} = ${angles[a1]}° (equal)`;
+    }
+  } else {
+    relType.textContent = 'No special relationship';
+    relFormula.textContent = '';
+  }
+}
+
+// Drag handling
+const visual = document.getElementById('visual');
+let dragging = false;
+
+function screenToSVG(clientX, clientY) {
+  const svg = document.getElementById('svg');
+  const rect = svg.getBoundingClientRect();
+  return {
+    x: (clientX - rect.left) / rect.width * 400,
+    y: (clientY - rect.top) / rect.height * 300
+  };
+}
+
+function isNearHandle(svgX, svgY) {
+  return Math.hypot(svgX - dragHandlePos.x, svgY - dragHandlePos.y) < 40;
+}
+
+function getAngleFromPoint(svgX, svgY) {
+  const dx = svgX - 200;
+  const dy = ly - svgY;
+  let a = Math.atan2(dy, dx) * 180 / Math.PI;
+  if (a < 0) a += 180;
+  return Math.max(30, Math.min(150, a));
+}
+
+visual.addEventListener('touchstart', (e) => {
+  const touch = e.touches[0];
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
+    dragging = true;
+    e.preventDefault();
+  }
+}, { passive: false });
+
+visual.addEventListener('touchmove', (e) => {
+  if (!dragging) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  const svgCoords = screenToSVG(touch.clientX, touch.clientY);
+  angle = getAngleFromPoint(svgCoords.x, svgCoords.y);
+  render();
+}, { passive: false });
+
+visual.addEventListener('touchend', () => { dragging = false; });
+
+visual.addEventListener('mousedown', (e) => {
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  if (isNearHandle(svgCoords.x, svgCoords.y)) {
+    dragging = true;
+  }
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  const svgCoords = screenToSVG(e.clientX, e.clientY);
+  angle = getAngleFromPoint(svgCoords.x, svgCoords.y);
+  render();
+});
+
+document.addEventListener('mouseup', () => { dragging = false; });
+
+// Phase switching
+document.getElementById('phaseBtn').onclick = () => {
+  if (phase === 'explore') {
+    phase = 'solve';
+    document.getElementById('phase1').classList.remove('active');
+    document.getElementById('phase2').classList.add('active');
+    document.getElementById('explorePanel').style.display = 'none';
+    document.getElementById('relationshipDisplay').style.display = 'none';
+    document.getElementById('problemPanel').classList.add('show');
+    document.getElementById('phaseBtn').style.display = 'none';
+    document.getElementById('scoreDisplay').style.display = 'block';
+    loadProblem();
+  }
+};
+
+function loadProblem() {
+  if (currentProblem >= problems.length) {
+    document.getElementById('questionText').textContent = `Complete! Score: ${score}/${problems.length}`;
+    document.getElementById('answerOptions').innerHTML = '';
+    return;
+  }
+  
+  const prob = problems[currentProblem];
+  answered = false;
+  selectedAngles = [prob.given, prob.find];
+  angle = prob.relationship === 'cointerior' ? 180 - prob.givenVal : prob.givenVal;
+  
+  render();
+  
+  document.getElementById('questionText').textContent = `If ∠${prob.given} = ${prob.givenVal}°, find ∠${prob.find}`;
+  
+  const correctAnswer = prob.relationship === 'cointerior' ? 180 - prob.givenVal : prob.givenVal;
+  const wrongAnswers = [
+    correctAnswer + 20,
+    180 - correctAnswer,
+    correctAnswer - 15,
+    90
+  ].filter(a => a !== correctAnswer && a > 0 && a < 180);
+  
+  const options = [correctAnswer, wrongAnswers[0], wrongAnswers[1], wrongAnswers[2]]
+    .sort(() => Math.random() - 0.5);
+  
+  document.getElementById('answerOptions').innerHTML = options.map(opt => 
+    `<button class="answer-opt" data-val="${opt}">${opt}°</button>`
+  ).join('');
+  
+  document.querySelectorAll('.answer-opt').forEach(btn => {
+    btn.onclick = () => checkAnswer(parseInt(btn.dataset.val), correctAnswer, btn);
+  });
+}
+
+function checkAnswer(selected, correct, btn) {
+  if (answered) return;
+  answered = true;
+  
+  const feedback = document.getElementById('feedback');
+  
+  document.querySelectorAll('.answer-opt').forEach(b => {
+    if (parseInt(b.dataset.val) === correct) {
+      b.classList.add('correct');
+    } else if (b === btn && selected !== correct) {
+      b.classList.add('wrong');
+    }
+  });
+  
+  if (selected === correct) {
+    score++;
+    document.getElementById('scoreVal').textContent = score;
+    feedback.textContent = '✅ Correct!';
+    feedback.className = 'feedback show correct';
+  } else {
+    feedback.textContent = `❌ The answer is ${correct}°`;
+    feedback.className = 'feedback show wrong';
+  }
+  
+  setTimeout(() => {
+    currentProblem++;
+    feedback.classList.remove('show');
+    loadProblem();
+  }, 1500);
+}
+
+render();
+</script>
+</body>
+</html>
