@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#e74c3c">
-<title>Find Angles - Interactive</title>
+<title>Find the Angles</title>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -30,218 +30,272 @@ body {
   padding: 10px;
 }
 
-.header h1 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.header h1 { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
 .header p { font-size: 11px; opacity: 0.9; }
 
-.problem-card {
+.main-card {
   background: #fff;
-  border-radius: 14px;
-  padding: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
   margin-bottom: 12px;
 }
 
-.problem-info {
+.problem-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.problem-num {
+.problem-badge {
   background: #e74c3c;
   color: white;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 11px;
+  padding: 6px 14px;
+  border-radius: 14px;
+  font-size: 12px;
   font-weight: 600;
 }
 
-.score { font-size: 12px; color: #666; }
-.score span { font-weight: 700; color: #27ae60; }
+.score-text { font-size: 13px; color: #666; }
+.score-text span { font-weight: 700; color: #27ae60; }
 
-.visual {
-  position: relative;
-  height: 45vh;
-  min-height: 320px;
-  background: linear-gradient(145deg, #fce4ec 0%, #f8bbd9 100%);
+.diagram-area {
+  background: linear-gradient(145deg, #fff5f5 0%, #ffe8e8 100%);
   border-radius: 12px;
-  touch-action: none;
-  overflow: hidden;
+  padding: 20px 10px;
+  margin-bottom: 14px;
 }
 
-svg { width: 100%; height: 100%; }
+.diagram-container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
 
-.angle-tap-zone {
+svg { width: 100%; height: auto; display: block; }
+
+.given-box {
+  background: #e74c3c;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+.given-box .label { font-size: 11px; opacity: 0.9; }
+.given-box .value { font-size: 18px; font-weight: 700; margin-top: 2px; }
+
+.angles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.angle-card {
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 12px 6px;
+  text-align: center;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.angle-tap-zone:hover { opacity: 0.8; }
+.angle-card.given {
+  background: #e74c3c;
+  border-color: #e74c3c;
+  cursor: default;
+}
 
-.angle-value-display {
-  position: absolute;
-  padding: 8px 14px;
-  background: white;
-  border-radius: 20px;
+.angle-card.given .angle-name,
+.angle-card.given .angle-value { color: white; }
+
+.angle-card.editable:active {
+  transform: scale(0.95);
+  border-color: #e74c3c;
+}
+
+.angle-card.filled {
+  background: #fff3cd;
+  border-color: #f39c12;
+}
+
+.angle-card.correct {
+  background: #d5f4e6;
+  border-color: #27ae60;
+}
+
+.angle-card.wrong {
+  background: #fce4ec;
+  border-color: #e74c3c;
+}
+
+.angle-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+}
+
+.angle-name.red { color: #e74c3c; }
+.angle-name.blue { color: #3498db; }
+.angle-name.green { color: #27ae60; }
+.angle-name.orange { color: #f39c12; }
+
+.angle-value {
   font-size: 18px;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 20;
-}
-
-.angle-value-display.given { background: #3498db; color: white; }
-.angle-value-display.correct { background: #27ae60; color: white; }
-.angle-value-display.wrong { background: #e74c3c; color: white; }
-.angle-value-display.active { background: #f39c12; color: white; animation: pulse 0.5s infinite; }
-
-@keyframes pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(1.1); }
-}
-
-.slider-popup {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  right: 10px;
-  background: white;
-  border-radius: 12px;
-  padding: 14px;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
-  z-index: 30;
-  display: none;
-}
-
-.slider-popup.show { display: block; }
-
-.slider-popup .title {
-  font-size: 14px;
-  font-weight: 600;
   color: #333;
-  margin-bottom: 10px;
-  text-align: center;
+  margin-top: 4px;
 }
-
-.slider-popup .value-display {
-  font-size: 32px;
-  font-weight: 700;
-  text-align: center;
-  color: #e74c3c;
-  margin-bottom: 10px;
-}
-
-.slider-popup input[type="range"] {
-  width: 100%;
-  height: 40px;
-  -webkit-appearance: none;
-  background: linear-gradient(to right, #fce4ec, #e74c3c);
-  border-radius: 20px;
-  outline: none;
-}
-
-.slider-popup input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: white;
-  border: 4px solid #e74c3c;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  cursor: grab;
-}
-
-.slider-popup .btn-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.slider-popup .btn {
-  flex: 1;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.slider-popup .btn.cancel { background: #ecf0f1; color: #666; }
-.slider-popup .btn.confirm { background: #27ae60; color: white; }
-
-.hint-box {
-  background: #fce4ec;
-  border-radius: 10px;
-  padding: 12px;
-  margin-top: 10px;
-  text-align: center;
-}
-
-.hint-box .given { font-size: 14px; font-weight: 600; color: #c62828; }
-.hint-box .instruction { font-size: 11px; color: #666; margin-top: 6px; }
 
 .check-btn {
   width: 100%;
-  padding: 14px;
-  margin-top: 12px;
-  border-radius: 10px;
+  padding: 16px;
+  border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
   color: white;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
 }
 
-.check-btn:disabled { opacity: 0.5; }
+.check-btn:disabled { opacity: 0.5; background: #bdc3c7; }
+.check-btn:active { transform: scale(0.98); }
 
-.result-box {
+.result-bar {
   padding: 14px;
   border-radius: 10px;
-  margin-top: 10px;
+  margin-top: 12px;
   text-align: center;
+  font-weight: 600;
   display: none;
 }
 
-.result-box.show { display: block; }
-.result-box.success { background: #d5f4e6; color: #1e8449; }
-.result-box.partial { background: #fff3cd; color: #856404; }
+.result-bar.show { display: block; }
+.result-bar.success { background: #d5f4e6; color: #1e8449; }
+.result-bar.partial { background: #fff3cd; color: #856404; }
 
 .next-btn {
   width: 100%;
-  padding: 14px;
+  padding: 16px;
   margin-top: 10px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
-  background: #27ae60;
+  background: #3498db;
   color: white;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   display: none;
 }
 
 .next-btn.show { display: block; }
 
-.relationship-hint {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  background: rgba(255,255,255,0.95);
-  border-radius: 10px;
-  padding: 10px;
-  font-size: 11px;
-  text-align: center;
-  z-index: 10;
+/* Number Pad Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
   display: none;
+  align-items: flex-end;
+  justify-content: center;
 }
 
-.relationship-hint.show { display: block; }
-.relationship-hint strong { color: #e74c3c; }
+.modal-overlay.show { display: flex; }
+
+.numpad-modal {
+  background: white;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 20px 20px 0 0;
+  padding: 20px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+.numpad-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.numpad-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.numpad-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f0f0;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.numpad-display {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.numpad-display .value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #333;
+}
+
+.numpad-hint {
+  font-size: 12px;
+  color: #e74c3c;
+  margin-top: 8px;
+  background: #fce4ec;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.numpad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.numpad-btn {
+  padding: 18px;
+  border-radius: 12px;
+  border: none;
+  background: #f0f0f0;
+  font-size: 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.numpad-btn:active { background: #e0e0e0; }
+.numpad-btn.action { background: #e74c3c; color: white; }
+.numpad-btn.action:active { background: #c0392b; }
+.numpad-btn.confirm { background: #27ae60; color: white; }
+.numpad-btn.confirm:active { background: #1e8449; }
+
+.tip-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.tip-box h4 { font-size: 13px; color: #e74c3c; margin-bottom: 8px; }
+.tip-box p { font-size: 11px; color: #555; line-height: 1.5; }
 </style>
 </head>
 
@@ -249,255 +303,305 @@ svg { width: 100%; height: 100%; }
 <div id="app">
 
 <div class="header">
-  <h1>📐 Tap the Angles to Set Values</h1>
-  <p>Interactive angle finding</p>
+  <h1>📐 Find All the Angles</h1>
+  <p>Tap each angle card to enter its value</p>
 </div>
 
-<div class="problem-card">
-  <div class="problem-info">
-    <span class="problem-num">Problem <span id="probNum">1</span>/6</span>
-    <span class="score">Score: <span id="scoreVal">0</span></span>
+<div class="main-card">
+  <div class="problem-bar">
+    <span class="problem-badge">Problem <span id="probNum">1</span> of 6</span>
+    <span class="score-text">Score: <span id="scoreVal">0</span></span>
   </div>
   
-  <div class="visual" id="visual">
-    <div class="relationship-hint" id="relationHint"></div>
-    <svg viewBox="0 0 400 320" id="svg"></svg>
-    <div class="slider-popup" id="sliderPopup">
-      <div class="title">Set angle <span id="sliderAngleName">a</span></div>
-      <div class="value-display"><span id="sliderValue">90</span>°</div>
-      <input type="range" id="angleSlider" min="10" max="170" value="90">
-      <div class="btn-row">
-        <button class="btn cancel" id="cancelBtn">Cancel</button>
-        <button class="btn confirm" id="confirmBtn">Set Value</button>
-      </div>
+  <div class="diagram-area">
+    <div class="diagram-container">
+      <svg viewBox="0 0 300 200" id="diagram"></svg>
     </div>
   </div>
   
-  <div class="hint-box">
-    <div class="given" id="givenText">Given: ∠a = 60°</div>
-    <div class="instruction">👆 Tap each unknown angle (?) to set its value</div>
+  <div class="given-box">
+    <div class="label">GIVEN</div>
+    <div class="value" id="givenText">∠a = 60°</div>
   </div>
   
-  <button class="check-btn" id="checkBtn">Check All Answers</button>
-  <div class="result-box" id="resultBox"></div>
+  <div class="angles-grid" id="anglesGrid"></div>
+  
+  <button class="check-btn" id="checkBtn">Check Answers</button>
+  <div class="result-bar" id="resultBar"></div>
   <button class="next-btn" id="nextBtn">Next Problem →</button>
 </div>
 
+<div class="tip-box">
+  <h4>💡 Remember</h4>
+  <p><strong>Vertically opposite</strong> angles are equal (∠a = ∠c, ∠b = ∠d)<br>
+  <strong>Linear pairs</strong> add to 180° (∠a + ∠b = 180°)</p>
+</div>
+
+</div>
+
+<!-- Number Pad Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="numpad-modal">
+    <div class="numpad-header">
+      <span class="numpad-title">Enter value for <span id="editingAngle">∠a</span></span>
+      <button class="numpad-close" id="closeModal">✕</button>
+    </div>
+    <div class="numpad-display">
+      <div class="value"><span id="numpadValue">0</span>°</div>
+      <div class="numpad-hint" id="numpadHint"></div>
+    </div>
+    <div class="numpad-grid">
+      <button class="numpad-btn" data-val="1">1</button>
+      <button class="numpad-btn" data-val="2">2</button>
+      <button class="numpad-btn" data-val="3">3</button>
+      <button class="numpad-btn" data-val="4">4</button>
+      <button class="numpad-btn" data-val="5">5</button>
+      <button class="numpad-btn" data-val="6">6</button>
+      <button class="numpad-btn" data-val="7">7</button>
+      <button class="numpad-btn" data-val="8">8</button>
+      <button class="numpad-btn" data-val="9">9</button>
+      <button class="numpad-btn action" data-val="clear">C</button>
+      <button class="numpad-btn" data-val="0">0</button>
+      <button class="numpad-btn confirm" data-val="ok">✓</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const problems = [
-  { given: 'a', givenVal: 60, angle: 60 },
-  { given: 'b', givenVal: 115, angle: 65 },
-  { given: 'c', givenVal: 48, angle: 48 },
-  { given: 'd', givenVal: 135, angle: 45 },
-  { given: 'a', givenVal: 72, angle: 72 },
-  { given: 'c', givenVal: 90, angle: 90 }
+  { given: 'a', givenVal: 60 },
+  { given: 'b', givenVal: 115 },
+  { given: 'c', givenVal: 48 },
+  { given: 'd', givenVal: 135 },
+  { given: 'a', givenVal: 72 },
+  { given: 'c', givenVal: 90 }
 ];
 
 let currentProblem = 0;
 let score = 0;
-let userAnswers = { a: null, b: null, c: null, d: null };
+let userAnswers = {};
 let correctAnswers = {};
-let activeAngle = null;
+let editingAngle = null;
+let numpadInput = '';
 let answered = false;
 
-const angleColors = {
-  a: '#e74c3c',
-  b: '#3498db', 
-  c: '#27ae60',
-  d: '#f39c12'
-};
+const angleColors = { a: 'red', b: 'blue', c: 'green', d: 'orange' };
 
-const anglePositions = {
-  a: { x: 255, y: 115 },
-  b: { x: 145, y: 115 },
-  c: { x: 145, y: 185 },
-  d: { x: 255, y: 185 }
-};
-
-function getCorrectAngles(prob) {
-  const a = prob.angle;
-  const b = 180 - a;
-  return { a, b, c: a, d: b };
-}
-
-function render() {
-  const prob = problems[currentProblem];
-  correctAnswers = getCorrectAngles(prob);
-  
-  // Reset user answers
-  userAnswers = { a: null, b: null, c: null, d: null };
-  userAnswers[prob.given] = prob.givenVal; // Given is pre-filled
-  answered = false;
-  
-  document.getElementById('probNum').textContent = currentProblem + 1;
-  document.getElementById('scoreVal').textContent = score;
-  document.getElementById('givenText').textContent = `Given: ∠${prob.given} = ${prob.givenVal}°`;
-  document.getElementById('resultBox').className = 'result-box';
-  document.getElementById('nextBtn').classList.remove('show');
-  document.getElementById('checkBtn').disabled = false;
-  document.getElementById('sliderPopup').classList.remove('show');
-  document.getElementById('relationHint').classList.remove('show');
-  
-  renderDiagram();
+function getCorrectAngles(givenAngle, givenVal) {
+  // For intersecting lines: a=c (vertically opposite), b=d, a+b=180
+  if (givenAngle === 'a' || givenAngle === 'c') {
+    return { a: givenVal, b: 180 - givenVal, c: givenVal, d: 180 - givenVal };
+  } else {
+    return { a: 180 - givenVal, b: givenVal, c: 180 - givenVal, d: givenVal };
+  }
 }
 
 function renderDiagram() {
   const prob = problems[currentProblem];
-  const cx = 200, cy = 160, len = 110;
-  const ang = prob.angle;
-  const rad = ang * Math.PI / 180;
+  correctAnswers = getCorrectAngles(prob.given, prob.givenVal);
+  const angle = correctAnswers.a;
   
-  const svg = document.getElementById('svg');
+  const cx = 150, cy = 100, len = 80;
+  const rad = angle * Math.PI / 180;
   
-  // Calculate line endpoints
   const l1 = { x: cx - len * Math.cos(rad), y: cy + len * Math.sin(rad) };
   const l2 = { x: cx + len * Math.cos(rad), y: cy - len * Math.sin(rad) };
   
-  svg.innerHTML = `
+  // Arc paths for angle visualization
+  const arcR = 25;
+  function arcPath(startAng, endAng) {
+    const s = startAng * Math.PI / 180;
+    const e = endAng * Math.PI / 180;
+    const x1 = cx + arcR * Math.cos(s), y1 = cy + arcR * Math.sin(s);
+    const x2 = cx + arcR * Math.cos(e), y2 = cy + arcR * Math.sin(e);
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${arcR} ${arcR} 0 0 1 ${x2} ${y2} Z`;
+  }
+  
+  document.getElementById('diagram').innerHTML = `
+    <!-- Angle arcs (proper pie slices) -->
+    <path d="${arcPath(-angle, 0)}" fill="#e74c3c" fill-opacity="0.2" stroke="#e74c3c" stroke-width="1.5"/>
+    <path d="${arcPath(180, 360-angle)}" fill="#3498db" fill-opacity="0.2" stroke="#3498db" stroke-width="1.5"/>
+    <path d="${arcPath(180-angle, 180)}" fill="#27ae60" fill-opacity="0.2" stroke="#27ae60" stroke-width="1.5"/>
+    <path d="${arcPath(0, 180-angle)}" fill="#f39c12" fill-opacity="0.2" stroke="#f39c12" stroke-width="1.5"/>
+    
     <!-- Lines -->
-    <line x1="${cx - len}" y1="${cy}" x2="${cx + len}" y2="${cy}" stroke="#2c3e50" stroke-width="4"/>
-    <line x1="${l1.x}" y1="${l1.y}" x2="${l2.x}" y2="${l2.y}" stroke="#8e44ad" stroke-width="4"/>
+    <line x1="${cx - len - 10}" y1="${cy}" x2="${cx + len + 10}" y2="${cy}" stroke="#2c3e50" stroke-width="3"/>
+    <line x1="${l1.x - 10 * Math.cos(rad)}" y1="${l1.y + 10 * Math.sin(rad)}" 
+          x2="${l2.x + 10 * Math.cos(rad)}" y2="${l2.y - 10 * Math.sin(rad)}" stroke="#8e44ad" stroke-width="3"/>
     
     <!-- Center point -->
-    <circle cx="${cx}" cy="${cy}" r="6" fill="#333"/>
+    <circle cx="${cx}" cy="${cy}" r="5" fill="#333"/>
     
-    <!-- Angle tap zones (invisible but tappable) -->
-    ${['a', 'b', 'c', 'd'].map(name => {
-      const pos = anglePositions[name];
-      const isGiven = name === prob.given;
-      const hasValue = userAnswers[name] !== null;
-      const color = angleColors[name];
-      
-      return `
-        <g class="angle-tap-zone" data-angle="${name}" ${isGiven ? '' : 'style="cursor: pointer;"'}>
-          <circle cx="${pos.x}" cy="${pos.y}" r="35" fill="${color}" fill-opacity="0.15" stroke="${color}" stroke-width="2" stroke-dasharray="${isGiven ? '0' : '5,3'}"/>
-          <text x="${pos.x}" y="${pos.y - 8}" text-anchor="middle" font-size="14" fill="${color}" font-weight="600">∠${name}</text>
-          <text x="${pos.x}" y="${pos.y + 14}" text-anchor="middle" font-size="16" fill="${isGiven ? '#333' : color}" font-weight="700">
-            ${hasValue ? userAnswers[name] + '°' : '?'}
-          </text>
-        </g>
-      `;
-    }).join('')}
+    <!-- Angle labels -->
+    <text x="${cx + 45}" y="${cy - 15}" font-size="14" fill="#e74c3c" font-weight="600">a</text>
+    <text x="${cx - 55}" y="${cy - 15}" font-size="14" fill="#3498db" font-weight="600">b</text>
+    <text x="${cx - 55}" y="${cy + 25}" font-size="14" fill="#27ae60" font-weight="600">c</text>
+    <text x="${cx + 45}" y="${cy + 25}" font-size="14" fill="#f39c12" font-weight="600">d</text>
     
     <!-- Line labels -->
-    <text x="${cx + len + 15}" y="${cy + 5}" font-size="16" fill="#2c3e50" font-weight="600">m</text>
-    <text x="${l2.x + 10}" y="${l2.y - 8}" font-size="16" fill="#8e44ad" font-weight="600">l</text>
+    <text x="${cx + len + 20}" y="${cy + 5}" font-size="14" fill="#2c3e50" font-weight="600">m</text>
+    <text x="${l2.x + 15}" y="${l2.y - 10}" font-size="14" fill="#8e44ad" font-weight="600">l</text>
   `;
-  
-  // Add tap handlers
-  document.querySelectorAll('.angle-tap-zone').forEach(zone => {
-    zone.onclick = (e) => {
-      if (answered) return;
-      const angleName = zone.dataset.angle;
-      if (angleName === prob.given) return; // Can't change given angle
-      
-      openSlider(angleName);
-    };
-  });
 }
 
-function openSlider(angleName) {
-  activeAngle = angleName;
-  const popup = document.getElementById('sliderPopup');
-  const slider = document.getElementById('angleSlider');
-  
-  document.getElementById('sliderAngleName').textContent = angleName;
-  slider.value = userAnswers[angleName] || 90;
-  document.getElementById('sliderValue').textContent = slider.value;
-  
-  popup.classList.add('show');
-  
-  // Show relationship hint
-  showRelationshipHint(angleName);
-}
-
-function showRelationshipHint(angleName) {
+function renderAngleCards() {
   const prob = problems[currentProblem];
-  const hint = document.getElementById('relationHint');
+  const grid = document.getElementById('anglesGrid');
   
-  let hintText = '';
-  if ((angleName === 'a' && prob.given === 'c') || (angleName === 'c' && prob.given === 'a')) {
-    hintText = `<strong>∠${angleName}</strong> and <strong>∠${prob.given}</strong> are vertically opposite → they're <strong>equal</strong>!`;
-  } else if ((angleName === 'b' && prob.given === 'd') || (angleName === 'd' && prob.given === 'b')) {
-    hintText = `<strong>∠${angleName}</strong> and <strong>∠${prob.given}</strong> are vertically opposite → they're <strong>equal</strong>!`;
-  } else {
-    hintText = `<strong>∠${angleName}</strong> and <strong>∠${prob.given}</strong> form a linear pair → they add to <strong>180°</strong>!`;
-  }
+  grid.innerHTML = ['a', 'b', 'c', 'd'].map(name => {
+    const isGiven = name === prob.given;
+    const value = isGiven ? prob.givenVal : userAnswers[name];
+    const hasValue = value !== undefined && value !== null;
+    
+    let cardClass = 'angle-card';
+    if (isGiven) cardClass += ' given';
+    else {
+      cardClass += ' editable';
+      if (hasValue) cardClass += ' filled';
+    }
+    
+    return `
+      <div class="${cardClass}" data-angle="${name}">
+        <div class="angle-name ${angleColors[name]}">∠${name}</div>
+        <div class="angle-value">${hasValue ? value + '°' : '?'}</div>
+      </div>
+    `;
+  }).join('');
   
-  hint.innerHTML = hintText;
-  hint.classList.add('show');
+  // Add click handlers for editable cards
+  document.querySelectorAll('.angle-card.editable').forEach(card => {
+    card.onclick = () => openNumpad(card.dataset.angle);
+  });
+  
+  // Enable check button only if all filled
+  const allFilled = ['a', 'b', 'c', 'd'].every(name => 
+    name === prob.given || (userAnswers[name] !== undefined && userAnswers[name] !== null)
+  );
+  document.getElementById('checkBtn').disabled = !allFilled || answered;
 }
 
-// Slider interaction
-document.getElementById('angleSlider').oninput = (e) => {
-  document.getElementById('sliderValue').textContent = e.target.value;
-};
-
-document.getElementById('cancelBtn').onclick = () => {
-  document.getElementById('sliderPopup').classList.remove('show');
-  document.getElementById('relationHint').classList.remove('show');
-  activeAngle = null;
-};
-
-document.getElementById('confirmBtn').onclick = () => {
-  if (activeAngle) {
-    userAnswers[activeAngle] = parseInt(document.getElementById('angleSlider').value);
-    renderDiagram();
+function openNumpad(angleName) {
+  if (answered) return;
+  
+  editingAngle = angleName;
+  numpadInput = userAnswers[angleName]?.toString() || '';
+  
+  document.getElementById('editingAngle').textContent = '∠' + angleName;
+  document.getElementById('numpadValue').textContent = numpadInput || '0';
+  
+  // Show hint based on relationship
+  const prob = problems[currentProblem];
+  let hint = '';
+  if ((angleName === 'a' && prob.given === 'c') || (angleName === 'c' && prob.given === 'a')) {
+    hint = `∠${angleName} and ∠${prob.given} are vertically opposite → Equal!`;
+  } else if ((angleName === 'b' && prob.given === 'd') || (angleName === 'd' && prob.given === 'b')) {
+    hint = `∠${angleName} and ∠${prob.given} are vertically opposite → Equal!`;
+  } else {
+    hint = `∠${angleName} + ∠${prob.given} = 180° (linear pair)`;
   }
-  document.getElementById('sliderPopup').classList.remove('show');
-  document.getElementById('relationHint').classList.remove('show');
-  activeAngle = null;
-};
+  document.getElementById('numpadHint').textContent = hint;
+  
+  document.getElementById('modalOverlay').classList.add('show');
+}
 
-document.getElementById('checkBtn').onclick = checkAnswers;
+function closeNumpad() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  editingAngle = null;
+}
+
+function handleNumpad(val) {
+  if (val === 'clear') {
+    numpadInput = '';
+  } else if (val === 'ok') {
+    if (numpadInput && editingAngle) {
+      userAnswers[editingAngle] = parseInt(numpadInput);
+      renderAngleCards();
+    }
+    closeNumpad();
+  } else {
+    if (numpadInput.length < 3) {
+      numpadInput += val;
+    }
+  }
+  document.getElementById('numpadValue').textContent = numpadInput || '0';
+}
 
 function checkAnswers() {
+  if (answered) return;
   answered = true;
+  
   const prob = problems[currentProblem];
-  
   let correctCount = 0;
-  let totalToCheck = 0;
+  let total = 0;
   
-  ['a', 'b', 'c', 'd'].forEach(name => {
-    if (name === prob.given) return;
-    totalToCheck++;
+  document.querySelectorAll('.angle-card.editable').forEach(card => {
+    const name = card.dataset.angle;
+    total++;
     
-    if (userAnswers[name] !== null && Math.abs(userAnswers[name] - correctAnswers[name]) <= 1) {
+    if (Math.abs(userAnswers[name] - correctAnswers[name]) <= 1) {
+      card.classList.remove('filled');
+      card.classList.add('correct');
       correctCount++;
+    } else {
+      card.classList.remove('filled');
+      card.classList.add('wrong');
+      // Show correct answer
+      card.querySelector('.angle-value').textContent = correctAnswers[name] + '°';
     }
-    // Fill in correct answers for display
-    userAnswers[name] = correctAnswers[name];
   });
   
-  renderDiagram();
-  
-  const resultBox = document.getElementById('resultBox');
-  if (correctCount === totalToCheck) {
+  const resultBar = document.getElementById('resultBar');
+  if (correctCount === total) {
     score++;
     document.getElementById('scoreVal').textContent = score;
-    resultBox.innerHTML = '🎉 Perfect! All angles correct!';
-    resultBox.className = 'result-box show success';
+    resultBar.textContent = '🎉 Perfect! All correct!';
+    resultBar.className = 'result-bar show success';
   } else {
-    resultBox.innerHTML = `You got ${correctCount}/${totalToCheck} correct. The correct values are shown.`;
-    resultBox.className = 'result-box show partial';
+    resultBar.textContent = `${correctCount}/${total} correct. See the right answers above.`;
+    resultBar.className = 'result-bar show partial';
   }
   
   document.getElementById('checkBtn').disabled = true;
   document.getElementById('nextBtn').classList.add('show');
 }
 
-document.getElementById('nextBtn').onclick = () => {
+function nextProblem() {
   if (currentProblem < problems.length - 1) {
     currentProblem++;
-    render();
+    userAnswers = {};
+    answered = false;
+    
+    document.getElementById('probNum').textContent = currentProblem + 1;
+    document.getElementById('resultBar').classList.remove('show');
+    document.getElementById('nextBtn').classList.remove('show');
+    
+    const prob = problems[currentProblem];
+    document.getElementById('givenText').textContent = `∠${prob.given} = ${prob.givenVal}°`;
+    
+    renderDiagram();
+    renderAngleCards();
   } else {
-    alert(`Complete! Your score: ${score}/${problems.length}`);
+    document.getElementById('nextBtn').textContent = `Done! Score: ${score}/${problems.length}`;
   }
+}
+
+// Event listeners
+document.getElementById('checkBtn').onclick = checkAnswers;
+document.getElementById('nextBtn').onclick = nextProblem;
+document.getElementById('closeModal').onclick = closeNumpad;
+document.getElementById('modalOverlay').onclick = (e) => {
+  if (e.target === document.getElementById('modalOverlay')) closeNumpad();
 };
 
-render();
+document.querySelectorAll('.numpad-btn').forEach(btn => {
+  btn.onclick = () => handleNumpad(btn.dataset.val);
+});
+
+// Initialize
+const prob = problems[0];
+document.getElementById('givenText').textContent = `∠${prob.given} = ${prob.givenVal}°`;
+renderDiagram();
+renderAngleCards();
 </script>
 </body>
 </html>
