@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#e74c3c">
+<title>Problem: Find Missing Angles</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 12px;
+}
+
+.header h1 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 11px; opacity: 0.9; }
+
+.progress-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.progress-dot {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+}
+
+.progress-dot.done { background: #27ae60; }
+.progress-dot.current { background: white; }
+
+.problem-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  margin-bottom: 12px;
+}
+
+.visual {
+  height: 34vh;
+  min-height: 240px;
+  background: linear-gradient(145deg, #fce4ec 0%, #f8bbd9 100%);
+  border-radius: 10px;
+  position: relative;
+}
+
+svg { width: 100%; height: 100%; }
+
+.question-box {
+  background: #fce4ec;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.question-box .given { font-size: 14px; font-weight: 700; color: #c62828; margin-bottom: 6px; }
+.question-box .find { font-size: 13px; color: #333; }
+
+.answer-section {
+  margin-top: 12px;
+}
+
+.answer-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.answer-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 50px;
+}
+
+.answer-row input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #f8bbd9;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+}
+
+.answer-row input:focus { border-color: #e74c3c; }
+.answer-row input.correct { border-color: #27ae60; background: #d5f4e6; }
+.answer-row input.wrong { border-color: #e74c3c; background: #fce4ec; }
+
+.answer-row .unit { font-size: 14px; color: #666; }
+
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.submit-btn:disabled { opacity: 0.5; }
+
+.feedback {
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 12px;
+  display: none;
+}
+
+.feedback.show { display: block; }
+.feedback.correct { background: #d5f4e6; color: #1e8449; }
+.feedback.wrong { background: #fce4ec; color: #c62828; }
+
+.next-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #27ae60;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: none;
+}
+
+.next-btn.show { display: block; }
+
+.method-box {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 11px;
+  display: none;
+}
+
+.method-box.show { display: block; }
+.method-box h4 { color: #e74c3c; margin-bottom: 8px; font-size: 12px; }
+.method-box .step { margin-bottom: 6px; padding-left: 12px; color: #555; }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="header">
+  <h1>📐 Find the Missing Angles</h1>
+  <p>Intersecting Lines Problems</p>
+</div>
+
+<div class="progress-bar" id="progress"></div>
+
+<div class="problem-card" id="problemCard"></div>
+
+<div class="method-box" id="methodBox">
+  <h4>💡 Method Used</h4>
+  <div id="methodSteps"></div>
+</div>
+
+</div>
+
+<script>
+const problems = [
+  { given: 'a', givenVal: 48, find: ['b', 'c', 'd'], angle: 48 },
+  { given: 'a', givenVal: 52, find: ['b', 'c', 'd'], angle: 52 },
+  { given: 'b', givenVal: 99, find: ['a', 'c', 'd'], angle: 81 },
+  { given: 'c', givenVal: 122, find: ['a', 'b', 'd'], angle: 122 },
+  { given: 'd', givenVal: 75, find: ['a', 'b', 'c'], angle: 105 },
+  { given: 'a', givenVal: 132, find: ['b', 'c', 'd'], angle: 132 },
+  { given: 'b', givenVal: 56, find: ['a', 'c', 'd'], angle: 124 },
+  { given: 'c', givenVal: 70, find: ['a', 'b', 'd'], angle: 70 }
+];
+
+let currentIdx = 0;
+let answered = false;
+
+function getAngles(angleA) {
+  const a = angleA;
+  const b = 180 - a;
+  const c = a;
+  const d = b;
+  return { a, b, c, d };
+}
+
+function renderProgress() {
+  const prog = document.getElementById('progress');
+  prog.innerHTML = problems.map((_, i) => 
+    `<div class="progress-dot ${i < currentIdx ? 'done' : (i === currentIdx ? 'current' : '')}"></div>`
+  ).join('');
+}
+
+function renderProblem() {
+  const prob = problems[currentIdx];
+  const angles = getAngles(prob.angle);
+  const cx = 200, cy = 140, len = 90;
+  const rad = prob.angle * Math.PI / 180;
+  
+  answered = false;
+  renderProgress();
+  
+  // Determine which angle to show as "?"
+  const showAngles = { a: '?', b: '?', c: '?', d: '?' };
+  showAngles[prob.given] = prob.givenVal + '°';
+  
+  const colors = { a: '#e74c3c', b: '#3498db', c: '#27ae60', d: '#f39c12' };
+  
+  document.getElementById('problemCard').innerHTML = `
+<div class="visual">
+  <svg viewBox="0 0 400 280">
+    <line x1="${cx - len}" y1="${cy}" x2="${cx + len}" y2="${cy}" stroke="#2c3e50" stroke-width="3"/>
+    <line x1="${cx - len * Math.cos(rad)}" y1="${cy + len * Math.sin(rad)}" 
+          x2="${cx + len * Math.cos(rad)}" y2="${cy - len * Math.sin(rad)}" stroke="#8e44ad" stroke-width="3"/>
+    <circle cx="${cx}" cy="${cy}" r="5" fill="#333"/>
+    
+    <!-- Angle labels -->
+    <text x="${cx + 35}" y="${cy - 20}" font-size="16" fill="${colors.a}" font-weight="700">∠a</text>
+    <text x="${cx - 55}" y="${cy - 20}" font-size="16" fill="${colors.b}" font-weight="700">∠b</text>
+    <text x="${cx - 55}" y="${cy + 30}" font-size="16" fill="${colors.c}" font-weight="700">∠c</text>
+    <text x="${cx + 35}" y="${cy + 30}" font-size="16" fill="${colors.d}" font-weight="700">∠d</text>
+    
+    <!-- Values -->
+    <text x="${cx + 60}" y="${cy - 8}" font-size="13" fill="${colors.a}" font-weight="600">${showAngles.a}</text>
+    <text x="${cx - 85}" y="${cy - 8}" font-size="13" fill="${colors.b}" font-weight="600">${showAngles.b}</text>
+    <text x="${cx - 85}" y="${cy + 18}" font-size="13" fill="${colors.c}" font-weight="600">${showAngles.c}</text>
+    <text x="${cx + 60}" y="${cy + 18}" font-size="13" fill="${colors.d}" font-weight="600">${showAngles.d}</text>
+    
+    <text x="${cx + len + 10}" y="${cy + 5}" font-size="14" fill="#2c3e50" font-weight="600">m</text>
+    <text x="${cx + len * Math.cos(rad) + 8}" y="${cy - len * Math.sin(rad) - 5}" font-size="14" fill="#8e44ad" font-weight="600">l</text>
+  </svg>
+</div>
+
+<div class="question-box">
+  <div class="given">Given: ∠${prob.given} = ${prob.givenVal}°</div>
+  <div class="find">Find: ${prob.find.map(x => '∠' + x).join(', ')}</div>
+</div>
+
+<div class="answer-section">
+  ${prob.find.map(f => `
+    <div class="answer-row">
+      <label style="color: ${colors[f]}">∠${f} =</label>
+      <input type="number" id="ans_${f}" inputmode="numeric" placeholder="?">
+      <span class="unit">°</span>
+    </div>
+  `).join('')}
+</div>
+
+<button class="submit-btn" id="submitBtn">Check Answers</button>
+<div class="feedback" id="feedback"></div>
+<button class="next-btn" id="nextBtn">${currentIdx < problems.length - 1 ? 'Next Problem →' : 'Complete! 🎉'}</button>`;
+
+  document.getElementById('submitBtn').onclick = checkAnswers;
+  document.getElementById('nextBtn').onclick = () => {
+    if (currentIdx < problems.length - 1) {
+      currentIdx++;
+      renderProblem();
+      document.getElementById('methodBox').classList.remove('show');
+    }
+  };
+  
+  // Enter key handling
+  prob.find.forEach(f => {
+    document.getElementById('ans_' + f).addEventListener('keypress', e => {
+      if (e.key === 'Enter') checkAnswers();
+    });
+  });
+}
+
+function checkAnswers() {
+  if (answered) return;
+  answered = true;
+  
+  const prob = problems[currentIdx];
+  const angles = getAngles(prob.angle);
+  
+  let allCorrect = true;
+  const methods = [];
+  
+  prob.find.forEach(f => {
+    const input = document.getElementById('ans_' + f);
+    const userVal = parseFloat(input.value);
+    const correctVal = angles[f];
+    
+    if (Math.abs(userVal - correctVal) < 0.5) {
+      input.classList.add('correct');
+    } else {
+      input.classList.add('wrong');
+      allCorrect = false;
+    }
+    input.value = correctVal;
+    
+    // Build method explanation
+    if (f === 'a' || f === 'c') {
+      if (prob.given === 'a' || prob.given === 'c') {
+        methods.push(`∠${f} = ∠${prob.given} = ${correctVal}° (vertically opposite)`);
+      } else {
+        methods.push(`∠${f} = 180° - ∠${prob.given} = 180° - ${prob.givenVal}° = ${correctVal}° (linear pair)`);
+      }
+    } else {
+      if (prob.given === 'b' || prob.given === 'd') {
+        methods.push(`∠${f} = ∠${prob.given} = ${correctVal}° (vertically opposite)`);
+      } else {
+        methods.push(`∠${f} = 180° - ∠${prob.given} = 180° - ${prob.givenVal}° = ${correctVal}° (linear pair)`);
+      }
+    }
+  });
+  
+  const feedback = document.getElementById('feedback');
+  if (allCorrect) {
+    feedback.textContent = '🎉 Perfect! All angles correct!';
+    feedback.className = 'feedback show correct';
+  } else {
+    feedback.textContent = 'Some answers were incorrect. See the correct values above.';
+    feedback.className = 'feedback show wrong';
+  }
+  
+  // Show method
+  document.getElementById('methodSteps').innerHTML = methods.map(m => `<div class="step">• ${m}</div>`).join('');
+  document.getElementById('methodBox').classList.add('show');
+  
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+renderProblem();
+</script>
+</body>
+</html>

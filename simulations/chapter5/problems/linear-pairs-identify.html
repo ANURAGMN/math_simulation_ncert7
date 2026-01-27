@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#9b59b6">
+<title>Problem: Identify Linear Pairs</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.header {
+  text-align: center;
+  color: #fff;
+  padding: 12px;
+}
+
+.header h1 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+.header p { font-size: 11px; opacity: 0.9; }
+
+.problem-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  margin-bottom: 12px;
+}
+
+.problem-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.problem-num {
+  background: #9b59b6;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.score { font-size: 12px; color: #666; }
+.score span { font-weight: 700; color: #27ae60; }
+
+.visual {
+  height: 32vh;
+  min-height: 220px;
+  background: linear-gradient(145deg, #f3e5f5 0%, #e1bee7 100%);
+  border-radius: 10px;
+  position: relative;
+}
+
+svg { width: 100%; height: 100%; }
+
+.question-box {
+  background: #f3e5f5;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.question-box .q { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px; }
+.question-box .hint { font-size: 10px; color: #666; }
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.option-btn {
+  padding: 12px 8px;
+  border-radius: 10px;
+  border: 2px solid #e1bee7;
+  background: white;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.option-btn:active { transform: scale(0.98); }
+.option-btn.selected { border-color: #9b59b6; background: #f3e5f5; }
+.option-btn.correct { border-color: #27ae60; background: #d5f4e6; color: #1e8449; }
+.option-btn.wrong { border-color: #e74c3c; background: #fce4ec; color: #c62828; }
+
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.submit-btn:disabled { opacity: 0.5; }
+
+.feedback {
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 12px;
+  display: none;
+}
+
+.feedback.show { display: block; }
+.feedback.correct { background: #d5f4e6; color: #1e8449; }
+.feedback.wrong { background: #fce4ec; color: #c62828; }
+
+.next-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #27ae60;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: none;
+}
+
+.next-btn.show { display: block; }
+
+.concept-box {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.concept-box h4 { color: #9b59b6; margin-bottom: 6px; font-size: 12px; }
+.concept-box ul { padding-left: 16px; color: #555; }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="header">
+  <h1>📝 Problem: Identify Angle Pairs</h1>
+  <p>Find linear pairs and vertically opposite angles</p>
+</div>
+
+<div class="problem-card" id="problemCard"></div>
+
+<div class="concept-box">
+  <h4>📖 Remember</h4>
+  <ul>
+    <li><strong>Linear Pair:</strong> Adjacent angles that form a straight line (sum = 180°)</li>
+    <li><strong>Vertically Opposite:</strong> Angles across from each other when lines cross (they're equal)</li>
+  </ul>
+</div>
+
+</div>
+
+<script>
+let problemNum = 1;
+let score = 0;
+let total = 0;
+let answered = false;
+let currentAnswer = null;
+let selected = [];
+
+const problems = [
+  {
+    type: 'linear',
+    question: 'Select ALL linear pairs from the angles shown',
+    answers: [['a','b'], ['b','c'], ['c','d'], ['d','a']],
+    angle: 55
+  },
+  {
+    type: 'vertical',
+    question: 'Select ALL pairs of vertically opposite angles',
+    answers: [['a','c'], ['b','d']],
+    angle: 70
+  },
+  {
+    type: 'linear',
+    question: 'Which pairs are linear pairs?',
+    answers: [['a','b'], ['b','c'], ['c','d'], ['d','a']],
+    angle: 120
+  },
+  {
+    type: 'vertical',
+    question: 'Which angles are vertically opposite?',
+    answers: [['a','c'], ['b','d']],
+    angle: 45
+  },
+  {
+    type: 'mixed',
+    question: 'Select the linear pair that includes ∠a',
+    answers: [['a','b'], ['a','d']],
+    angle: 80
+  }
+];
+
+const allPairs = [['a','b'], ['b','c'], ['c','d'], ['d','a'], ['a','c'], ['b','d']];
+
+function pairToString(pair) {
+  return `∠${pair[0]} & ∠${pair[1]}`;
+}
+
+function arraysEqual(a, b) {
+  return JSON.stringify(a.sort()) === JSON.stringify(b.sort());
+}
+
+function renderProblem() {
+  const prob = problems[(problemNum - 1) % problems.length];
+  const ang = prob.angle;
+  const angB = 180 - ang;
+  
+  const cx = 200, cy = 130, len = 80;
+  const rad = ang * Math.PI / 180;
+  
+  const card = document.getElementById('problemCard');
+  
+  card.innerHTML = `
+<div class="problem-header">
+  <span class="problem-num">Problem ${problemNum}</span>
+  <span class="score">Score: <span>${score}/${total}</span></span>
+</div>
+
+<div class="visual">
+  <svg viewBox="0 0 400 260">
+    <line x1="${cx - len}" y1="${cy}" x2="${cx + len}" y2="${cy}" stroke="#2c3e50" stroke-width="3"/>
+    <line x1="${cx - len * Math.cos(rad)}" y1="${cy + len * Math.sin(rad)}" 
+          x2="${cx + len * Math.cos(rad)}" y2="${cy - len * Math.sin(rad)}" stroke="#8e44ad" stroke-width="3"/>
+    <circle cx="${cx}" cy="${cy}" r="5" fill="#333"/>
+    
+    <text x="${cx + 45}" y="${cy - 15}" font-size="16" fill="#e74c3c" font-weight="600">a</text>
+    <text x="${cx - 55}" y="${cy - 15}" font-size="16" fill="#3498db" font-weight="600">b</text>
+    <text x="${cx - 55}" y="${cy + 25}" font-size="16" fill="#27ae60" font-weight="600">c</text>
+    <text x="${cx + 45}" y="${cy + 25}" font-size="16" fill="#f39c12" font-weight="600">d</text>
+    
+    <text x="${cx + 65}" y="${cy - 5}" font-size="12" fill="#e74c3c">${ang}°</text>
+    <text x="${cx - 80}" y="${cy - 5}" font-size="12" fill="#3498db">${angB}°</text>
+    <text x="${cx - 80}" y="${cy + 15}" font-size="12" fill="#27ae60">${ang}°</text>
+    <text x="${cx + 65}" y="${cy + 15}" font-size="12" fill="#f39c12">${angB}°</text>
+    
+    <text x="${cx + len + 10}" y="${cy + 5}" font-size="14" fill="#2c3e50" font-weight="600">m</text>
+    <text x="${cx + len * Math.cos(rad) + 8}" y="${cy - len * Math.sin(rad) - 5}" font-size="14" fill="#8e44ad" font-weight="600">l</text>
+  </svg>
+</div>
+
+<div class="question-box">
+  <div class="q">${prob.question}</div>
+  <div class="hint">Tap all correct pairs, then submit</div>
+</div>
+
+<div class="options" id="options">
+  ${allPairs.map((pair, i) => `
+    <button class="option-btn" data-idx="${i}">${pairToString(pair)}</button>
+  `).join('')}
+</div>
+
+<button class="submit-btn" id="submitBtn">Check Answer</button>
+<div class="feedback" id="feedback"></div>
+<button class="next-btn" id="nextBtn">Next Problem →</button>`;
+
+  answered = false;
+  selected = [];
+  currentAnswer = prob.answers;
+  
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.onclick = () => {
+      if (answered) return;
+      const idx = parseInt(btn.dataset.idx);
+      if (selected.includes(idx)) {
+        selected = selected.filter(i => i !== idx);
+        btn.classList.remove('selected');
+      } else {
+        selected.push(idx);
+        btn.classList.add('selected');
+      }
+    };
+  });
+  
+  document.getElementById('submitBtn').onclick = checkAnswer;
+  document.getElementById('nextBtn').onclick = () => {
+    problemNum++;
+    renderProblem();
+  };
+}
+
+function checkAnswer() {
+  if (answered || selected.length === 0) return;
+  answered = true;
+  total++;
+  
+  const selectedPairs = selected.map(i => allPairs[i]);
+  const correctPairs = currentAnswer;
+  
+  // Check if selected matches answer
+  let isCorrect = selectedPairs.length === correctPairs.length;
+  if (isCorrect) {
+    for (const sp of selectedPairs) {
+      const found = correctPairs.some(cp => 
+        (cp[0] === sp[0] && cp[1] === sp[1]) || (cp[0] === sp[1] && cp[1] === sp[0])
+      );
+      if (!found) { isCorrect = false; break; }
+    }
+  }
+  
+  const feedback = document.getElementById('feedback');
+  
+  if (isCorrect) {
+    score++;
+    feedback.textContent = '🎉 Correct! Well done!';
+    feedback.className = 'feedback show correct';
+  } else {
+    feedback.textContent = `❌ The correct pairs are: ${correctPairs.map(pairToString).join(', ')}`;
+    feedback.className = 'feedback show wrong';
+  }
+  
+  // Show correct/wrong on buttons
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    const pair = allPairs[i];
+    const isAnswer = correctPairs.some(cp => 
+      (cp[0] === pair[0] && cp[1] === pair[1]) || (cp[0] === pair[1] && cp[1] === pair[0])
+    );
+    if (isAnswer) {
+      btn.classList.add('correct');
+    } else if (selected.includes(i)) {
+      btn.classList.add('wrong');
+    }
+  });
+  
+  document.querySelector('.score span').textContent = `${score}/${total}`;
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+renderProblem();
+</script>
+</body>
+</html>
