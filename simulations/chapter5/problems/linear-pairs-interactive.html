@@ -51,11 +51,11 @@ body {
 
 .mode-tab {
   flex: 1;
-  padding: 12px;
+  padding: 12px 8px;
   border: none;
   background: transparent;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #666;
   cursor: pointer;
@@ -91,126 +91,95 @@ body {
 }
 .progress-text span { font-weight: 700; color: #27ae60; }
 
-/* Diagram */
+/* Diagram - Clean & Simple */
 .diagram-area {
-  background: linear-gradient(145deg, #faf5ff 0%, #f3e8ff 100%);
+  background: #fafafa;
   border-radius: 14px;
-  padding: 16px;
+  padding: 20px;
   margin-bottom: 16px;
+  border: 2px solid #eee;
 }
 
 svg { width: 100%; height: auto; display: block; }
 
-/* Angle Selection UI */
-.selection-area {
-  margin-bottom: 14px;
-}
-
+/* Angle Selection Grid */
 .selection-label {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 10px;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 12px;
   text-align: center;
+  font-weight: 500;
 }
 
-.angle-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
+.angle-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .angle-btn {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+  padding: 16px 8px;
+  border-radius: 12px;
   border: 3px solid #e0e0e0;
   background: #fff;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  font-weight: 700;
+  gap: 4px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
 }
 
-.angle-btn.red { color: #e74c3c; }
-.angle-btn.blue { color: #3498db; }
-.angle-btn.green { color: #27ae60; }
-.angle-btn.orange { color: #f39c12; }
+.angle-btn .symbol {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.angle-btn .degree {
+  font-size: 11px;
+  color: #888;
+}
+
+.angle-btn.a { color: #e74c3c; }
+.angle-btn.b { color: #3498db; }
+.angle-btn.c { color: #27ae60; }
+.angle-btn.d { color: #f39c12; }
 
 .angle-btn.selected {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.angle-btn.selected.red { border-color: #e74c3c; background: #fce4ec; }
-.angle-btn.selected.blue { border-color: #3498db; background: #e3f2fd; }
-.angle-btn.selected.green { border-color: #27ae60; background: #e8f5e9; }
-.angle-btn.selected.orange { border-color: #f39c12; background: #fff8e1; }
+.angle-btn.selected.a { border-color: #e74c3c; background: #fef0ef; }
+.angle-btn.selected.b { border-color: #3498db; background: #eff6fc; }
+.angle-btn.selected.c { border-color: #27ae60; background: #effcf4; }
+.angle-btn.selected.d { border-color: #f39c12; background: #fef9ef; }
 
-/* Selected Pair Display */
-.pair-display {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 14px;
-  text-align: center;
-  margin-bottom: 14px;
-}
-
-.pair-display .label {
-  font-size: 11px;
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.pair-boxes {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.pair-box {
-  width: 60px;
-  height: 50px;
-  border: 2px dashed #ccc;
+/* Hint Box */
+.hint-box {
+  background: #f8f4ff;
+  border: 2px solid #9b59b6;
   border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: #999;
-  background: #fff;
-}
-
-.pair-box.filled { border-style: solid; }
-.pair-box.filled.red { border-color: #e74c3c; color: #e74c3c; background: #fce4ec; }
-.pair-box.filled.blue { border-color: #3498db; color: #3498db; background: #e3f2fd; }
-.pair-box.filled.green { border-color: #27ae60; color: #27ae60; background: #e8f5e9; }
-.pair-box.filled.orange { border-color: #f39c12; color: #f39c12; background: #fff8e1; }
-
-.pair-plus {
-  font-size: 22px;
-  font-weight: 700;
-  color: #999;
-}
-
-/* Relationship Hint */
-.relationship-hint {
-  background: #e8f4fd;
-  border-left: 4px solid #3498db;
-  border-radius: 8px;
   padding: 12px;
   margin-bottom: 14px;
-  font-size: 13px;
-  color: #2c3e50;
+  text-align: center;
   display: none;
 }
 
-.relationship-hint.show { display: block; }
+.hint-box.show { display: block; }
+
+.hint-box .type {
+  font-size: 14px;
+  font-weight: 700;
+  color: #9b59b6;
+  margin-bottom: 4px;
+}
+
+.hint-box .explain {
+  font-size: 12px;
+  color: #666;
+}
 
 /* Buttons */
 .btn-row {
@@ -240,6 +209,7 @@ svg { width: 100%; height: auto; display: block; }
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .check-btn:disabled { opacity: 0.5; }
@@ -269,7 +239,7 @@ svg { width: 100%; height: auto; display: block; }
   border: 2px solid #27ae60;
   padding: 8px 12px;
   border-radius: 10px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: #1e8449;
 }
@@ -304,7 +274,7 @@ svg { width: 100%; height: auto; display: block; }
 }
 
 .tip-box h4 { font-size: 13px; color: #9b59b6; margin-bottom: 8px; }
-.tip-box p { font-size: 11px; color: #555; line-height: 1.5; }
+.tip-box p { font-size: 11px; color: #555; line-height: 1.6; }
 </style>
 </head>
 
@@ -318,7 +288,7 @@ svg { width: 100%; height: auto; display: block; }
 
 <div class="main-card">
   <div class="mode-tabs">
-    <button class="mode-tab active" data-mode="linear">Linear Pairs (180°)</button>
+    <button class="mode-tab active" data-mode="linear">Linear Pairs</button>
     <button class="mode-tab" data-mode="vertical">Vertically Opposite</button>
   </div>
   
@@ -328,29 +298,34 @@ svg { width: 100%; height: auto; display: block; }
   </div>
   
   <div class="diagram-area">
-    <svg viewBox="0 0 300 180" id="diagram"></svg>
+    <svg viewBox="0 0 280 180" id="diagram"></svg>
   </div>
   
-  <div class="selection-area">
-    <div class="selection-label">Tap two angles to select them:</div>
-    <div class="angle-buttons">
-      <button class="angle-btn red" data-angle="a">∠a</button>
-      <button class="angle-btn blue" data-angle="b">∠b</button>
-      <button class="angle-btn green" data-angle="c">∠c</button>
-      <button class="angle-btn orange" data-angle="d">∠d</button>
-    </div>
+  <div class="selection-label">Tap two angles to select:</div>
+  
+  <div class="angle-grid">
+    <button class="angle-btn a" data-angle="a">
+      <span class="symbol">∠a</span>
+      <span class="degree" id="degA">55°</span>
+    </button>
+    <button class="angle-btn b" data-angle="b">
+      <span class="symbol">∠b</span>
+      <span class="degree" id="degB">125°</span>
+    </button>
+    <button class="angle-btn c" data-angle="c">
+      <span class="symbol">∠c</span>
+      <span class="degree" id="degC">55°</span>
+    </button>
+    <button class="angle-btn d" data-angle="d">
+      <span class="symbol">∠d</span>
+      <span class="degree" id="degD">125°</span>
+    </button>
   </div>
   
-  <div class="pair-display">
-    <div class="label">Your selected pair</div>
-    <div class="pair-boxes">
-      <div class="pair-box" id="slot1">?</div>
-      <span class="pair-plus">+</span>
-      <div class="pair-box" id="slot2">?</div>
-    </div>
+  <div class="hint-box" id="hintBox">
+    <div class="type" id="hintType"></div>
+    <div class="explain" id="hintExplain"></div>
   </div>
-  
-  <div class="relationship-hint" id="relationshipHint"></div>
   
   <div class="btn-row">
     <button class="clear-btn" id="clearBtn">Clear</button>
@@ -366,127 +341,105 @@ svg { width: 100%; height: auto; display: block; }
   
   <div class="success-banner" id="successBanner">
     <h3>🎉 All Pairs Found!</h3>
-    <p>Great job! You've identified all the pairs.</p>
+    <p id="successMsg">Great job!</p>
   </div>
 </div>
 
 <div class="tip-box">
   <h4>💡 Remember</h4>
-  <p><strong>Linear pairs:</strong> Adjacent angles on a straight line that add to 180°<br>
-  <strong>Vertically opposite:</strong> Angles across from each other that are always equal</p>
+  <p><strong>Linear pair:</strong> Two adjacent angles on a straight line → add to 180°<br>
+  <strong>Vertically opposite:</strong> Angles across the intersection → always equal</p>
 </div>
 
 </div>
 
 <script>
-// Correct pairs
 const linearPairs = [['a', 'b'], ['b', 'c'], ['c', 'd'], ['d', 'a']];
 const verticalPairs = [['a', 'c'], ['b', 'd']];
 
 let mode = 'linear';
 let selected = [];
 let foundPairs = { linear: [], vertical: [] };
-
-const angleColors = { a: 'red', b: 'blue', c: 'green', d: 'orange' };
+const angle = 55;
 
 function renderDiagram() {
-  const cx = 150, cy = 90, len = 70;
-  const angle = 55; // angle of second line
+  const cx = 140, cy = 90, len = 100;
   const rad = angle * Math.PI / 180;
   
-  const l1 = { x: cx - len * Math.cos(rad), y: cy + len * Math.sin(rad) };
-  const l2 = { x: cx + len * Math.cos(rad), y: cy - len * Math.sin(rad) };
+  const l1x = cx - len * Math.cos(rad);
+  const l1y = cy + len * Math.sin(rad);
+  const l2x = cx + len * Math.cos(rad);
+  const l2y = cy - len * Math.sin(rad);
   
-  // Arc paths for angle visualization
-  const arcR = 22;
-  function arcPath(startAng, endAng) {
+  // Small arc for angle markers
+  const arcR = 28;
+  function smallArc(startAng, endAng, color) {
     const s = startAng * Math.PI / 180;
     const e = endAng * Math.PI / 180;
     const x1 = cx + arcR * Math.cos(s), y1 = cy + arcR * Math.sin(s);
     const x2 = cx + arcR * Math.cos(e), y2 = cy + arcR * Math.sin(e);
-    const largeArc = Math.abs(endAng - startAng) > 180 ? 1 : 0;
-    return `M ${cx} ${cy} L ${x1} ${y1} A ${arcR} ${arcR} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+    return `<path d="M ${x1} ${y1} A ${arcR} ${arcR} 0 0 1 ${x2} ${y2}" 
+            fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>`;
   }
   
-  // Selected highlighting
+  // Highlight selected angles
   const selSet = new Set(selected);
-  const aOpacity = selSet.has('a') ? 0.5 : 0.2;
-  const bOpacity = selSet.has('b') ? 0.5 : 0.2;
-  const cOpacity = selSet.has('c') ? 0.5 : 0.2;
-  const dOpacity = selSet.has('d') ? 0.5 : 0.2;
   
   document.getElementById('diagram').innerHTML = `
-    <!-- Angle arcs (proper pie slices) -->
-    <path d="${arcPath(-angle, 0)}" fill="#e74c3c" fill-opacity="${aOpacity}" stroke="#e74c3c" stroke-width="2"/>
-    <path d="${arcPath(180, 360-angle)}" fill="#3498db" fill-opacity="${bOpacity}" stroke="#3498db" stroke-width="2"/>
-    <path d="${arcPath(180-angle, 180)}" fill="#27ae60" fill-opacity="${cOpacity}" stroke="#27ae60" stroke-width="2"/>
-    <path d="${arcPath(0, 180-angle)}" fill="#f39c12" fill-opacity="${dOpacity}" stroke="#f39c12" stroke-width="2"/>
-    
     <!-- Lines -->
-    <line x1="${cx - len - 15}" y1="${cy}" x2="${cx + len + 15}" y2="${cy}" stroke="#2c3e50" stroke-width="3" stroke-linecap="round"/>
-    <line x1="${l1.x - 12 * Math.cos(rad)}" y1="${l1.y + 12 * Math.sin(rad)}" 
-          x2="${l2.x + 12 * Math.cos(rad)}" y2="${l2.y - 12 * Math.sin(rad)}" stroke="#8e44ad" stroke-width="3" stroke-linecap="round"/>
+    <line x1="${cx - len - 10}" y1="${cy}" x2="${cx + len + 10}" y2="${cy}" 
+          stroke="#2c3e50" stroke-width="4" stroke-linecap="round"/>
+    <line x1="${l1x - 8 * Math.cos(rad)}" y1="${l1y + 8 * Math.sin(rad)}" 
+          x2="${l2x + 8 * Math.cos(rad)}" y2="${l2y - 8 * Math.sin(rad)}" 
+          stroke="#8e44ad" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Angle arcs (small, clean) -->
+    ${smallArc(-angle, 0, selSet.has('a') ? '#e74c3c' : '#ffcdd2')}
+    ${smallArc(180, 360 - angle, selSet.has('b') ? '#3498db' : '#bbdefb')}
+    ${smallArc(180 - angle, 180, selSet.has('c') ? '#27ae60' : '#c8e6c9')}
+    ${smallArc(0, 180 - angle, selSet.has('d') ? '#f39c12' : '#ffe0b2')}
     
     <!-- Center point -->
-    <circle cx="${cx}" cy="${cy}" r="5" fill="#333"/>
+    <circle cx="${cx}" cy="${cy}" r="6" fill="#333"/>
     
-    <!-- Angle labels -->
-    <text x="${cx + 40}" y="${cy - 12}" font-size="16" fill="#e74c3c" font-weight="700">a</text>
-    <text x="${cx - 50}" y="${cy - 12}" font-size="16" fill="#3498db" font-weight="700">b</text>
-    <text x="${cx - 50}" y="${cy + 24}" font-size="16" fill="#27ae60" font-weight="700">c</text>
-    <text x="${cx + 40}" y="${cy + 24}" font-size="16" fill="#f39c12" font-weight="700">d</text>
+    <!-- Angle labels - positioned clearly -->
+    <text x="${cx + 48}" y="${cy - 20}" font-size="18" font-weight="700" fill="#e74c3c">a</text>
+    <text x="${cx - 58}" y="${cy - 20}" font-size="18" font-weight="700" fill="#3498db">b</text>
+    <text x="${cx - 58}" y="${cy + 32}" font-size="18" font-weight="700" fill="#27ae60">c</text>
+    <text x="${cx + 48}" y="${cy + 32}" font-size="18" font-weight="700" fill="#f39c12">d</text>
     
     <!-- Line labels -->
-    <text x="${cx + len + 20}" y="${cy + 5}" font-size="14" fill="#2c3e50" font-weight="600">m</text>
-    <text x="${l2.x + 12}" y="${l2.y - 8}" font-size="14" fill="#8e44ad" font-weight="600">l</text>
+    <text x="${cx + len + 16}" y="${cy + 5}" font-size="16" fill="#2c3e50" font-weight="600">m</text>
+    <text x="${l2x + 10}" y="${l2y - 10}" font-size="16" fill="#8e44ad" font-weight="600">l</text>
   `;
 }
 
 function updateUI() {
-  // Update angle buttons
+  // Update button states
   document.querySelectorAll('.angle-btn').forEach(btn => {
     btn.classList.toggle('selected', selected.includes(btn.dataset.angle));
   });
   
-  // Update slots
-  const slot1 = document.getElementById('slot1');
-  const slot2 = document.getElementById('slot2');
-  
-  if (selected.length >= 1) {
-    slot1.textContent = '∠' + selected[0];
-    slot1.className = 'pair-box filled ' + angleColors[selected[0]];
-  } else {
-    slot1.textContent = '?';
-    slot1.className = 'pair-box';
-  }
-  
-  if (selected.length >= 2) {
-    slot2.textContent = '∠' + selected[1];
-    slot2.className = 'pair-box filled ' + angleColors[selected[1]];
-  } else {
-    slot2.textContent = '?';
-    slot2.className = 'pair-box';
-  }
-  
-  // Update relationship hint
-  const hint = document.getElementById('relationshipHint');
+  // Update hint box
+  const hintBox = document.getElementById('hintBox');
   if (selected.length === 2) {
     const [a, b] = selected.sort();
     const isLinear = linearPairs.some(p => p.sort().join() === [a, b].join());
     const isVertical = verticalPairs.some(p => p.sort().join() === [a, b].join());
     
-    if (isLinear && isVertical) {
-      hint.textContent = "These angles could be a linear pair OR vertically opposite!";
-    } else if (isLinear) {
-      hint.innerHTML = `∠${selected[0]} and ∠${selected[1]} are <strong>adjacent</strong> (share a side and vertex) → Linear pair!`;
+    hintBox.classList.add('show');
+    
+    if (isLinear) {
+      document.getElementById('hintType').textContent = '→ Linear Pair';
+      document.getElementById('hintExplain').textContent = 
+        `∠${selected[0]} and ∠${selected[1]} are adjacent and form a straight line. They add to 180°!`;
     } else if (isVertical) {
-      hint.innerHTML = `∠${selected[0]} and ∠${selected[1]} are <strong>across</strong> from each other → Vertically opposite!`;
-    } else {
-      hint.textContent = "These don't form a special pair.";
+      document.getElementById('hintType').textContent = '→ Vertically Opposite';
+      document.getElementById('hintExplain').textContent = 
+        `∠${selected[0]} and ∠${selected[1]} are across from each other. They are equal!`;
     }
-    hint.classList.add('show');
   } else {
-    hint.classList.remove('show');
+    hintBox.classList.remove('show');
   }
   
   // Enable check button
@@ -505,7 +458,7 @@ function updateFoundList() {
   document.getElementById('totalCount').textContent = targetPairs.length;
   
   if (pairs.length === 0) {
-    list.innerHTML = '<span class="found-item empty">None yet - start tapping!</span>';
+    list.innerHTML = '<span class="found-item empty">None yet</span>';
   } else {
     list.innerHTML = pairs.map(p => 
       `<span class="found-item">∠${p[0]} + ∠${p[1]}</span>`
@@ -516,11 +469,8 @@ function updateFoundList() {
   const banner = document.getElementById('successBanner');
   if (pairs.length === targetPairs.length) {
     banner.classList.add('show');
-    if (mode === 'linear') {
-      banner.querySelector('p').textContent = "All 4 linear pairs found! Try vertically opposite next.";
-    } else {
-      banner.querySelector('p').textContent = "Both vertically opposite pairs found!";
-    }
+    document.getElementById('successMsg').textContent = 
+      mode === 'linear' ? "All 4 linear pairs found! Try 'Vertically Opposite' next." : "Both pairs found!";
   } else {
     banner.classList.remove('show');
   }
@@ -532,7 +482,6 @@ function selectAngle(angle) {
   } else if (selected.length < 2) {
     selected.push(angle);
   } else {
-    // Replace oldest
     selected = [selected[1], angle];
   }
   updateUI();
@@ -550,30 +499,29 @@ function checkPair() {
   const targetPairs = mode === 'linear' ? linearPairs : verticalPairs;
   const isValid = targetPairs.some(p => p.sort().join() === [a, b].join());
   
+  const btn = document.getElementById('checkBtn');
+  
   if (isValid) {
-    // Check if already found
     const alreadyFound = foundPairs[mode].some(p => p.sort().join() === [a, b].join());
     if (!alreadyFound) {
       foundPairs[mode].push([a, b]);
       updateFoundList();
     }
     
-    // Visual feedback
-    document.getElementById('checkBtn').textContent = '✓ Correct!';
-    document.getElementById('checkBtn').style.background = '#27ae60';
+    btn.textContent = '✓ Correct!';
+    btn.style.background = '#27ae60';
     setTimeout(() => {
-      document.getElementById('checkBtn').textContent = 'Check Pair';
-      document.getElementById('checkBtn').style.background = '';
+      btn.textContent = 'Check Pair';
+      btn.style.background = '';
       clearSelection();
-    }, 800);
+    }, 700);
   } else {
-    // Wrong pair
-    document.getElementById('checkBtn').textContent = '✗ Not a ' + (mode === 'linear' ? 'linear pair' : 'vertical pair');
-    document.getElementById('checkBtn').style.background = '#e74c3c';
+    btn.textContent = '✗ Not this type';
+    btn.style.background = '#e74c3c';
     setTimeout(() => {
-      document.getElementById('checkBtn').textContent = 'Check Pair';
-      document.getElementById('checkBtn').style.background = '';
-    }, 1000);
+      btn.textContent = 'Check Pair';
+      btn.style.background = '';
+    }, 900);
   }
 }
 
