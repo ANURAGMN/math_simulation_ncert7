@@ -113,9 +113,46 @@ const UNITS=[
 ];
 
 const ct=document.getElementById("sim");
-let uIdx=0;
+let uIdx=0,ucMode="explore",ucQIdx=0,ucQScore=0,ucQTotal=0,ucQAns=false;
+
+const UC_QUIZ=[
+  {q:"12 mm = ? cm",opts:["1.2 cm","0.12 cm","12.0 cm","0.012 cm"],ans:"1.2 cm",ex:"12 ÷ 10 = 1.2 (10 mm per cm)"},
+  {q:"56 mm = ? cm",opts:["5.6 cm","0.56 cm","56.0 cm","0.056 cm"],ans:"5.6 cm",ex:"56 ÷ 10 = 5.6"},
+  {q:"36 cm = ? m",opts:["0.36 m","3.6 m","0.036 m","36.0 m"],ans:"0.36 m",ex:"36 ÷ 100 = 0.36 (100 cm per m)"},
+  {q:"325 cm = ? m",opts:["3.25 m","32.5 m","0.325 m","325.0 m"],ans:"3.25 m",ex:"325 ÷ 100 = 3.25"},
+  {q:"465 g = ? kg",opts:["0.465 kg","4.65 kg","46.5 kg","0.0465 kg"],ans:"0.465 kg",ex:"465 ÷ 1000 = 0.465 (1000 g per kg)"},
+  {q:"1560 g = ? kg",opts:["1.56 kg","15.6 kg","0.156 kg","156.0 kg"],ans:"1.56 kg",ex:"1560 ÷ 1000 = 1.56"},
+  {q:"75 paise = ? rupees",opts:["₹0.75","₹7.50","₹0.075","₹75.00"],ans:"₹0.75",ex:"75 ÷ 100 = 0.75 (100 paise per rupee)"},
+  {q:"250 paise = ? rupees",opts:["₹2.50","₹25.00","₹0.25","₹250.00"],ans:"₹2.50",ex:"250 ÷ 100 = 2.50"},
+  {q:"A doctor prescribes 0.05 mg. A nurse reads it as 0.5 mg. How many times more is that?",opts:["10 times","100 times","2 times","5 times"],ans:"10 times",ex:"0.5 ÷ 0.05 = 10. A decimal point error → 10× overdose!"},
+  {q:"How many mm in 1 kilometer?",opts:["1,000,000","100,000","10,000","1,000"],ans:"1,000,000",ex:"1 km = 1000 m, 1 m = 1000 mm → 1,000 × 1,000 = 10,00,000 mm"}
+];
+
+function renderUCQuiz(){
+  if(ucQIdx>=UC_QUIZ.length)ucQIdx=0;
+  const q=UC_QUIZ[ucQIdx];
+  ct.innerHTML=`
+  <div class="mode-tabs">
+    <button class="mode-tab" onclick="ucMode='explore';render()">Explore</button>
+    <button class="mode-tab active">Quiz</button>
+  </div>
+  <div style="text-align:center;font-size:13px;font-weight:600;color:#555;margin-bottom:10px">Score: <b style="color:#059669">${ucQScore}/${ucQTotal}</b> &bull; Question <b>${ucQIdx+1}/${UC_QUIZ.length}</b></div>
+  <div style="font-size:16px;font-weight:700;color:#1e293b;text-align:center;padding:16px;background:#ecfdf5;border-radius:12px;margin-bottom:12px;line-height:1.5">${q.q}</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px" id="ucqo">${q.opts.map(o=>`<button style="padding:14px;border-radius:12px;border:2px solid #e5e7eb;font-size:14px;font-weight:600;cursor:pointer;background:#fff;text-align:center" class="qopt" data-v="${o}">${o}</button>`).join('')}</div>
+  <div id="ucfb" style="text-align:center;font-size:13px;min-height:20px;margin-bottom:10px"></div>
+  <button id="ucnxt" style="display:none;margin:0 auto;padding:14px 32px;border-radius:12px;border:none;background:linear-gradient(135deg,#059669,#0369a1);color:#fff;font-weight:700;font-size:14px;cursor:pointer">Next Question</button>`;
+  ucQAns=false;
+  ct.querySelector('#ucqo').addEventListener('click',e=>{
+    const b=e.target.closest('.qopt');if(!b||ucQAns)return;ucQAns=true;ucQTotal++;
+    if(b.dataset.v===q.ans){b.style.borderColor='#16a34a';b.style.background='#dcfce7';b.style.color='#166534';ucQScore++;ct.querySelector('#ucfb').innerHTML=`<div style="background:#dcfce7;color:#166534;padding:12px;border-radius:10px"><b>Correct!</b> ${q.ex}</div>`}
+    else{b.style.borderColor='#dc2626';b.style.background='#fef2f2';b.style.color='#991b1b';ct.querySelectorAll('.qopt').forEach(x=>{if(x.dataset.v===q.ans){x.style.borderColor='#16a34a';x.style.background='#dcfce7';x.style.color='#166534'}});ct.querySelector('#ucfb').innerHTML=`<div style="background:#fef2f2;color:#991b1b;padding:12px;border-radius:10px"><b>Answer: ${q.ans}</b> &mdash; ${q.ex}</div>`}
+    ct.querySelector('#ucnxt').style.display='block';
+  });
+  ct.querySelector('#ucnxt').onclick=()=>{ucQIdx++;renderUCQuiz()};
+}
 
 function render(){
+  if(ucMode==='quiz'){renderUCQuiz();return}
   const u=UNITS[uIdx];
   const v=u.val;
   const converted=v/u.factor;
@@ -124,7 +161,10 @@ function render(){
   let tabsHtml=UNITS.map((ux,i)=>`<button class="mode-tab${i===uIdx?' active':''}" data-i="${i}">${ux.name}</button>`).join('');
 
   ct.innerHTML=`
-  <div class="mode-tabs">${tabsHtml}</div>
+  <div class="mode-tabs">
+    ${tabsHtml}
+    <button class="mode-tab" onclick="ucMode='quiz';ucQIdx=0;ucQScore=0;ucQTotal=0;renderUCQuiz()" style="background:#fef3c7;border-color:#f59e0b;color:#92400e">Quiz</button>
+  </div>
   <div class="conv-display">
     <div class="conv-box"><div class="conv-val">${v}</div><div class="conv-unit">${u.from}</div></div>
     <div class="conv-arrow">=</div>

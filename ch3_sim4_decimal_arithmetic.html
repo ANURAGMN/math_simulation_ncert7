@@ -116,11 +116,48 @@ const PROBLEMS=[
 ];
 
 const ct=document.getElementById("sim");
-let pIdx=0;
+let pIdx=0,arMode="explore",arQIdx=0,arQScore=0,arQTotal=0,arQAns=false;
+
+const AR_QUIZ=[
+  {q:"5.3 + 2.6 = ?",opts:["7.9","7.09","8.9","79"],ans:"7.9",ex:"3+6=9 tenths, 5+2=7 → 7.9"},
+  {q:"18 + 8.8 = ?",opts:["26.8","26.08","188.8","9.8"],ans:"26.8",ex:"18.0 + 8.8: 0+8=8 tenths, 18+8=26 → 26.8"},
+  {q:"2.15 + 5.26 = ?",opts:["7.41","7.31","73.1","7.14"],ans:"7.41",ex:"5+6=11 hundredths (carry 1), 1+2+1=4 tenths, 2+5=7 → 7.41"},
+  {q:"5.6 − 2.3 = ?",opts:["3.3","3.03","33","2.3"],ans:"3.3",ex:"6−3=3 tenths, 5−2=3 → 3.3"},
+  {q:"18 − 8.8 = ?",opts:["9.2","9.02","10.2","8.2"],ans:"9.2",ex:"18.0 − 8.8: borrow 1 unit → 17.10, 10−8=2 tenths, 17−8=9 → 9.2"},
+  {q:"10.4 − 4.5 = ?",opts:["5.9","6.9","5.1","6.1"],ans:"5.9",ex:"Can't do 4−5 tenths → borrow: 9.14, 14−5=9 tenths, 9−4=5 → 5.9"},
+  {q:"0.75 + 0.03 = ?",opts:["0.78","0.78","7.8","0.708"],ans:"0.78",ex:"5+3=8 hundredths, 7 tenths stays → 0.78"},
+  {q:"9.9 − 9.09 = ?",opts:["0.81","0.09","0.9","8.1"],ans:"0.81",ex:"9.90 − 9.09: 0−9 → borrow: 9.8.10, 10−9=1 h, 8−0=8 t, 9−9=0 → 0.81"},
+  {q:"Estimate: 25.936 + 8.202 is between?",opts:["33 and 36","25 and 30","40 and 45","8 and 10"],ans:"33 and 36",ex:"Whole parts: 25+8=33. Max: 26+9=35. So between 33 and 36."},
+  {q:"17 − 0.05 = ?",opts:["16.95","16.5","16.05","17.05"],ans:"16.95",ex:"17.00 − 0.05: 0−5 → borrow: 16.9.10, 10−5=5 h, 9 t, 16 → 16.95"}
+];
+
+function renderARQuiz(){
+  if(arQIdx>=AR_QUIZ.length)arQIdx=0;
+  const q=AR_QUIZ[arQIdx];
+  ct.innerHTML=`
+  <div style="display:flex;gap:6px;margin-bottom:14px">
+    <button class="preset-btn" style="flex:1;text-align:center;padding:10px" onclick="arMode='explore';render()">Explore Problems</button>
+    <button class="preset-btn" style="flex:1;text-align:center;padding:10px;background:#dc2626;color:#fff;border-color:#dc2626">Quiz</button>
+  </div>
+  <div style="text-align:center;font-size:13px;font-weight:600;color:#555;margin-bottom:10px">Score: <b style="color:#dc2626">${arQScore}/${arQTotal}</b> &bull; Question <b>${arQIdx+1}/${AR_QUIZ.length}</b></div>
+  <div style="font-size:18px;font-weight:800;color:#1e293b;text-align:center;padding:18px;background:#fef2f2;border-radius:14px;margin-bottom:12px;font-family:'Courier New',monospace">${q.q}</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px" id="arqo">${q.opts.map(o=>`<button style="padding:14px;border-radius:12px;border:2px solid #e5e7eb;font-size:15px;font-weight:700;cursor:pointer;background:#fff;text-align:center;font-family:'Courier New',monospace" class="qopt" data-v="${o}">${o}</button>`).join('')}</div>
+  <div id="arfb" style="text-align:center;font-size:13px;min-height:20px;margin-bottom:10px"></div>
+  <button id="arnxt" style="display:none;margin:0 auto;padding:14px 32px;border-radius:12px;border:none;background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;font-weight:700;font-size:14px;cursor:pointer">Next Question</button>`;
+  arQAns=false;
+  ct.querySelector('#arqo').addEventListener('click',e=>{
+    const b=e.target.closest('.qopt');if(!b||arQAns)return;arQAns=true;arQTotal++;
+    if(b.dataset.v===q.ans){b.style.borderColor='#16a34a';b.style.background='#dcfce7';b.style.color='#166534';arQScore++;ct.querySelector('#arfb').innerHTML=`<div style="background:#dcfce7;color:#166534;padding:12px;border-radius:10px"><b>Correct!</b> ${q.ex}</div>`}
+    else{b.style.borderColor='#dc2626';b.style.background='#fef2f2';b.style.color='#991b1b';ct.querySelectorAll('.qopt').forEach(x=>{if(x.dataset.v===q.ans){x.style.borderColor='#16a34a';x.style.background='#dcfce7';x.style.color='#166534'}});ct.querySelector('#arfb').innerHTML=`<div style="background:#fef2f2;color:#991b1b;padding:12px;border-radius:10px"><b>Answer: ${q.ans}</b> &mdash; ${q.ex}</div>`}
+    ct.querySelector('#arnxt').style.display='block';
+  });
+  ct.querySelector('#arnxt').onclick=()=>{arQIdx++;renderARQuiz()};
+}
 
 function pad(n,dp){return n.toFixed(dp)}
 
 function render(){
+  if(arMode==='quiz'){renderARQuiz();return}
   const p=PROBLEMS[pIdx];
   const dp=Math.max((p.a.toString().split('.')[1]||'').length,(p.b.toString().split('.')[1]||'').length,
     (p.result.toString().split('.')[1]||'').length);
@@ -154,6 +191,10 @@ function render(){
   ).join('');
 
   ct.innerHTML=`
+  <div style="display:flex;gap:6px;margin-bottom:14px">
+    <button class="preset-btn" style="flex:1;text-align:center;padding:10px;background:#dc2626;color:#fff;border-color:#dc2626">Explore Problems</button>
+    <button class="preset-btn" style="flex:1;text-align:center;padding:10px" onclick="arMode='quiz';arQIdx=0;arQScore=0;arQTotal=0;renderARQuiz()">Quiz</button>
+  </div>
   <div class="comp-display">${rows}</div>
   ${stepsHtml}
   <div class="result-panel">
