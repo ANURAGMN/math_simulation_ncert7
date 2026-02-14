@@ -17,36 +17,50 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .mode-tabs{display:flex;gap:6px;margin-bottom:12px}
 .mode-tab{flex:1;padding:10px 4px;border:2px solid #e0e0e0;border-radius:8px;background:#fafafa;font-size:10px;font-weight:600;text-align:center;cursor:pointer}
 .mode-tab.active{border-color:#ea580c;background:#fff7ed;color:#9a3412}
+/* Rule box */
+.rule-box{background:linear-gradient(135deg,#fff7ed,#fed7aa);border-radius:12px;padding:12px;margin-bottom:10px;border:2px solid #fdba74}
+.rule-box h3{font-size:13px;color:#9a3412;margin-bottom:6px}
+.rule-box p{font-size:12px;color:#7c2d12;line-height:1.5}
+.rule-box .rule-digits{display:flex;gap:6px;margin-top:8px;justify-content:center}
+.rule-box .digit-chip{padding:8px 14px;background:#ea580c;color:#fff;border-radius:10px;font-size:16px;font-weight:800;font-family:'Courier New',monospace}
+.rule-box .op-chip{padding:6px 10px;background:#fff;color:#9a3412;border-radius:8px;font-size:13px;font-weight:700;border:1px solid #fdba74}
 /* Target display */
-.target-display{background:linear-gradient(135deg,#7c2d12,#9a3412);border-radius:12px;padding:16px;text-align:center;margin-bottom:10px}
+.target-display{background:linear-gradient(135deg,#7c2d12,#9a3412);border-radius:12px;padding:14px;text-align:center;margin-bottom:10px}
 .target-label{font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px}
 .target-value{font-size:36px;font-weight:800;color:#fff;margin:4px 0}
 .target-sub{font-size:11px;color:rgba(255,255,255,.5)}
 /* Expression builder */
 .builder{background:#fff7ed;border-radius:12px;padding:12px;margin-bottom:10px}
-.builder-expr{font-size:22px;font-weight:700;text-align:center;color:#1e293b;min-height:36px;font-family:'Courier New',monospace;margin-bottom:8px;word-break:break-all}
-.builder-result{text-align:center;font-size:14px;font-weight:600;margin-bottom:8px}
-.builder-result .val{color:#ea580c;font-size:18px}
-.builder-result .match{color:#16a34a}
-.builder-result .no-match{color:#dc2626}
+.builder-expr{font-size:24px;font-weight:700;text-align:center;color:#1e293b;min-height:40px;font-family:'Courier New',monospace;margin-bottom:8px;word-break:break-all;letter-spacing:1px}
+.builder-result{text-align:center;font-size:14px;font-weight:600;margin-bottom:4px}
+.builder-result .val{color:#ea580c;font-size:20px}
+.builder-result .match{color:#16a34a;font-weight:700}
+.builder-result .no-match{color:#94a3b8}
 /* Buttons */
-.btn-grid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.calc-btn{width:52px;height:44px;border-radius:10px;border:none;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.calc-btn:active{transform:scale(.93)}
-.calc-btn.num{background:#f1f5f9;color:#1e293b}
+.btn-grid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:4px 0}
+.calc-btn{width:52px;height:46px;border-radius:10px;border:none;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s}
+.calc-btn:active{transform:scale(.9)}
+.calc-btn.num{background:#f1f5f9;color:#1e293b;font-family:'Courier New',monospace}
 .calc-btn.op{background:#ea580c;color:#fff}
 .calc-btn.bracket{background:#fbbf24;color:#7c2d12}
-.calc-btn.clear{background:#fef2f2;color:#dc2626}
+.calc-btn.action{background:#fef2f2;color:#dc2626}
 .calc-btn.eval{background:#16a34a;color:#fff;width:80px}
-/* Results grid for four 4s */
-.results-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:10px 0}
-.result-cell{padding:8px 4px;border-radius:8px;text-align:center;font-size:12px;font-weight:700}
+/* Progress grid */
+.progress-section{margin:10px 0}
+.progress-title{font-size:11px;font-weight:600;color:#888;margin-bottom:6px}
+.results-grid{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.result-cell{width:42px;padding:8px 4px;border-radius:8px;text-align:center;font-size:12px;font-weight:700}
 .result-cell.found{background:#dcfce7;color:#166534}
 .result-cell.missing{background:#f1f5f9;color:#cbd5e1}
+.result-cell.current{background:#fef3c7;color:#92400e;border:2px solid #f59e0b}
 /* Status */
-.status-bar{text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:8px;margin:8px 0}
+.status-bar{text-align:center;font-size:12px;font-weight:600;padding:10px;border-radius:10px;margin:8px 0}
 .status-bar.success{background:#dcfce7;color:#166534}
 .status-bar.try{background:#fff7ed;color:#9a3412}
+.status-bar.info{background:#eff6ff;color:#1e40af}
+/* Solutions list */
+.solutions{margin-top:8px}
+.solution-item{font-size:11px;color:#555;padding:3px 0;font-family:'Courier New',monospace;border-bottom:1px solid #f1f5f9}
 /* Insight */
 .insight-box{background:linear-gradient(135deg,#fff7ed,#fed7aa);border-radius:10px;padding:12px;margin-top:12px;border-left:4px solid #ea580c;font-size:12px;line-height:1.5}
 .insight-title{font-weight:700;color:#9a3412;margin-bottom:4px}
@@ -78,8 +92,10 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 </div>
 <div class="sim-card" id="sim"></div>
 <div class="insight-box">
-  <div class="insight-title">Challenge</div>
-  Using the given numbers with +, −, ×, ÷ and brackets, build an expression that equals the target. There are often multiple solutions — creativity with arithmetic properties helps!
+  <div class="insight-title">From the Textbook (Page 45)</div>
+  Using three 3s: (3+3)/3 = 2, 3+3−3 = 3, 3×3+3 = 12.<br>
+  Using four 4s: make every number from 1 to 20!<br>
+  The same digits with different operations and brackets create completely different values. That's the power of arithmetic expressions!
 </div>
 
 <button class="help-btn" id="helpBtn">?</button>
@@ -88,20 +104,20 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
     <div class="help-close"><h2>How to Use This Simulation</h2><button id="helpClose">&times;</button></div>
     <div class="help-section">
       <div class="help-section-title">What To Do</div>
-      <div class="help-step"><span class="help-step-num">1</span><span>Look at the <b>target number</b> at the top. Your goal is to build an expression that equals this number.</span></div>
-      <div class="help-step"><span class="help-step-num">2</span><span>Tap <b>numbers</b>, <b>operations</b> (+, −, ×, ÷), and <b>brackets</b> to build your expression.</span></div>
-      <div class="help-step"><span class="help-step-num">3</span><span>Tap the green <b>= button</b> to evaluate. If it matches the target, you win!</span></div>
-      <div class="help-step"><span class="help-step-num">4</span><span>In <b>Four 4s</b> mode, use exactly four 4s to make each number from 1 to 20.</span></div>
+      <div class="help-step"><span class="help-step-num">1</span><span>Pick a <b>challenge</b> — each one tells you exactly which digits you can use and how many.</span></div>
+      <div class="help-step"><span class="help-step-num">2</span><span>A <b>target number</b> is highlighted. Build an expression using ONLY the allowed digits.</span></div>
+      <div class="help-step"><span class="help-step-num">3</span><span>Use <b>+, −, ×, ÷</b> and <b>brackets ( )</b> to connect the digits. Tap <b>=</b> to check.</span></div>
+      <div class="help-step"><span class="help-step-num">4</span><span>When you match a target, it turns <b>green</b>. Try to find ALL targets in each challenge!</span></div>
     </div>
     <div class="help-section">
       <div class="help-section-title">Try This</div>
-      <div class="help-try"><b>Three 3s:</b> (3+3)/3 = 2, 3+3−3 = 3, 3×3+3 = 12</div>
-      <div class="help-try"><b>Four 4s:</b> (4+4)/(4+4) = 1, 4/4+4/4 = 2, (4+4+4)/4 = 3, 4+(4−4)×4 = 4</div>
-      <div class="help-try"><b>Using 2,3,5:</b> 2−3+5 = 4, 3−(5−2) = 0, 5+3+2 = 10, 2×(3+5) = 16</div>
+      <div class="help-try"><b>Four 4s → 1:</b> Try (4+4)÷(4+4). That's 8÷8 = 1!</div>
+      <div class="help-try"><b>Four 4s → 5:</b> Try (4×4+4)÷4. That's 20÷4 = 5!</div>
+      <div class="help-try"><b>2,3,5 → 0:</b> Try 5−3−2. Or 2+3−5. Both work!</div>
     </div>
     <div class="help-section">
       <div class="help-section-title">Key Concept</div>
-      <div class="help-key">The same numbers with different operations and bracket placement create very different values. This is the power of arithmetic expressions — brackets change everything!</div>
+      <div class="help-key">Brackets change everything! 4+4÷4+4 = 9, but (4+4)÷(4+4) = 1. Same digits, same operations, different brackets → completely different value.</div>
     </div>
   </div>
 </div>
@@ -111,130 +127,152 @@ document.getElementById('helpBtn').onclick=()=>document.getElementById('helpOver
 document.getElementById('helpClose').onclick=()=>document.getElementById('helpOverlay').classList.remove('open');
 document.getElementById('helpOverlay').onclick=(e)=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')};
 
-const c=document.getElementById("sim");
-let mode="free",expr="",target=14,found=new Set();
-
 const CHALLENGES=[
-  {name:"Three 3s",nums:"3",desc:"Use three 3s",targets:[0,1,2,3,4,5,6,7,8,9,10,11,12]},
-  {name:"Four 4s",nums:"4",desc:"Use four 4s to make 1–20",targets:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]},
-  {name:"2, 3, 5",nums:"2,3,5",desc:"Use 2, 3, 5 once each",targets:[-6,-4,-2,0,1,2,3,4,5,6,7,8,9,10]}
+  {id:"three3s",name:"Three 3s",digits:["3","3","3"],digitDisplay:"3, 3, 3",
+   rule:"Use exactly three 3s with +, −, ×, ÷ and brackets to make each target value.",
+   targets:[0,1,2,3,4,5,6,7,8,9,10,11,12],
+   hints:{0:"3−3+3−3? No... 3×3−3×3? Try: (3−3)×3",1:"Divide! 3÷3÷3? No... (3−3+3)÷3? Try: 3−3+3÷3... Hmm try 3÷3×3÷3... actually: (3+3−3)÷3? Just try (3−3)×3+... actually simplest: 3÷(3×3)? No that's fraction. Think about 3−3+3÷3... ",2:"(3+3)÷3",3:"3+3−3",6:"3×3−3",9:"3×3×3÷3? No: 3+3+3",12:"3×3+3"}},
+  {id:"four4s",name:"Four 4s",digits:["4","4","4","4"],digitDisplay:"4, 4, 4, 4",
+   rule:"Use exactly four 4s with +, −, ×, ÷ and brackets to make each number from 1 to 20.",
+   targets:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+   hints:{1:"(4+4)÷(4+4)",2:"4÷4+4÷4",3:"(4+4+4)÷4",4:"4+(4−4)×4",5:"(4×4+4)÷4",7:"4+4−4÷4",8:"4+4+4−4",10:"(44−4)÷4",12:"4×(4−4÷4)",15:"4×4−4÷4",16:"4×4+4−4",17:"4×4+4÷4",20:"4×(4+4÷4)"}},
+  {id:"use235",name:"Use 2, 3, 5",digits:["2","3","5"],digitDisplay:"2, 3, 5",
+   rule:"Use the numbers 2, 3, and 5 exactly once each. Use +, − and brackets.",
+   targets:[-6,-4,0,1,4,6,10],
+   hints:{0:"5−3−2 or 2+3−5",4:"5+2−3 or 2−3+5",10:"5+3+2","-6":"2−3−5","-4":"3−2−5",6:"5−2+3"}},
+  {id:"pay432",name:"Pay ₹432",digits:["₹1","₹5","₹10","₹20","₹50","₹100"],digitDisplay:"Coins & notes",
+   rule:"Express ₹432 using ₹1, ₹5, ₹10, ₹20, ₹50, ₹100 notes. Write as a sum of products (e.g., 4×100+1×20+...).",
+   targets:[432],
+   hints:{432:"4×100+1×20+1×10+2×1 OR 8×50+1×10+4×5+2×1"}}
 ];
-let chIdx=0;
+
+const c=document.getElementById("sim");
+let chIdx=0,expr="",found={},currentTarget=null,solutions={};
 
 function safeEval(s){
-  try{
-    // Replace ÷ with /
-    s=s.replace(/÷/g,'/');
-    // Only allow digits, operators, brackets, spaces
-    if(!/^[0-9+\-*/().÷× ]+$/.test(s))return NaN;
-    s=s.replace(/×/g,'*');
-    const v=Function('"use strict"; return ('+s+')')();
-    if(!isFinite(v))return NaN;
-    return Math.round(v*1000)/1000;
-  }catch(e){return NaN}
+  try{s=s.replace(/÷/g,'/').replace(/×/g,'*');if(!/^[0-9+\-*/().₹ ]+$/.test(s))return NaN;const v=Function('"use strict"; return ('+s+')')();if(!isFinite(v))return NaN;return Math.round(v*10000)/10000}catch(e){return NaN}
 }
 
-function renderFree(){
-  const val=safeEval(expr);
-  const match=val===target;
-  const nums=[1,2,3,4,5,6,7,8,9,0];
-  const ops=["+","−","×","÷"];
-
-  c.innerHTML=`
-  <div class="mode-tabs">
-    <button class="mode-tab active" data-m="free">Free Build</button>
-    <button class="mode-tab" data-m="challenge">Challenges</button>
-  </div>
-  <div class="target-display">
-    <div class="target-label">Target</div>
-    <div class="target-value">${target}</div>
-    <div class="target-sub">Build an expression that equals this</div>
-  </div>
-  <div class="builder">
-    <div class="builder-expr" id="expr-display">${expr||"_"}</div>
-    <div class="builder-result">${expr?`= <span class="val">${isNaN(val)?"?":val}</span> ${match?'<span class="match">✓ Match!</span>':'<span class="no-match">✗</span>'}`:""}</div>
-  </div>
-  ${match?'<div class="status-bar success">You got it! Try a different expression for the same target.</div>':'<div class="status-bar try">Keep building...</div>'}
-  <div class="btn-grid">
-    ${nums.map(n=>`<button class="calc-btn num" data-v="${n}">${n}</button>`).join("")}
-    ${ops.map(o=>`<button class="calc-btn op" data-v="${o}">${o}</button>`).join("")}
-    <button class="calc-btn bracket" data-v="(">(</button>
-    <button class="calc-btn bracket" data-v=")">)</button>
-    <button class="calc-btn clear" data-v="C">C</button>
-    <button class="calc-btn clear" data-v="⌫">⌫</button>
-    <button class="calc-btn eval" data-v="=">=</button>
-  </div>
-  <div style="margin-top:10px">
-    <div style="font-size:10px;color:#888;margin-bottom:4px">Change target:</div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px">${[0,1,2,3,4,5,10,12,14,20,24,100].map(t=>`<button class="calc-btn num" style="width:42px;height:32px;font-size:12px" data-t="${t}">${t}</button>`).join("")}</div>
-  </div>`;
-
-  wireCommon();
-  c.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{target=parseInt(b.dataset.t);expr="";renderFree()});
-}
-
-function renderChallenge(){
+function render(){
   const ch=CHALLENGES[chIdx];
-  const val=safeEval(expr);
+  if(!found[ch.id])found[ch.id]=new Set();
+  if(!solutions[ch.id])solutions[ch.id]={};
+  if(currentTarget===null)currentTarget=ch.targets.find(t=>!found[ch.id].has(t));
+  if(currentTarget===null)currentTarget=ch.targets[0];
 
+  const val=safeEval(expr);
+  const isMatch=!isNaN(val)&&ch.targets.includes(val);
+  const foundCount=found[ch.id].size;
+
+  // Challenge tabs
+  let chTabs=CHALLENGES.map((cx,i)=>`<button class="mode-tab${i===chIdx?" active":""}" data-ch="${i}">${cx.name}</button>`).join("");
+
+  // Rule box
+  let digitChips=ch.id==="pay432"
+    ?`<span class="op-chip">₹1, ₹5, ₹10, ₹20, ₹50, ₹100</span>`
+    :ch.digits.map(d=>`<span class="digit-chip">${d}</span>`).join("");
+
+  // Progress grid
   let gridHtml=ch.targets.map(t=>{
-    const f=found.has(chIdx+":"+t);
-    return`<div class="result-cell ${f?"found":"missing"}">${t}${f?" ✓":""}</div>`;
+    const f=found[ch.id].has(t);
+    const cur=t===currentTarget&&!f;
+    return`<div class="result-cell ${f?"found":cur?"current":"missing"}" data-tgt="${t}">${t}${f?" ✓":""}</div>`;
   }).join("");
 
-  const nums=ch.nums==="4"?["4"]:ch.nums==="3"?["3"]:["2","3","5"];
-  const ops=["+","−","×","÷"];
+  // Solutions for current target
+  let solHtml="";
+  if(solutions[ch.id][currentTarget]){
+    solHtml=`<div class="solutions"><div style="font-size:10px;color:#888;margin-bottom:2px">Your solutions for ${currentTarget}:</div>`;
+    solutions[ch.id][currentTarget].forEach(s=>{solHtml+=`<div class="solution-item">${s}</div>`});
+    solHtml+=`</div>`;
+  }
+
+  // Hint for current target
+  let hintText="";
+  if(ch.hints&&ch.hints[currentTarget]!==undefined){
+    hintText=`<div style="font-size:10px;color:#888;margin-top:6px">Stuck? Hint: <span style="color:#ea580c;font-weight:600">${ch.hints[currentTarget]}</span></div>`;
+  }
+
+  // Available buttons
+  let numBtns;
+  if(ch.id==="pay432"){
+    numBtns=[1,5,10,20,50,100].map(n=>`<button class="calc-btn num" data-v="${n}" style="font-size:12px">${n}</button>`).join("");
+  } else {
+    numBtns=ch.digits.filter((v,i,a)=>a.indexOf(v)===i).map(d=>`<button class="calc-btn num" data-v="${d}">${d}</button>`).join("");
+  }
+
+  let statusHtml;
+  if(foundCount===ch.targets.length){
+    statusHtml=`<div class="status-bar success">All ${ch.targets.length} targets found! Amazing!</div>`;
+  } else if(isMatch&&expr){
+    statusHtml=`<div class="status-bar success">You made ${val}! ${foundCount+(!found[ch.id].has(val)?1:0)}/${ch.targets.length} found.</div>`;
+  } else {
+    statusHtml=`<div class="status-bar try">Target: <b>${currentTarget}</b> — build an expression that equals it. (${foundCount}/${ch.targets.length} found)</div>`;
+  }
 
   c.innerHTML=`
-  <div class="mode-tabs">
-    <button class="mode-tab" data-m="free">Free Build</button>
-    <button class="mode-tab active" data-m="challenge">Challenges</button>
+  <div class="mode-tabs">${chTabs}</div>
+
+  <div class="rule-box">
+    <h3>${ch.name}</h3>
+    <p>${ch.rule}</p>
+    <div class="rule-digits">${digitChips}<span class="op-chip">+ − × ÷ ( )</span></div>
   </div>
-  <div style="display:flex;gap:6px;margin-bottom:10px">${CHALLENGES.map((cx,i)=>`<button class="mode-tab${i===chIdx?" active":""}" data-ch="${i}" style="flex:1;font-size:9px">${cx.name}</button>`).join("")}</div>
-  <div class="target-display" style="padding:10px">
-    <div class="target-label">${ch.desc}</div>
-    <div class="target-value" style="font-size:18px">Found: ${ch.targets.filter(t=>found.has(chIdx+":"+t)).length} / ${ch.targets.length}</div>
+
+  <div class="progress-section">
+    <div class="progress-title">Targets — tap one to set it as your goal:</div>
+    <div class="results-grid" id="target-grid">${gridHtml}</div>
   </div>
-  <div class="results-grid">${gridHtml}</div>
+
+  ${statusHtml}
+
   <div class="builder">
-    <div class="builder-expr">${expr||"_"}</div>
-    <div class="builder-result">${expr?`= <span class="val">${isNaN(val)?"?":val}</span> ${ch.targets.includes(val)&&!isNaN(val)?'<span class="match">✓</span>':''}`:""}</div>
+    <div class="builder-expr">${expr||"tap digits and operators below"}</div>
+    <div class="builder-result">${expr&&expr.length>0?`= <span class="val">${isNaN(val)?"...":val}</span> ${isMatch?'<span class="match">✓ Match!</span>':'<span class="no-match">'+(isNaN(val)?'':'≠ '+currentTarget)+'</span>'}`:""}</div>
   </div>
+
   <div class="btn-grid">
-    ${nums.map(n=>`<button class="calc-btn num" data-v="${n}">${n}</button>`).join("")}
-    ${ops.map(o=>`<button class="calc-btn op" data-v="${o}">${o}</button>`).join("")}
+    ${numBtns}
+    <button class="calc-btn op" data-v="+">+</button>
+    <button class="calc-btn op" data-v="−">−</button>
+    <button class="calc-btn op" data-v="×">×</button>
+    <button class="calc-btn op" data-v="÷">÷</button>
     <button class="calc-btn bracket" data-v="(">(</button>
     <button class="calc-btn bracket" data-v=")">)</button>
-    <button class="calc-btn clear" data-v="C">C</button>
-    <button class="calc-btn clear" data-v="⌫">⌫</button>
+    <button class="calc-btn action" data-v="⌫">⌫</button>
+    <button class="calc-btn action" data-v="C">C</button>
     <button class="calc-btn eval" data-v="=">=</button>
-  </div>`;
+  </div>
 
-  wireCommon();
-  c.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>{chIdx=parseInt(b.dataset.ch);expr="";renderChallenge()});
-}
+  ${solHtml}
+  ${hintText}`;
 
-function wireCommon(){
-  c.querySelectorAll(".mode-tab[data-m]").forEach(b=>b.onclick=()=>{
-    mode=b.dataset.m;expr="";if(mode==="free")renderFree();else renderChallenge();
+  // Wire events
+  c.querySelectorAll(".mode-tab[data-ch]").forEach(b=>b.onclick=()=>{chIdx=parseInt(b.dataset.ch);expr="";currentTarget=null;render()});
+  c.querySelector("#target-grid").addEventListener("click",e=>{
+    const cell=e.target.closest(".result-cell");if(!cell)return;
+    currentTarget=parseInt(cell.dataset.tgt);expr="";render();
   });
   c.querySelectorAll(".calc-btn[data-v]").forEach(b=>b.onclick=()=>{
     const v=b.dataset.v;
     if(v==="C"){expr=""}
     else if(v==="⌫"){expr=expr.slice(0,-1)}
     else if(v==="="){
-      const val=safeEval(expr);
-      if(!isNaN(val)&&mode==="challenge"){
-        const ch=CHALLENGES[chIdx];
-        if(ch.targets.includes(val))found.add(chIdx+":"+val);
+      const result=safeEval(expr);
+      if(!isNaN(result)&&ch.targets.includes(result)){
+        found[ch.id].add(result);
+        if(!solutions[ch.id][result])solutions[ch.id][result]=[];
+        if(!solutions[ch.id][result].includes(expr))solutions[ch.id][result].push(expr);
+        // Auto-advance to next unfound target
+        const nextUnfound=ch.targets.find(t=>!found[ch.id].has(t));
+        if(nextUnfound!==undefined)setTimeout(()=>{currentTarget=nextUnfound;expr="";render()},800);
       }
     }
     else{expr+=v}
-    if(mode==="free")renderFree();else renderChallenge();
+    render();
   });
 }
-
-renderFree();
+render();
 </script>
 </body>
 </html>
