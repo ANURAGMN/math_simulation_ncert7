@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sense of Scale — Large Number Visualizer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:#f4f6f8}
+#app{max-width:420px;margin:auto;padding:10px}
+.section-title{font-size:13px;font-weight:600;margin:8px 4px;color:#444}
+.sim-card{background:#fff;border-radius:14px;padding:8px;box-shadow:0 6px 18px rgba(0,0,0,.08);margin-bottom:12px}
+.visual{position:relative;min-height:220px;background:#eef3f9;border-radius:12px;overflow:hidden;touch-action:none}
+svg{width:100%;height:100%;display:block}
+.static-hint{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.95);border-radius:8px;padding:6px 8px;font-size:11px;line-height:1.3;box-shadow:0 3px 8px rgba(0,0,0,.12);z-index:2;max-width:60%}
+.metrics{position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.96);border-radius:8px;padding:6px 8px;font-size:11px;line-height:1.4;box-shadow:0 3px 8px rgba(0,0,0,.12);z-index:2;max-width:calc(100% - 16px)}
+.control-toggle{position:absolute;right:8px;top:8px;background:#007AFF;color:#fff;font-size:11px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer;z-index:2}
+.control-overlay{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid #ddd;padding:8px;transform:translateY(100%);transition:transform .25s ease;z-index:5;max-height:70%;overflow-y:auto}
+.control-overlay.open{transform:translateY(0)}
+.control-group{margin-bottom:6px}
+.control-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px}
+.control-group input[type="range"]{width:100%}
+.segmented{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap}
+.segmented button{flex:1;min-width:55px;padding:6px 4px;border-radius:6px;border:none;font-size:10px;background:#e0e0e0;cursor:pointer}
+.segmented button.active{background:#007AFF;color:#fff;font-weight:600}
+.submit-btn{width:100%;margin-top:6px;padding:8px;border-radius:8px;border:none;background:#007AFF;color:#fff;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="section-title">Reference (baseline — familiar sizes)</div>
+  <div class="sim-card" id="ref"></div>
+  <div class="section-title">Experiment (change & observe)</div>
+  <div class="sim-card" id="exp"></div>
+</div>
+<script>
+function fmtI(n){if(n===0)return"0";let s=Math.round(n).toString();if(s.length<=3)return s;let l=s.slice(-3),r=s.slice(0,-3),p=[];while(r.length>2){p.unshift(r.slice(-2));r=r.slice(0,-2)}if(r.length)p.unshift(r);return p.join(",")+","+l}
+
+// ── Reference: Height comparison (Somu's building baseline) ──
+function createRef(cid){
+  const c=document.getElementById(cid);
+  const items=[
+    {name:"Somu (1m)",h:1,color:"#f59e0b"},
+    {name:"Building (40m)",h:40,color:"#6366f1"},
+    {name:"Statue of Unity (182m)",h:182,color:"#10b981"},
+    {name:"Kunchikal Falls (455m)",h:455,color:"#3b82f6"},
+    {name:"Burj Khalifa (828m)",h:828,color:"#8b5cf6"},
+    {name:"Bald Eagle max (6000m)",h:6000,color:"#ef4444"},
+    {name:"Mt. Everest (8850m)",h:8850,color:"#64748b"},
+    {name:"Aeroplane (12800m)",h:12800,color:"#0ea5e9"}
+  ];
+  const maxH=12800;
+  const W=380,H=240,baseY=220,maxBar=180;
+
+  function render(){
+    let bars="";
+    items.forEach((it,i)=>{
+      const bw=36,x=10+i*(bw+8);
+      const bh=Math.max(2,it.h/maxH*maxBar);
+      const y=baseY-bh;
+      bars+=`<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3" fill="${it.color}" opacity=".85"/>`;
+      bars+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="8" font-weight="600" fill="#333">${it.h>999?Math.round(it.h/1000)+"K":it.h}m</text>`;
+      // Rotated label
+      bars+=`<text x="${x+bw/2}" y="${baseY+10}" text-anchor="end" font-size="6" fill="#888" transform="rotate(-45 ${x+bw/2} ${baseY+10})">${it.name.split("(")[0].trim()}</text>`;
+    });
+    c.innerHTML=`
+    <div class="visual">
+      <div class="static-hint"><b>Height comparison</b><br>Somu's building = baseline</div>
+      <svg viewBox="0 0 ${W} ${H+30}">
+        <line x1="5" y1="${baseY}" x2="${W-5}" y2="${baseY}" stroke="#ccc" stroke-width="1"/>
+        ${bars}
+      </svg>
+      <div class="metrics">
+        <div>Statue of Unity = <b>${(182/40).toFixed(1)}x</b> the building</div>
+        <div>Mt. Everest = <b>${(8850/40).toFixed(0)}x</b> the building</div>
+        <div>Tap to see next comparison</div>
+      </div>
+    </div>`;
+  }
+  render();
+}
+
+// ── Experiment: Interactive scenario builder ──
+function createExp(cid){
+  const c=document.getElementById(cid);
+
+  const SCENARIOS=[
+    {
+      id:"journey",title:"Journey Calculator",
+      desc:"How far can you travel?",
+      vars:[
+        {key:"speed",label:"Speed (km/day)",min:10,max:5000,step:10,val:100},
+        {key:"years",label:"Duration (years)",min:1,max:500,step:1,val:10}
+      ],
+      targets:[
+        {name:"Earth to Moon",dist:384400,color:"#f59e0b"},
+        {name:"Earth to Sun",dist:147000000,color:"#ef4444"},
+        {name:"Longest train (Russia)",dist:9300,color:"#6366f1"}
+      ],
+      compute(s){
+        const d=s.speed*365*s.years;
+        return{distance:d,facts:this.targets.map(t=>({...t,pct:Math.min(100,d/t.dist*100),reached:d>=t.dist}))};
+      }
+    },
+    {
+      id:"buses",title:"Can They Fit?",
+      desc:"How many people can vehicles carry?",
+      vars:[
+        {key:"capacity",label:"People per vehicle",min:1,max:500,step:1,val:50},
+        {key:"count",label:"Number of vehicles",min:100,max:1000000,step:100,val:100000}
+      ],
+      targets:[
+        {name:"Chintamani (75,000)",pop:75000,color:"#10b981"},
+        {name:"Jaipur (30,46,163)",pop:3046163,color:"#3b82f6"},
+        {name:"Mumbai (1,24,42,373)",pop:12442373,color:"#ef4444"},
+      ],
+      compute(s){
+        const total=s.capacity*s.count;
+        return{total,facts:this.targets.map(t=>({...t,pct:Math.min(100,total/t.pop*100),enough:total>=t.pop}))};
+      }
+    },
+    {
+      id:"weight",title:"Can You Lift It?",
+      desc:"How heavy are many small things?",
+      vars:[
+        {key:"item_weight",label:"Weight per item (grams)",min:1,max:100,step:1,val:5},
+        {key:"count",label:"Number of items",min:1000,max:1000000,step:1000,val:100000}
+      ],
+      targets:[
+        {name:"Child can lift (~20 kg)",w:20000,color:"#f59e0b"},
+        {name:"Adult can lift (~50 kg)",w:50000,color:"#10b981"},
+        {name:"Weightlifter (~250 kg)",w:250000,color:"#ef4444"}
+      ],
+      compute(s){
+        const total=s.item_weight*s.count;
+        return{totalG:total,totalKg:total/1000,facts:this.targets.map(t=>({...t,pct:Math.min(100,total/t.w*100),liftable:total<=t.w}))};
+      }
+    },
+    {
+      id:"time",title:"How Long to Count?",
+      desc:"Count 1 item per second",
+      vars:[
+        {key:"target",label:"Items to count",min:1000,max:10000000,step:1000,val:1000000},
+        {key:"rate",label:"Items per second",min:1,max:10,step:1,val:1}
+      ],
+      targets:[
+        {name:"1 Hour (3,600s)",t:3600,color:"#3b82f6"},
+        {name:"1 Day (86,400s)",t:86400,color:"#f59e0b"},
+        {name:"1 Year (3,15,36,000s)",t:31536000,color:"#10b981"}
+      ],
+      compute(s){
+        const secs=s.target/s.rate;
+        const days=secs/86400;
+        const years=days/365;
+        return{secs,days,years,facts:this.targets.map(t=>({...t,pct:Math.min(100,secs/t.t*100),fits:secs<=t.t}))};
+      }
+    },
+    {
+      id:"facts",title:"Uncover the Fact!",
+      desc:"Compute to reveal",
+      vars:[
+        {key:"prob",label:"Problem",min:0,max:4,step:1,val:0}
+      ],
+      problems:[
+        {expr:"1250 × 380",a:1250,b:380,op:"×",fact:"is the number of kirtanas composed by Purandaradasa"},
+        {expr:"2100 × 70,000",a:2100,b:70000,op:"×",fact:"km is the approximate distance between Earth and Sun"},
+        {expr:"6400 × 62,500",a:6400,b:62500,op:"×",fact:"litres of water the Amazon discharges per second"},
+        {expr:"13,95,000 ÷ 150",a:1395000,b:150,op:"÷",fact:"km is the longest single-train journey (Russia)"},
+        {expr:"10,50,00,000 ÷ 700",a:10500000,b:700,op:"÷",fact:"kg is how much an adult blue whale can weigh"}
+      ],
+      compute(s){
+        const p=this.problems[s.prob]||this.problems[0];
+        const result=p.op==="×"?p.a*p.b:Math.round(p.a/p.b);
+        return{result,problem:p};
+      }
+    }
+  ];
+
+  let scIdx=0,sc=SCENARIOS[scIdx];
+  let state={};
+  sc.vars.forEach(v=>{state[v.key]=v.val});
+
+  function render(){
+    sc=SCENARIOS[scIdx];
+    // Compute
+    const res=sc.compute(state);
+    // Build SVG visualization
+    const W=380,H=180;
+    let svg="";
+
+    if(sc.id==="journey"){
+      const barW=100,baseY=140;
+      svg+=`<text x="${W/2}" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#333">Distance travelled: ${fmtI(res.distance)} km</text>`;
+      res.facts.forEach((f,i)=>{
+        const y=35+i*38;
+        const pct=Math.min(f.pct,100);
+        svg+=`<rect x="10" y="${y}" width="${W-20}" height="24" rx="6" fill="#f0f0f0"/>`;
+        svg+=`<rect x="10" y="${y}" width="${Math.max(2,(W-20)*pct/100)}" height="24" rx="6" fill="${f.color}" opacity=".7"/>`;
+        svg+=`<text x="16" y="${y+16}" font-size="10" font-weight="600" fill="#333">${f.name}: ${f.pct.toFixed(1)}% ${f.reached?"reached!":""}</text>`;
+      });
+    } else if(sc.id==="buses"){
+      svg+=`<text x="${W/2}" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#333">Total capacity: ${fmtI(res.total)} people</text>`;
+      res.facts.forEach((f,i)=>{
+        const y=35+i*38;
+        svg+=`<rect x="10" y="${y}" width="${W-20}" height="24" rx="6" fill="#f0f0f0"/>`;
+        svg+=`<rect x="10" y="${y}" width="${Math.max(2,(W-20)*Math.min(f.pct,100)/100)}" height="24" rx="6" fill="${f.color}" opacity=".7"/>`;
+        svg+=`<text x="16" y="${y+16}" font-size="10" font-weight="600" fill="#333">${f.name}: ${f.enough?"Yes!":"No"} (${f.pct.toFixed(1)}%)</text>`;
+      });
+    } else if(sc.id==="weight"){
+      svg+=`<text x="${W/2}" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#333">Total weight: ${fmtI(res.totalKg)} kg (${fmtI(res.totalG)} g)</text>`;
+      res.facts.forEach((f,i)=>{
+        const y=35+i*38;
+        svg+=`<rect x="10" y="${y}" width="${W-20}" height="24" rx="6" fill="#f0f0f0"/>`;
+        const pct=Math.min(res.totalG/f.w*100,100);
+        svg+=`<rect x="10" y="${y}" width="${Math.max(2,(W-20)*pct/100)}" height="24" rx="6" fill="${f.color}" opacity=".7"/>`;
+        svg+=`<text x="16" y="${y+16}" font-size="10" font-weight="600" fill="#333">${f.name}: ${f.liftable?"Can lift":"Too heavy"} (${(res.totalG/f.w*100).toFixed(0)}%)</text>`;
+      });
+    } else if(sc.id==="time"){
+      svg+=`<text x="${W/2}" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#333">Time needed: ${fmtI(Math.round(res.secs))} seconds</text>`;
+      svg+=`<text x="${W/2}" y="34" text-anchor="middle" font-size="10" fill="#666">(${res.days.toFixed(1)} days = ${res.years.toFixed(2)} years)</text>`;
+      res.facts.forEach((f,i)=>{
+        const y=48+i*38;
+        const pct=Math.min(res.secs/f.t*100,100);
+        svg+=`<rect x="10" y="${y}" width="${W-20}" height="24" rx="6" fill="#f0f0f0"/>`;
+        svg+=`<rect x="10" y="${y}" width="${Math.max(2,(W-20)*pct/100)}" height="24" rx="6" fill="${f.color}" opacity=".7"/>`;
+        svg+=`<text x="16" y="${y+16}" font-size="10" font-weight="600" fill="#333">${f.fits?"Fits in":"Exceeds"} ${f.name} (${(res.secs/f.t*100).toFixed(1)}%)</text>`;
+      });
+    } else if(sc.id==="facts"){
+      const p=res.problem;
+      svg+=`<text x="${W/2}" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#007AFF">${p.expr}</text>`;
+      svg+=`<text x="${W/2}" y="55" text-anchor="middle" font-size="11" fill="#888">= ?</text>`;
+      svg+=`<text x="${W/2}" y="90" text-anchor="middle" font-size="22" font-weight="800" fill="#16a34a">${fmtI(res.result)}</text>`;
+      // Word wrap the fact
+      const words=p.fact.split(" ");
+      let line="",lineY=120;
+      words.forEach(w=>{
+        if((line+w).length>45){svg+=`<text x="${W/2}" y="${lineY}" text-anchor="middle" font-size="11" fill="#555">${line.trim()}</text>`;lineY+=16;line=""}
+        line+=w+" ";
+      });
+      if(line)svg+=`<text x="${W/2}" y="${lineY}" text-anchor="middle" font-size="11" fill="#555">${line.trim()}</text>`;
+    }
+
+    // Build sliders
+    let slidersHtml="";
+    if(sc.id==="facts"){
+      slidersHtml=`<div class="control-group"><div class="control-label">Problem: <span>${sc.problems[state.prob||0].expr}</span></div><input type="range" data-key="prob" min="0" max="${sc.problems.length-1}" step="1" value="${state.prob||0}"></div>`;
+    } else {
+      sc.vars.forEach(v=>{
+        slidersHtml+=`<div class="control-group"><div class="control-label">${v.label}: <span id="lbl-${v.key}">${fmtI(state[v.key])}</span></div><input type="range" data-key="${v.key}" min="${v.min}" max="${v.max}" step="${v.step}" value="${state[v.key]}"></div>`;
+      });
+    }
+
+    // Scenario selector
+    let scBtns=SCENARIOS.map((s,i)=>`<button ${i===scIdx?'class="active"':""} data-i="${i}">${s.title}</button>`).join("");
+
+    c.innerHTML=`
+    <div class="visual">
+      <div class="static-hint">${sc.desc}</div>
+      <button class="control-toggle" id="exp-adj">Adjust</button>
+      <svg viewBox="0 0 ${W} ${H}" style="min-height:${H}px">${svg}</svg>
+      <div class="control-overlay" id="exp-overlay">
+        <div class="control-group">
+          <div class="control-label">Scenario:</div>
+          <div class="segmented" id="sc-sel">${scBtns}</div>
+        </div>
+        ${slidersHtml}
+        <button class="submit-btn" id="exp-apply">Apply Changes</button>
+      </div>
+    </div>`;
+
+    // Wire
+    c.querySelector("#exp-adj").onclick=()=>c.querySelector("#exp-overlay").classList.toggle("open");
+    c.querySelector("#exp-apply").onclick=()=>c.querySelector("#exp-overlay").classList.remove("open");
+    c.querySelectorAll(".control-group input[type='range']").forEach(sl=>{
+      sl.oninput=function(){
+        const k=this.dataset.key;
+        state[k]=parseFloat(this.value);
+        const lbl=c.querySelector("#lbl-"+k);
+        if(lbl)lbl.textContent=fmtI(state[k]);
+        render();
+      };
+    });
+    c.querySelector("#sc-sel").addEventListener("click",e=>{
+      const b=e.target.closest("button");if(!b)return;
+      scIdx=parseInt(b.dataset.i);sc=SCENARIOS[scIdx];
+      state={};sc.vars.forEach(v=>{state[v.key]=v.val});
+      render();
+    });
+  }
+  render();
+}
+
+createRef("ref");
+createExp("exp");
+</script>
+</body>
+</html>
