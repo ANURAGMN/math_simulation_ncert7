@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Creative Chitti Calculator — Place Value Builder</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:#f4f6f8}
+#app{max-width:420px;margin:auto;padding:10px}
+.section-title{font-size:13px;font-weight:600;margin:8px 4px;color:#444}
+.sim-card{background:#fff;border-radius:14px;padding:8px;box-shadow:0 6px 18px rgba(0,0,0,.08);margin-bottom:12px}
+.visual{position:relative;min-height:220px;background:#eef3f9;border-radius:12px;overflow:hidden;touch-action:none}
+svg{width:100%;height:100%;display:block}
+.static-hint{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.95);border-radius:8px;padding:6px 8px;font-size:11px;line-height:1.3;box-shadow:0 3px 8px rgba(0,0,0,.12);z-index:2}
+.metrics{position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.96);border-radius:8px;padding:6px 8px;font-size:11px;line-height:1.4;box-shadow:0 3px 8px rgba(0,0,0,.12);z-index:2}
+.control-toggle{position:absolute;right:8px;top:8px;background:#007AFF;color:#fff;font-size:11px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer;z-index:2}
+.control-overlay{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid #ddd;padding:8px;transform:translateY(100%);transition:transform .25s ease;z-index:5}
+.control-overlay.open{transform:translateY(0)}
+.control-group{margin-bottom:6px}
+.control-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px}
+.control-group input[type="range"]{width:100%}
+.segmented{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap}
+.segmented button{flex:1;min-width:60px;padding:6px 4px;border-radius:6px;border:none;font-size:10px;background:#e0e0e0;cursor:pointer}
+.segmented button.active{background:#007AFF;color:#fff;font-weight:600}
+.submit-btn{width:100%;margin-top:6px;padding:8px;border-radius:8px;border:none;background:#007AFF;color:#fff;font-weight:600;cursor:pointer}
+/* Button grid in SVG area */
+.btn-row{display:flex;gap:4px;padding:4px 6px;flex-wrap:wrap;justify-content:center}
+.pv-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;border-radius:8px;border:none;cursor:pointer;min-width:52px;flex:1;transition:transform .1s;-webkit-tap-highlight-color:transparent}
+.pv-btn:active{transform:scale(.93)}
+.pv-btn .bv{font-size:12px;font-weight:700;color:#fff}
+.pv-btn .bl{font-size:7px;color:rgba(255,255,255,.75);margin-top:1px;text-transform:uppercase}
+.pv-btn.c0{background:#e74c3c}.pv-btn.c1{background:#e67e22}.pv-btn.c2{background:#f1c40f}
+.pv-btn.c3{background:#2ecc71}.pv-btn.c4{background:#3498db}.pv-btn.c5{background:#9b59b6}.pv-btn.c6{background:#34495e}
+.pv-btn.c2 .bv,.pv-btn.c2 .bl{color:#333}
+.act-row{display:flex;gap:4px;padding:2px 6px 6px}
+.act-btn{flex:1;padding:7px;border-radius:8px;border:none;font-size:11px;font-weight:600;cursor:pointer}
+.act-btn:active{transform:scale(.96)}
+.act-btn.undo{background:#eee;color:#555}
+.act-btn.reset{background:#fee2e2;color:#b91c1c}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="section-title">Reference (baseline — Systematic Sippy's way)</div>
+  <div class="sim-card" id="ref"></div>
+  <div class="section-title">Experiment (tap buttons — Creative Chitti's way)</div>
+  <div class="sim-card" id="exp"></div>
+</div>
+<script>
+// ── Shared Utilities ──
+const PV=[
+  {v:1,label:"Ones",short:"+1"},
+  {v:10,label:"Tens",short:"+10"},
+  {v:100,label:"Hund.",short:"+100"},
+  {v:1000,label:"Thous.",short:"+1K"},
+  {v:10000,label:"T.Thous.",short:"+10K"},
+  {v:100000,label:"Lakhs",short:"+1L"},
+  {v:1000000,label:"T.Lakhs",short:"+10L"}
+];
+const COLORS=["#e74c3c","#e67e22","#f1c40f","#2ecc71","#3498db","#9b59b6","#34495e"];
+
+function fmtI(n){if(n===0)return"0";let s=n.toString();if(s.length<=3)return s;let l=s.slice(-3),r=s.slice(0,-3),p=[];while(r.length>2){p.unshift(r.slice(-2));r=r.slice(0,-2)}if(r.length)p.unshift(r);return p.join(",")+","+l}
+function digitSum(n){let s=0;while(n>0){s+=n%10;n=Math.floor(n/10)}return s}
+function getDigits(n){let d=[];for(let i=0;i<7;i++){d.push(Math.floor(n/PV[i].v)%10)}return d}
+function toWords(n){if(n===0)return"Zero";const o=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];const t=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];function tw(x){if(x<20)return o[x];return t[Math.floor(x/10)]+(x%10?" "+o[x%10]:"")}function th(x){if(x<100)return tw(x);return o[Math.floor(x/100)]+" Hundred"+(x%100?" "+tw(x%100):"")}let p=[];if(n>=10000000){p.push(tw(Math.floor(n/10000000))+" Crore");n%=10000000}if(n>=100000){p.push(tw(Math.floor(n/100000))+" Lakh");n%=100000}if(n>=1000){p.push(tw(Math.floor(n/1000))+" Thousand");n%=1000}if(n>0)p.push(th(n));return p.join(" ")||"Zero"}
+
+const TARGETS=[
+  {n:5072,hint:"From the textbook — build 5,072!"},
+  {n:8300,hint:"Build 8,300 — how few clicks?"},
+  {n:40629,hint:"Reach 40,629."},
+  {n:56354,hint:"Make 56,354."},
+  {n:66666,hint:"All sixes — 66,666!"},
+  {n:367813,hint:"A big one — 3,67,813."},
+  {n:997,hint:"Make 997 — minimum 25 clicks!"},
+  {n:100000,hint:"One Lakh — 1,00,000!"},
+  {n:75000,hint:"Chintamani's population."},
+  {n:321,hint:"Simple start — 321."}
+];
+
+// ── Reference Panel ──
+function createRef(cid){
+  const c=document.getElementById(cid);
+  let tIdx=0,target=TARGETS[tIdx];
+
+  function renderRef(){
+    const n=target.n,d=getDigits(n),ds=digitSum(n);
+    // Build SVG bar chart showing place-value decomposition
+    const W=380,H=200,barW=40,gap=10,baseY=170,maxH=130;
+    let bars="";
+    for(let i=6;i>=0;i--){
+      const x=20+(6-i)*(barW+gap);
+      const h=d[i]===0?2:d[i]/9*maxH;
+      const y=baseY-h;
+      bars+=`<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="4" fill="${COLORS[i]}" opacity=".85"/>`;
+      bars+=`<text x="${x+barW/2}" y="${y-6}" text-anchor="middle" font-size="13" font-weight="700" fill="#333">${d[i]}</text>`;
+      bars+=`<text x="${x+barW/2}" y="${baseY+14}" text-anchor="middle" font-size="8" fill="#888">${PV[i].label}</text>`;
+    }
+    // Expression line
+    let expr=[];
+    for(let i=6;i>=0;i--){if(d[i]>0)expr.push(`${d[i]}×${PV[i].v.toLocaleString()}`)}
+    const exprStr=expr.join(" + ")+" = "+fmtI(n);
+
+    c.innerHTML=`
+    <div class="visual" style="padding-bottom:4px">
+      <div class="static-hint"><b>Systematic Sippy's way</b><br>Fewest clicks = digit sum</div>
+      <svg viewBox="0 0 ${W} ${H+30}" style="min-height:200px">
+        <line x1="15" y1="${baseY}" x2="${W-10}" y2="${baseY}" stroke="#ccc" stroke-width="1"/>
+        ${bars}
+        <text x="${W/2}" y="${H+20}" text-anchor="middle" font-size="10" fill="#555">${exprStr}</text>
+      </svg>
+      <div class="metrics">
+        <div><b>${fmtI(n)}</b> — ${toWords(target.n)}</div>
+        <div>Min clicks: <b>${ds}</b> (digit sum: ${getDigits(target.n).reverse().join("+")})</div>
+      </div>
+    </div>`;
+  }
+
+  // Allow cycling through targets by tapping the card
+  c.addEventListener("click",()=>{tIdx=(tIdx+1)%TARGETS.length;target=TARGETS[tIdx];renderRef()});
+  renderRef();
+}
+
+// ── Experiment Panel ──
+function createExp(cid){
+  const c=document.getElementById(cid);
+  let num=0,clicks=0,history=[],tIdx=0,challenge=TARGETS[tIdx],mode="challenge";
+
+  function buildUI(){
+    const W=380,H=160;
+    // SVG for live bar visualization
+    let btns=PV.map((p,i)=>`<button class="pv-btn c${i}" data-i="${i}"><span class="bv">${p.short}</span><span class="bl">${p.label}</span></button>`).reverse().join("");
+
+    c.innerHTML=`
+    <div class="visual" id="exp-vis" style="padding-bottom:0">
+      <div class="static-hint" id="exp-hint">Tap buttons to build the number</div>
+      <button class="control-toggle" id="exp-adjust">Adjust</button>
+      <svg viewBox="0 0 ${W} ${H}" id="exp-svg" style="min-height:160px"></svg>
+      <div class="metrics" id="exp-metrics"></div>
+      <div class="control-overlay" id="exp-overlay">
+        <div class="control-group">
+          <div class="control-label">Mode:</div>
+          <div class="segmented" id="exp-mode-seg">
+            <button class="active" data-v="challenge">Challenge</button>
+            <button data-v="free">Free Explore</button>
+          </div>
+        </div>
+        <div class="control-group" id="exp-challenge-ctrl">
+          <div class="control-label">Target: <span id="exp-target-label">${fmtI(challenge.n)}</span></div>
+          <input type="range" id="exp-target-slider" min="0" max="${TARGETS.length-1}" step="1" value="0">
+        </div>
+        <div class="control-group" id="exp-restrict-ctrl">
+          <div class="control-label">Restrict buttons:</div>
+          <div class="segmented" id="exp-restrict-seg">
+            <button class="active" data-v="all">All</button>
+            <button data-v="1000">+1K only</button>
+            <button data-v="100">+100 only</button>
+            <button data-v="10">+10 only</button>
+          </div>
+        </div>
+        <button class="submit-btn" id="exp-apply">Apply Changes</button>
+      </div>
+    </div>
+    <div class="btn-row" id="exp-btns">${btns}</div>
+    <div class="act-row">
+      <button class="act-btn undo" id="exp-undo">Undo</button>
+      <button class="act-btn reset" id="exp-reset">Reset</button>
+    </div>`;
+  }
+
+  let restrict="all";
+
+  function render(){
+    const d=getDigits(num);
+    const W=380,H=160,barW=40,gap=10,baseY=130,maxH=100;
+    let bars="";
+    for(let i=6;i>=0;i--){
+      const x=20+(6-i)*(barW+gap);
+      const h=d[i]===0?2:d[i]/9*maxH;
+      const y=baseY-h;
+      bars+=`<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="4" fill="${COLORS[i]}" opacity=".85"/>`;
+      bars+=`<text x="${x+barW/2}" y="${y-5}" text-anchor="middle" font-size="13" font-weight="700" fill="#333">${d[i]}</text>`;
+      bars+=`<text x="${x+barW/2}" y="${baseY+12}" text-anchor="middle" font-size="8" fill="#888">${PV[i].label}</text>`;
+    }
+    const svg=c.querySelector("#exp-svg");
+    svg.innerHTML=`<line x1="15" y1="${baseY}" x2="${W-10}" y2="${baseY}" stroke="#ccc" stroke-width="1"/>${bars}`;
+
+    // Metrics
+    const met=c.querySelector("#exp-metrics");
+    let mHtml=`<div><b>${fmtI(num)}</b></div><div>Clicks: <b>${clicks}</b> | Min: <b>${digitSum(num)}</b> | Digits: <b>${num===0?1:num.toString().length}</b></div>`;
+    if(mode==="challenge"){
+      const diff=challenge.n-num;
+      if(diff===0) mHtml+=`<div style="color:#16a34a;font-weight:700">Target reached!${clicks===digitSum(challenge.n)?" Minimum clicks!":""}</div>`;
+      else if(diff<0) mHtml+=`<div style="color:#dc2626">Over by ${fmtI(-diff)}</div>`;
+      else mHtml+=`<div>Target: ${fmtI(challenge.n)} (${fmtI(diff)} to go)</div>`;
+    }
+    met.innerHTML=mHtml;
+
+    // Hint
+    const hint=c.querySelector("#exp-hint");
+    if(mode==="challenge"){
+      if(num===challenge.n) hint.innerHTML=clicks===digitSum(challenge.n)?"<b>Perfect!</b> Fewest clicks possible.":"<b>Done!</b> Can you do it in fewer clicks?";
+      else hint.textContent=challenge.hint;
+    } else {
+      hint.textContent="Tap buttons freely. Watch the bars change.";
+    }
+
+    // Button enable/disable for restrict mode
+    c.querySelectorAll(".pv-btn").forEach(b=>{
+      const idx=parseInt(b.dataset.i);
+      if(restrict==="all") b.style.opacity="1";
+      else b.style.opacity=PV[idx].v===parseInt(restrict)?"1":"0.3";
+    });
+  }
+
+  function addVal(idx){
+    if(restrict!=="all"&&PV[idx].v!==parseInt(restrict))return;
+    const before=num;
+    num+=PV[idx].v;
+    if(num>9999999)num=9999999;
+    clicks++;
+    history.push({idx,before});
+    render();
+  }
+
+  function undo(){if(!history.length)return;const h=history.pop();num=h.before;clicks--;render()}
+  function reset(){num=0;clicks=0;history=[];render()}
+
+  buildUI();
+
+  // Wire buttons
+  c.querySelector("#exp-btns").addEventListener("click",e=>{
+    const b=e.target.closest(".pv-btn");if(!b)return;addVal(parseInt(b.dataset.i));
+  });
+  c.querySelector("#exp-undo").onclick=undo;
+  c.querySelector("#exp-reset").onclick=reset;
+  c.querySelector("#exp-adjust").onclick=()=>c.querySelector("#exp-overlay").classList.toggle("open");
+  c.querySelector("#exp-apply").onclick=()=>c.querySelector("#exp-overlay").classList.remove("open");
+
+  // Mode toggle
+  c.querySelector("#exp-mode-seg").addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;
+    c.querySelectorAll("#exp-mode-seg button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");mode=b.dataset.v;
+    c.querySelector("#exp-challenge-ctrl").style.display=mode==="challenge"?"block":"none";
+    reset();render();
+  });
+
+  // Target slider
+  c.querySelector("#exp-target-slider").oninput=function(){
+    tIdx=parseInt(this.value);challenge=TARGETS[tIdx];
+    c.querySelector("#exp-target-label").textContent=fmtI(challenge.n);
+    reset();render();
+  };
+
+  // Restrict buttons
+  c.querySelector("#exp-restrict-seg").addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;
+    c.querySelectorAll("#exp-restrict-seg button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");restrict=b.dataset.v;
+    reset();render();
+  });
+
+  render();
+}
+
+createRef("ref");
+createExp("exp");
+</script>
+</body>
+</html>
