@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Indian vs International Number Systems</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:#f4f6f8}
+#app{max-width:420px;margin:auto;padding:10px}
+.section-title{font-size:13px;font-weight:600;margin:8px 4px;color:#444}
+.sim-card{background:#fff;border-radius:14px;padding:8px;box-shadow:0 6px 18px rgba(0,0,0,.08);margin-bottom:12px}
+.visual{position:relative;min-height:220px;background:#eef3f9;border-radius:12px;overflow:hidden;touch-action:none}
+svg{width:100%;height:100%;display:block}
+.static-hint{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.95);border-radius:8px;padding:6px 8px;font-size:11px;line-height:1.3;box-shadow:0 3px 8px rgba(0,0,0,.12);z-index:2}
+.metrics{position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.96);border-radius:8px;padding:6px 8px;font-size:11px;line-height:1.4;box-shadow:0 3px 8px rgba(0,0,0,.12);z-index:2;max-width:calc(100% - 16px)}
+.control-toggle{position:absolute;right:8px;top:8px;background:#007AFF;color:#fff;font-size:11px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer;z-index:2}
+.control-overlay{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid #ddd;padding:8px;transform:translateY(100%);transition:transform .25s ease;z-index:5}
+.control-overlay.open{transform:translateY(0)}
+.control-group{margin-bottom:6px}
+.control-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px}
+.control-group input[type="range"]{width:100%}
+.segmented{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap}
+.segmented button{flex:1;min-width:50px;padding:6px 4px;border-radius:6px;border:none;font-size:10px;background:#e0e0e0;cursor:pointer}
+.segmented button.active{background:#007AFF;color:#fff;font-weight:600}
+.submit-btn{width:100%;margin-top:6px;padding:8px;border-radius:8px;border:none;background:#007AFF;color:#fff;font-weight:600;cursor:pointer}
+/* Digit boxes */
+.digit-strip{display:flex;justify-content:center;gap:0;padding:8px 4px;flex-wrap:nowrap;overflow-x:auto}
+.d-box{width:28px;height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #ddd;border-radius:4px;font-size:16px;font-weight:700;color:#333;flex-shrink:0;position:relative}
+.d-box .d-place{font-size:6px;color:#888;position:absolute;bottom:1px;font-weight:400}
+.d-comma{width:10px;height:38px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.d-comma.indian{color:#e74c3c}
+.d-comma.intl{color:#3498db}
+/* Quiz area */
+.quiz-area{padding:8px}
+.quiz-q{font-size:13px;font-weight:600;color:#333;text-align:center;margin-bottom:8px;line-height:1.4}
+.quiz-opts{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
+.quiz-opt{padding:10px 14px;border-radius:10px;border:2px solid #e0e0e0;font-size:13px;font-weight:600;cursor:pointer;background:#fff;transition:all .15s;min-width:80px;text-align:center}
+.quiz-opt:active{transform:scale(.96)}
+.quiz-opt.correct{border-color:#16a34a;background:#dcfce7;color:#16a34a}
+.quiz-opt.wrong{border-color:#dc2626;background:#fee2e2;color:#dc2626}
+.quiz-feedback{text-align:center;font-size:12px;min-height:20px;margin-bottom:4px}
+.quiz-next{display:block;margin:0 auto;padding:8px 20px;border-radius:8px;border:none;background:#007AFF;color:#fff;font-weight:600;font-size:12px;cursor:pointer}
+.quiz-score{text-align:center;font-size:11px;color:#888;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="section-title">Reference (baseline — comma placement rules)</div>
+  <div class="sim-card" id="ref"></div>
+  <div class="section-title">Experiment (compare & quiz)</div>
+  <div class="sim-card" id="exp"></div>
+</div>
+<script>
+// ── Utilities ──
+function fmtI(n){if(n===0)return"0";let s=n.toString();if(s.length<=3)return s;let l=s.slice(-3),r=s.slice(0,-3),p=[];while(r.length>2){p.unshift(r.slice(-2));r=r.slice(0,-2)}if(r.length)p.unshift(r);return p.join(",")+","+l}
+function fmtX(n){return n.toLocaleString("en-US")}
+function toWordsI(n){if(n===0)return"Zero";const o=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];const t=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];function tw(x){if(x<20)return o[x];return t[Math.floor(x/10)]+(x%10?" "+o[x%10]:"")}function th(x){if(x<100)return tw(x);return o[Math.floor(x/100)]+" Hundred"+(x%100?" "+tw(x%100):"")}let p=[];if(n>=10000000){p.push(tw(Math.floor(n/10000000))+" Crore");n%=10000000}if(n>=100000){p.push(tw(Math.floor(n/100000))+" Lakh");n%=100000}if(n>=1000){p.push(tw(Math.floor(n/1000))+" Thousand");n%=1000}if(n>0)p.push(th(n));return p.join(" ")}
+function toWordsX(n){if(n===0)return"Zero";const o=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];const t=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];function tw(x){if(x<20)return o[x];return t[Math.floor(x/10)]+(x%10?" "+o[x%10]:"")}function th(x){if(x<100)return tw(x);return o[Math.floor(x/100)]+" Hundred"+(x%100?" "+tw(x%100):"")}let p=[];if(n>=1000000000){p.push(th(Math.floor(n/1000000000))+" Billion");n%=1000000000}if(n>=1000000){p.push(th(Math.floor(n/1000000))+" Million");n%=1000000}if(n>=1000){p.push(th(Math.floor(n/1000))+" Thousand");n%=1000}if(n>0)p.push(th(n));return p.join(" ")}
+
+// Builds a digit-strip with commas showing which system
+function digitStrip(n,system){
+  const s=n.toString();
+  // Determine comma positions from right
+  let commaPos=[];
+  if(system==="indian"){
+    if(s.length>3)commaPos.push(s.length-3);
+    let pos=s.length-3;
+    while(pos>2){pos-=2;commaPos.push(pos)}
+  } else {
+    let pos=s.length-3;
+    while(pos>0){commaPos.push(pos);pos-=3}
+  }
+  let html="";
+  for(let i=0;i<s.length;i++){
+    if(commaPos.includes(i)&&i>0) html+=`<span class="d-comma ${system}">,</span>`;
+    html+=`<span class="d-box">${s[i]}</span>`;
+  }
+  return html;
+}
+
+const PLACE_NAMES_I=["Ones","Tens","Hundreds","Thousands","Ten Thousands","Lakhs","Ten Lakhs","Crores","Ten Crores","Arabs"];
+const PLACE_NAMES_X=["Ones","Tens","Hundreds","Thousands","Ten Thousands","Hund. Thousands","Millions","Ten Millions","Hund. Millions","Billions"];
+
+const EXAMPLES=[
+  {n:100000,  note:"1 Lakh = 100 Thousand"},
+  {n:1000000, note:"10 Lakhs = 1 Million"},
+  {n:10000000,note:"1 Crore = 10 Million"},
+  {n:1000000000,note:"1 Arab = 1 Billion"},
+  {n:4050678, note:"Textbook exercise (a)"},
+  {n:48121620,note:"Textbook exercise (b)"},
+  {n:20022002,note:"Textbook exercise (c)"},
+  {n:246813579,note:"Textbook exercise (d)"},
+  {n:345000543,note:"Textbook exercise (e)"},
+  {n:1020304050,note:"Textbook exercise (f)"}
+];
+
+// ── Reference Panel ──
+function createRef(cid){
+  const c=document.getElementById(cid);
+  let idx=0;
+  function render(){
+    const ex=EXAMPLES[idx],n=ex.n;
+    c.innerHTML=`
+    <div class="visual" style="padding:0">
+      <div class="static-hint"><b>Comma placement rules</b><br>Indian: 3-2-2-2 from right<br>Int'l: 3-3-3 from right</div>
+      <div style="padding:60px 8px 8px">
+        <div style="font-size:10px;color:#888;text-align:center;margin-bottom:2px">INDIAN SYSTEM (3-2-2-2)</div>
+        <div class="digit-strip">${digitStrip(n,"indian")}</div>
+        <div style="text-align:center;font-size:11px;color:#e74c3c;font-weight:600;margin:4px 0">${toWordsI(n)}</div>
+        <div style="font-size:10px;color:#888;text-align:center;margin:8px 0 2px">INTERNATIONAL SYSTEM (3-3-3)</div>
+        <div class="digit-strip">${digitStrip(n,"intl")}</div>
+        <div style="text-align:center;font-size:11px;color:#3498db;font-weight:600;margin:4px 0">${toWordsX(n)}</div>
+        <div style="text-align:center;font-size:10px;color:#555;margin-top:8px;background:#fff;border-radius:6px;padding:4px">${ex.note}</div>
+        <div style="text-align:center;font-size:9px;color:#aaa;margin-top:6px">Tap card to see next example (${idx+1}/${EXAMPLES.length})</div>
+      </div>
+    </div>`;
+  }
+  c.addEventListener("click",()=>{idx=(idx+1)%EXAMPLES.length;render()});
+  render();
+}
+
+// ── Experiment Panel ──
+function createExp(cid){
+  const c=document.getElementById(cid);
+  let expMode="explore"; // "explore" or "quiz"
+  let currentNum=4050678;
+
+  // Quiz state
+  const QUIZ=[];
+  // Generate quiz questions
+  function genQuiz(){
+    QUIZ.length=0;
+    // Type 1: Indian vs International comparison
+    const pairs=[
+      {a:"30 Thousand",av:30000,b:"3 Lakhs",bv:300000,ans:"<"},
+      {a:"500 Lakhs",av:50000000,b:"5 Million",bv:5000000,ans:">"},
+      {a:"800 Thousand",av:800000,b:"8 Million",bv:8000000,ans:"<"},
+      {a:"640 Crore",av:6400000000,b:"60 Billion",bv:60000000000,ans:"<"},
+      {a:"10 Lakhs",av:1000000,b:"1 Million",bv:1000000,ans:"="},
+      {a:"1 Crore",av:10000000,b:"10 Million",bv:10000000,ans:"="},
+      {a:"100 Crore",av:1000000000,b:"1 Billion",bv:1000000000,ans:"="},
+      {a:"50 Lakhs",av:5000000,b:"500 Thousand",bv:500000,ans:">"},
+      {a:"2 Crore",av:20000000,b:"20 Million",bv:20000000,ans:"="},
+      {a:"1 Lakh",av:100000,b:"1 Million",bv:1000000,ans:"<"},
+    ];
+    pairs.forEach(p=>{
+      QUIZ.push({type:"compare",q:`${p.a}  ___  ${p.b}`,opts:["<",">","="],ans:p.ans,explain:`${p.a} = ${fmtI(p.av)} | ${p.b} = ${fmtX(p.bv)}`});
+    });
+    // Type 2: Read number in Indian system
+    const nums=[4050678,48121620,20022002,246813579,75000,106000,1000000];
+    nums.forEach(n=>{
+      const correct=fmtI(n);
+      // Generate wrong options
+      const wrong1=fmtX(n);
+      const wrong2=n.toString();
+      if(correct!==wrong1){
+        QUIZ.push({type:"format",q:`Write ${n} in Indian notation:`,opts:[correct,wrong1,wrong2].filter((v,i,a)=>a.indexOf(v)===i).slice(0,3),ans:correct,explain:toWordsI(n)});
+      }
+    });
+    // Shuffle
+    for(let i=QUIZ.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[QUIZ[i],QUIZ[j]]=[QUIZ[j],QUIZ[i]]}
+  }
+  genQuiz();
+  let qIdx=0,score=0,answered=false;
+
+  function renderExplore(){
+    const n=currentNum;
+    c.innerHTML=`
+    <div class="visual" style="padding:0">
+      <button class="control-toggle" id="exp-adj">Adjust</button>
+      <div class="static-hint">Drag slider to change number</div>
+      <div style="padding:50px 8px 8px">
+        <div style="font-size:10px;color:#888;text-align:center;margin-bottom:2px">INDIAN</div>
+        <div class="digit-strip">${digitStrip(n,"indian")}</div>
+        <div style="text-align:center;font-size:11px;color:#e74c3c;font-weight:600;margin:4px 0">${toWordsI(n)}</div>
+        <div style="font-size:10px;color:#888;text-align:center;margin:8px 0 2px">INTERNATIONAL</div>
+        <div class="digit-strip">${digitStrip(n,"intl")}</div>
+        <div style="text-align:center;font-size:11px;color:#3498db;font-weight:600;margin:4px 0">${toWordsX(n)}</div>
+        <div style="padding:6px">
+          <input type="range" id="exp-num-slider" min="1000" max="999999999" step="1" value="${n}" style="width:100%">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:#aaa"><span>1,000</span><span>99,99,99,999</span></div>
+        </div>
+        <div style="text-align:center;font-size:10px;color:#555;background:#fff;border-radius:6px;padding:4px;margin:4px">Zeros: ${n.toString().split('').filter(c=>c==='0').length} | Digits: ${n.toString().length}</div>
+      </div>
+      <div class="control-overlay" id="exp-overlay">
+        <div class="control-group">
+          <div class="control-label">Mode:</div>
+          <div class="segmented" id="exp-mode-seg">
+            <button class="active" data-v="explore">Explore</button>
+            <button data-v="quiz">Quiz</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="control-label">Quick presets:</div>
+          <div class="segmented" id="exp-presets">
+            <button data-v="100000">1 Lakh</button>
+            <button data-v="1000000">10 Lakhs</button>
+            <button data-v="10000000">1 Crore</button>
+            <button data-v="1000000000">1 Arab</button>
+          </div>
+        </div>
+        <button class="submit-btn" id="exp-apply">Apply Changes</button>
+      </div>
+    </div>`;
+    // Wire
+    c.querySelector("#exp-num-slider").oninput=function(){currentNum=parseInt(this.value);renderExplore()};
+    c.querySelector("#exp-adj").onclick=()=>c.querySelector("#exp-overlay").classList.toggle("open");
+    c.querySelector("#exp-apply").onclick=()=>c.querySelector("#exp-overlay").classList.remove("open");
+    c.querySelector("#exp-mode-seg").addEventListener("click",e=>{
+      const b=e.target.closest("button");if(!b)return;
+      if(b.dataset.v==="quiz"){expMode="quiz";qIdx=0;score=0;answered=false;genQuiz();renderQuiz()}
+    });
+    c.querySelector("#exp-presets").addEventListener("click",e=>{
+      const b=e.target.closest("button");if(!b)return;
+      currentNum=parseInt(b.dataset.v);c.querySelector("#exp-overlay").classList.remove("open");renderExplore();
+    });
+  }
+
+  function renderQuiz(){
+    if(qIdx>=QUIZ.length){qIdx=0;genQuiz()}
+    const q=QUIZ[qIdx];
+    let optsHtml=q.opts.map(o=>`<button class="quiz-opt" data-v="${o}">${o}</button>`).join("");
+    c.innerHTML=`
+    <div class="visual" style="padding:0">
+      <button class="control-toggle" id="exp-adj2">Adjust</button>
+      <div style="padding:48px 12px 12px">
+        <div class="quiz-q">${q.q}</div>
+        <div class="quiz-opts" id="quiz-opts">${optsHtml}</div>
+        <div class="quiz-feedback" id="quiz-fb"></div>
+        <button class="quiz-next" id="quiz-next" style="display:none">Next</button>
+        <div class="quiz-score">Score: ${score}/${qIdx} | Question ${qIdx+1}</div>
+      </div>
+      <div class="control-overlay" id="exp-overlay">
+        <div class="control-group">
+          <div class="control-label">Mode:</div>
+          <div class="segmented" id="exp-mode-seg2">
+            <button data-v="explore">Explore</button>
+            <button class="active" data-v="quiz">Quiz</button>
+          </div>
+        </div>
+        <button class="submit-btn" id="exp-apply2">Apply Changes</button>
+      </div>
+    </div>`;
+    answered=false;
+    c.querySelector("#quiz-opts").addEventListener("click",e=>{
+      const b=e.target.closest(".quiz-opt");if(!b||answered)return;
+      answered=true;
+      const v=b.dataset.v;
+      if(v===q.ans){
+        b.classList.add("correct");score++;
+        c.querySelector("#quiz-fb").innerHTML=`<span style="color:#16a34a">Correct!</span> ${q.explain}`;
+      } else {
+        b.classList.add("wrong");
+        c.querySelectorAll(".quiz-opt").forEach(o=>{if(o.dataset.v===q.ans)o.classList.add("correct")});
+        c.querySelector("#quiz-fb").innerHTML=`<span style="color:#dc2626">Not quite.</span> ${q.explain}`;
+      }
+      c.querySelector("#quiz-next").style.display="block";
+    });
+    c.querySelector("#quiz-next").onclick=()=>{qIdx++;answered=false;renderQuiz()};
+    c.querySelector("#exp-adj2").onclick=()=>c.querySelector("#exp-overlay").classList.toggle("open");
+    c.querySelector("#exp-apply2").onclick=()=>c.querySelector("#exp-overlay").classList.remove("open");
+    c.querySelector("#exp-mode-seg2").addEventListener("click",e=>{
+      const b=e.target.closest("button");if(!b)return;
+      if(b.dataset.v==="explore"){expMode="explore";renderExplore()}
+    });
+  }
+
+  renderExplore();
+}
+
+createRef("ref");
+createExp("exp");
+</script>
+</body>
+</html>
