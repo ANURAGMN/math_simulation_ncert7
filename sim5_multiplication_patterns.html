@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Multiplication Patterns & Digit Count</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:#f4f6f8}
+#app{max-width:420px;margin:auto;padding:10px}
+.section-title{font-size:13px;font-weight:600;margin:8px 4px;color:#444}
+.sim-card{background:#fff;border-radius:14px;padding:8px;box-shadow:0 6px 18px rgba(0,0,0,.08);margin-bottom:12px}
+.visual{position:relative;min-height:220px;background:#eef3f9;border-radius:12px;overflow:hidden;touch-action:none}
+svg{width:100%;height:100%;display:block}
+.static-hint{position:absolute;top:8px;left:8px;background:rgba(255,255,255,.95);border-radius:8px;padding:6px 8px;font-size:11px;line-height:1.3;box-shadow:0 3px 8px rgba(0,0,0,.12);z-index:2;max-width:60%}
+.metrics{position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.96);border-radius:8px;padding:6px 8px;font-size:11px;line-height:1.4;box-shadow:0 3px 8px rgba(0,0,0,.12);z-index:2;max-width:calc(100% - 16px)}
+.control-toggle{position:absolute;right:8px;top:8px;background:#007AFF;color:#fff;font-size:11px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer;z-index:2}
+.control-overlay{position:absolute;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid #ddd;padding:8px;transform:translateY(100%);transition:transform .25s ease;z-index:5;max-height:75%;overflow-y:auto}
+.control-overlay.open{transform:translateY(0)}
+.control-group{margin-bottom:6px}
+.control-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px}
+.control-group input[type="range"]{width:100%}
+.segmented{display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap}
+.segmented button{flex:1;min-width:60px;padding:6px 4px;border-radius:6px;border:none;font-size:10px;background:#e0e0e0;cursor:pointer}
+.segmented button.active{background:#007AFF;color:#fff;font-weight:600}
+.submit-btn{width:100%;margin-top:6px;padding:8px;border-radius:8px;border:none;background:#007AFF;color:#fff;font-weight:600;cursor:pointer}
+/* Pattern table */
+.ptable{width:100%;border-collapse:collapse;font-size:11px;margin:4px 0}
+.ptable th{background:#e5e7eb;padding:4px 6px;text-align:center;font-weight:600;font-size:10px}
+.ptable td{padding:4px 6px;text-align:center;border-bottom:1px solid #f0f0f0}
+.ptable td.hl{background:#fef3c7;font-weight:700}
+.ptable td.prod{color:#007AFF;font-weight:700}
+/* Shortcut cards */
+.sc-card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:8px;margin:4px 0;font-size:11px;line-height:1.5}
+.sc-card b{color:#007AFF}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="section-title">Reference (baseline — patterns & rules)</div>
+  <div class="sim-card" id="ref"></div>
+  <div class="section-title">Experiment (explore & discover)</div>
+  <div class="sim-card" id="exp"></div>
+</div>
+<script>
+function fmtI(n){if(n===0)return"0";let s=n.toString();if(s.length<=3)return s;let l=s.slice(-3),r=s.slice(0,-3),p=[];while(r.length>2){p.unshift(r.slice(-2));r=r.slice(0,-2)}if(r.length)p.unshift(r);return p.join(",")+","+l}
+function dLen(n){return n.toString().length}
+
+// ── Reference: Show the beautiful patterns + digit count rule ──
+function createRef(cid){
+  const c=document.getElementById(cid);
+  const PATTERNS=[
+    {title:"Palindrome Pattern",rows:[[11,11],[111,111],[1111,1111],[11111,11111]]},
+    {title:"66×61 Pattern",rows:[[66,61],[666,661],[6666,6661]]},
+    {title:"3×5 Pattern",rows:[[3,5],[33,35],[333,335],[3333,3335]]},
+    {title:"101/102/103 Pattern",rows:[[101,101],[102,102],[103,103],[104,104]]},
+    {title:"Digit Count Rule",rows:[[10,10],[99,99],[100,100],[999,999],[10,100],[99,999],[1000,10],[9999,99]]}
+  ];
+  let pIdx=0;
+
+  function render(){
+    const pat=PATTERNS[pIdx];
+    let tableHtml=`<table class="ptable"><tr><th>A</th><th>B</th><th>A × B</th><th>Digits(A)</th><th>Digits(B)</th><th>Digits(A×B)</th></tr>`;
+    pat.rows.forEach(([a,b])=>{
+      const prod=a*b;
+      const da=dLen(a),db=dLen(b),dp=dLen(prod);
+      const expected_min=da+db-1,expected_max=da+db;
+      const matches=(dp===expected_min||dp===expected_max);
+      tableHtml+=`<tr>
+        <td>${fmtI(a)}</td><td>${fmtI(b)}</td>
+        <td class="prod">${fmtI(prod)}</td>
+        <td>${da}</td><td>${db}</td>
+        <td class="${matches?'hl':''}">${dp}</td>
+      </tr>`;
+    });
+    tableHtml+=`</table>`;
+
+    c.innerHTML=`
+    <div class="visual" style="padding:0;min-height:auto">
+      <div style="padding:10px">
+        <div style="font-size:13px;font-weight:700;color:#333;text-align:center;margin-bottom:4px">${pat.title}</div>
+        ${tableHtml}
+        <div style="background:#eff6ff;border-radius:8px;padding:6px 8px;font-size:10px;color:#1e40af;margin-top:6px;text-align:center">
+          <b>Rule:</b> m-digit × n-digit = <b>(m+n−1)</b> or <b>(m+n)</b> digit product
+        </div>
+        <div style="text-align:center;font-size:9px;color:#aaa;margin-top:6px">Tap to see next pattern (${pIdx+1}/${PATTERNS.length})</div>
+      </div>
+    </div>`;
+  }
+  c.addEventListener("click",()=>{pIdx=(pIdx+1)%PATTERNS.length;render()});
+  render();
+}
+
+// ── Experiment: Interactive multiplier + shortcut explorer ──
+function createExp(cid){
+  const c=document.getElementById(cid);
+  let expMode="multiply"; // multiply, shortcuts, digitRule
+  let numA=111,numB=111;
+
+  function renderMultiply(){
+    const prod=numA*numB;
+    const da=dLen(numA),db=dLen(numB),dp=dLen(prod);
+    const ruleMin=da+db-1,ruleMax=da+db;
+    const ruleOK=(dp===ruleMin||dp===ruleMax);
+
+    const W=380,H=160;
+    // Visual: two blocks multiplying
+    let svg="";
+    // Block A
+    const aW=Math.min(140,da*22),bW=Math.min(140,db*22),pW=Math.min(300,dp*18);
+    svg+=`<rect x="${(W/2-aW)/2}" y="20" width="${aW}" height="30" rx="6" fill="#3498db" opacity=".8"/>`;
+    svg+=`<text x="${(W/2-aW)/2+aW/2}" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">${fmtI(numA)}</text>`;
+    svg+=`<text x="${(W/2-aW)/2+aW/2}" y="65" text-anchor="middle" font-size="9" fill="#888">${da}-digit</text>`;
+    // ×
+    svg+=`<text x="${W/2}" y="40" text-anchor="middle" font-size="18" font-weight="700" fill="#333">×</text>`;
+    // Block B
+    svg+=`<rect x="${W/2+(W/2-bW)/2}" y="20" width="${bW}" height="30" rx="6" fill="#e74c3c" opacity=".8"/>`;
+    svg+=`<text x="${W/2+(W/2-bW)/2+bW/2}" y="40" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">${fmtI(numB)}</text>`;
+    svg+=`<text x="${W/2+(W/2-bW)/2+bW/2}" y="65" text-anchor="middle" font-size="9" fill="#888">${db}-digit</text>`;
+    // = Product
+    svg+=`<text x="${W/2}" y="85" text-anchor="middle" font-size="11" fill="#888">=</text>`;
+    svg+=`<rect x="${(W-pW)/2}" y="92" width="${pW}" height="34" rx="8" fill="${ruleOK?'#16a34a':'#f59e0b'}" opacity=".15"/>`;
+    svg+=`<text x="${W/2}" y="114" text-anchor="middle" font-size="18" font-weight="800" fill="#16a34a">${fmtI(prod)}</text>`;
+    svg+=`<text x="${W/2}" y="140" text-anchor="middle" font-size="10" fill="#555">${dp}-digit product | Rule predicts: ${ruleMin} or ${ruleMax} digits ${ruleOK?"✓":"✗"}</text>`;
+
+    c.innerHTML=`
+    <div class="visual" style="min-height:${H+80}px">
+      <div class="static-hint">Drag sliders to multiply</div>
+      <button class="control-toggle" id="exp-adj">Adjust</button>
+      <svg viewBox="0 0 ${W} ${H}" style="min-height:${H}px">${svg}</svg>
+      <div style="padding:4px 10px">
+        <div style="font-size:10px;color:#888">Number A: <b>${fmtI(numA)}</b></div>
+        <input type="range" id="sl-a" min="1" max="99999" step="1" value="${numA}" style="width:100%">
+        <div style="font-size:10px;color:#888;margin-top:2px">Number B: <b>${fmtI(numB)}</b></div>
+        <input type="range" id="sl-b" min="1" max="99999" step="1" value="${numB}" style="width:100%">
+      </div>
+      <div class="control-overlay" id="exp-overlay">
+        <div class="control-group">
+          <div class="control-label">Mode:</div>
+          <div class="segmented" id="exp-mode-seg">
+            <button class="active" data-v="multiply">Multiply</button>
+            <button data-v="shortcuts">Shortcuts</button>
+            <button data-v="digitRule">Digit Rule</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="control-label">Quick sets:</div>
+          <div class="segmented" id="exp-presets">
+            <button data-a="11" data-b="11">11×11</button>
+            <button data-a="111" data-b="111">111×111</button>
+            <button data-a="66" data-b="61">66×61</button>
+            <button data-a="333" data-b="335">333×335</button>
+          </div>
+        </div>
+        <button class="submit-btn" id="exp-apply">Apply Changes</button>
+      </div>
+    </div>`;
+
+    c.querySelector("#sl-a").oninput=function(){numA=parseInt(this.value);renderMultiply()};
+    c.querySelector("#sl-b").oninput=function(){numB=parseInt(this.value);renderMultiply()};
+    wireCommon();
+  }
+
+  function renderShortcuts(){
+    const shortcuts=[
+      {title:"Multiply by 5",rule:"÷ 2, then × 10",examples:[[116,5,580],[248,5,1240],[372,5,1860]],
+       explain:"116 × 5 = 116 × 10 ÷ 2 = 1160 ÷ 2 = 580"},
+      {title:"Multiply by 25",rule:"÷ 4, then × 100",examples:[[824,25,20600],[48,25,1200],[72,25,1800]],
+       explain:"824 × 25 = 824 × 100 ÷ 4 = 82400 ÷ 4 = 20600"},
+      {title:"Multiply by 125",rule:"÷ 8, then × 1000",examples:[[72,125,9000],[40,125,5000],[16,125,2000]],
+       explain:"72 × 125 = 72 ÷ 8 × 1000 = 9 × 1000 = 9000"},
+      {title:"Smart regrouping",rule:"Look for pairs that make 100 or 1000",examples:[[2,1768,50],[125,40,8,25]],
+       explain:"2 × 1768 × 50 = (2×50) × 1768 = 100 × 1768\n125 × 40 × 8 × 25 = (125×8) × (40×25) = 1000 × 1000"}
+    ];
+
+    let cardsHtml=shortcuts.map(s=>{
+      let exHtml=s.examples.map(e=>{
+        if(e.length===3) return `<div>${fmtI(e[0])} × ${fmtI(e[1])} = <b>${fmtI(e[2])}</b></div>`;
+        return `<div>${e.map(fmtI).join(" × ")} = <b>${fmtI(e.reduce((a,b)=>a*b,1))}</b></div>`;
+      }).join("");
+      return `<div class="sc-card">
+        <div style="font-weight:700;color:#333;margin-bottom:2px">${s.title}</div>
+        <div style="color:#007AFF;font-weight:600;margin-bottom:4px">Rule: ${s.rule}</div>
+        ${exHtml}
+        <div style="font-size:10px;color:#888;margin-top:4px;white-space:pre-line">${s.explain}</div>
+      </div>`;
+    }).join("");
+
+    c.innerHTML=`
+    <div class="visual" style="min-height:auto;padding:0">
+      <div style="padding:10px;max-height:400px;overflow-y:auto">
+        <div style="font-size:13px;font-weight:700;text-align:center;margin-bottom:6px">Multiplication Shortcuts</div>
+        ${cardsHtml}
+      </div>
+      <button class="control-toggle" id="exp-adj">Adjust</button>
+      <div class="control-overlay" id="exp-overlay">
+        <div class="control-group">
+          <div class="control-label">Mode:</div>
+          <div class="segmented" id="exp-mode-seg">
+            <button data-v="multiply">Multiply</button>
+            <button class="active" data-v="shortcuts">Shortcuts</button>
+            <button data-v="digitRule">Digit Rule</button>
+          </div>
+        </div>
+        <button class="submit-btn" id="exp-apply">Apply Changes</button>
+      </div>
+    </div>`;
+    wireCommon();
+  }
+
+  function renderDigitRule(){
+    const W=380,H=260;
+    // Grid: x-axis = digits of A (1-5), y-axis = digits of B (1-5)
+    // Each cell shows: product digit count range
+    let svg="";
+    const ox=60,oy=40,cw=56,ch=38;
+    svg+=`<text x="${W/2}" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#333">Digit Count Rule Grid</text>`;
+    svg+=`<text x="${ox+cw*2.5}" y="34" text-anchor="middle" font-size="9" fill="#888">Digits in A →</text>`;
+    svg+=`<text x="12" y="${oy+ch*2.5+5}" font-size="9" fill="#888" transform="rotate(-90 12 ${oy+ch*2.5+5})">Digits in B →</text>`;
+
+    for(let a=1;a<=5;a++){
+      svg+=`<text x="${ox+(a-1)*cw+cw/2}" y="${oy-4}" text-anchor="middle" font-size="10" font-weight="600" fill="#555">${a}</text>`;
+    }
+    for(let b=1;b<=5;b++){
+      svg+=`<text x="${ox-8}" y="${oy+(b-1)*ch+ch/2+4}" text-anchor="end" font-size="10" font-weight="600" fill="#555">${b}</text>`;
+      for(let a=1;a<=5;a++){
+        const minD=a+b-1,maxD=a+b;
+        const x=ox+(a-1)*cw,y=oy+(b-1)*ch;
+        // Color intensity based on digit count
+        const intensity=Math.min(1,(minD)/10);
+        const hue=200-intensity*150;
+        svg+=`<rect x="${x}" y="${y}" width="${cw-2}" height="${ch-2}" rx="4" fill="hsl(${hue},60%,88%)" stroke="#ddd" stroke-width="0.5"/>`;
+        svg+=`<text x="${x+cw/2-1}" y="${y+ch/2+1}" text-anchor="middle" font-size="11" font-weight="700" fill="hsl(${hue},70%,35%)">${minD}`;
+        if(minD!==maxD) svg+=`<tspan font-size="8" fill="hsl(${hue},50%,55%)"> or ${maxD}</tspan>`;
+        svg+=`</text>`;
+      }
+    }
+    // Highlight example
+    const ha=dLen(numA)-1,hb=dLen(numB)-1;
+    if(ha<5&&hb<5){
+      svg+=`<rect x="${ox+ha*cw-1}" y="${oy+hb*ch-1}" width="${cw}" height="${ch}" rx="4" fill="none" stroke="#e74c3c" stroke-width="2.5"/>`;
+    }
+
+    svg+=`<text x="${W/2}" y="${oy+5*ch+18}" text-anchor="middle" font-size="10" fill="#555">${fmtI(numA)} (${dLen(numA)}d) × ${fmtI(numB)} (${dLen(numB)}d) = ${fmtI(numA*numB)} (${dLen(numA*numB)}d)</text>`;
+
+    c.innerHTML=`
+    <div class="visual" style="min-height:${H+60}px">
+      <div class="static-hint">Red box = your selection</div>
+      <button class="control-toggle" id="exp-adj">Adjust</button>
+      <svg viewBox="0 0 ${W} ${H}" style="min-height:${H}px">${svg}</svg>
+      <div style="padding:4px 10px">
+        <div style="font-size:10px;color:#888">A: <b>${fmtI(numA)}</b> (${dLen(numA)}-digit)</div>
+        <input type="range" id="sl-a" min="1" max="99999" step="1" value="${numA}" style="width:100%">
+        <div style="font-size:10px;color:#888;margin-top:2px">B: <b>${fmtI(numB)}</b> (${dLen(numB)}-digit)</div>
+        <input type="range" id="sl-b" min="1" max="99999" step="1" value="${numB}" style="width:100%">
+      </div>
+      <div class="control-overlay" id="exp-overlay">
+        <div class="control-group">
+          <div class="control-label">Mode:</div>
+          <div class="segmented" id="exp-mode-seg">
+            <button data-v="multiply">Multiply</button>
+            <button data-v="shortcuts">Shortcuts</button>
+            <button class="active" data-v="digitRule">Digit Rule</button>
+          </div>
+        </div>
+        <button class="submit-btn" id="exp-apply">Apply Changes</button>
+      </div>
+    </div>`;
+
+    c.querySelector("#sl-a").oninput=function(){numA=parseInt(this.value);renderDigitRule()};
+    c.querySelector("#sl-b").oninput=function(){numB=parseInt(this.value);renderDigitRule()};
+    wireCommon();
+  }
+
+  function wireCommon(){
+    c.querySelector("#exp-adj").onclick=()=>c.querySelector("#exp-overlay").classList.toggle("open");
+    c.querySelector("#exp-apply").onclick=()=>c.querySelector("#exp-overlay").classList.remove("open");
+    c.querySelector("#exp-mode-seg").addEventListener("click",e=>{
+      const b=e.target.closest("button");if(!b)return;
+      expMode=b.dataset.v;
+      if(expMode==="multiply")renderMultiply();
+      else if(expMode==="shortcuts")renderShortcuts();
+      else renderDigitRule();
+    });
+    const presets=c.querySelector("#exp-presets");
+    if(presets){
+      presets.addEventListener("click",e=>{
+        const b=e.target.closest("button");if(!b)return;
+        numA=parseInt(b.dataset.a);numB=parseInt(b.dataset.b);
+        c.querySelector("#exp-overlay").classList.remove("open");
+        if(expMode==="multiply")renderMultiply();
+        else if(expMode==="digitRule")renderDigitRule();
+      });
+    }
+  }
+
+  renderMultiply();
+}
+
+createRef("ref");
+createExp("exp");
+</script>
+</body>
+</html>
