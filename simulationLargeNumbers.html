@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Large Numbers Around Us — Place Value Explorer</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f4f6f8;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+#app {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+}
+
+.app-title {
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  color: #222;
+  margin: 6px 0 2px;
+}
+
+.app-subtitle {
+  font-size: 11px;
+  text-align: center;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 4px;
+  color: #444;
+}
+
+.sim-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
+
+/* --- Number Display --- */
+.number-display {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 12px;
+  padding: 14px 12px 10px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.number-display::after {
+  content: '';
+  position: absolute;
+  top: -40%; right: -20%;
+  width: 60%; height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.display-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.display-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+  word-break: break-all;
+  line-height: 1.2;
+}
+
+.display-words {
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  margin-top: 4px;
+  line-height: 1.3;
+  min-height: 28px;
+}
+
+.display-system-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8);
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.display-system-toggle:active {
+  background: rgba(255,255,255,0.2);
+}
+
+/* --- Place Value Bars --- */
+.pv-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.pv-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pv-label {
+  font-size: 9px;
+  color: #888;
+  width: 58px;
+  text-align: right;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.pv-bar-track {
+  flex: 1;
+  height: 18px;
+  background: #f0f2f5;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.pv-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  min-width: 0;
+}
+
+.pv-bar-fill.c0 { background: linear-gradient(90deg, #FF6B6B, #ee5a5a); }
+.pv-bar-fill.c1 { background: linear-gradient(90deg, #FFA502, #e89400); }
+.pv-bar-fill.c2 { background: linear-gradient(90deg, #FECA57, #e8b84a); }
+.pv-bar-fill.c3 { background: linear-gradient(90deg, #48DBFB, #38c8e8); }
+.pv-bar-fill.c4 { background: linear-gradient(90deg, #0ABDE3, #099fc2); }
+.pv-bar-fill.c5 { background: linear-gradient(90deg, #5F27CD, #4e20a8); }
+.pv-bar-fill.c6 { background: linear-gradient(90deg, #341f97, #2a1a7a); }
+
+.pv-digit {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* --- Metrics --- */
+.metrics-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.metric-chip {
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 6px 10px;
+  flex: 1;
+  min-width: 90px;
+}
+
+.metric-chip-label {
+  font-size: 9px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-chip-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #222;
+  margin-top: 1px;
+}
+
+/* --- Button Grid (Experiment) --- */
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.pv-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 4px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pv-btn:active {
+  transform: scale(0.95);
+}
+
+.pv-btn .btn-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.pv-btn .btn-label {
+  font-size: 8px;
+  color: rgba(255,255,255,0.75);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.pv-btn.b0 { background: linear-gradient(135deg, #FF6B6B, #ee5a5a); border-color: #d94848; }
+.pv-btn.b1 { background: linear-gradient(135deg, #FFA502, #e89400); border-color: #cc8200; }
+.pv-btn.b2 { background: linear-gradient(135deg, #FECA57, #e8b84a); border-color: #cca03e; color: #333; }
+.pv-btn.b3 { background: linear-gradient(135deg, #48DBFB, #38c8e8); border-color: #2cb0cc; }
+.pv-btn.b4 { background: linear-gradient(135deg, #0ABDE3, #099fc2); border-color: #0889a8; }
+.pv-btn.b5 { background: linear-gradient(135deg, #5F27CD, #4e20a8); border-color: #3e1a88; }
+.pv-btn.b6 { background: linear-gradient(135deg, #341f97, #2a1a7a); border-color: #201260; }
+
+.pv-btn.b2 .btn-value { color: #333; }
+.pv-btn.b2 .btn-label { color: rgba(0,0,0,0.5); }
+
+/* --- Action Buttons Row --- */
+.action-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.action-btn:active { transform: scale(0.97); }
+
+.action-btn.reset {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.action-btn.undo {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.action-btn.target-btn {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* --- Target Challenge --- */
+.challenge-bar {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.challenge-bar .challenge-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.challenge-label {
+  font-size: 9px;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.challenge-number {
+  font-size: 18px;
+  font-weight: 800;
+  color: #78350f;
+}
+
+.challenge-status {
+  font-size: 20px;
+}
+
+.challenge-btn {
+  background: #f59e0b;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.challenge-btn:active { transform: scale(0.96); }
+
+/* --- Mode Selector --- */
+.mode-selector {
+  display: flex;
+  gap: 4px;
+  background: #f0f2f5;
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 10px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 7px 4px;
+  border-radius: 8px;
+  border: none;
+  font-size: 11px;
+  font-weight: 500;
+  color: #666;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-btn.active {
+  background: #fff;
+  color: #222;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* --- Hint --- */
+.hint-bar {
+  background: #eff6ff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #1e40af;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+/* --- History log --- */
+.history-log {
+  max-height: 80px;
+  overflow-y: auto;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+}
+
+.history-item {
+  font-size: 10px;
+  color: #666;
+  padding: 2px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.history-item:last-child { border-bottom: none; }
+
+/* --- Comparison Table (Reference) --- */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.comparison-table th {
+  background: #f0f2f5;
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.comparison-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+}
+
+.comparison-table tr:last-child td { border-bottom: none; }
+
+.comparison-table .highlight { 
+  background: #fffbeb;
+  font-weight: 600;
+}
+
+/* --- Confetti --- */
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(60px) rotate(360deg); opacity: 0; }
+}
+
+.confetti-container {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confetti-fall 1.2s ease forwards;
+}
+
+/* Responsiveness */
+@media (max-width: 360px) {
+  .display-number { font-size: 22px; }
+  .pv-btn { padding: 8px 3px; }
+  .pv-btn .btn-value { font-size: 11px; }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+  <div class="app-title">Large Numbers Around Us</div>
+  <div class="app-subtitle">NCERT Class 7 &bull; Chapter 1 &bull; Place Value Explorer</div>
+  
+  <div class="section-title">Reference (Indian &amp; International Systems)</div>
+  <div class="sim-card" id="ref"></div>
+  
+  <div class="section-title">Experiment (Build &amp; Explore)</div>
+  <div class="sim-card" id="exp"></div>
+</div>
+
+<script>
+// ─── Utility Functions ───
+const PLACE_VALUES = [
+  { value: 1,       label: "Ones",        short: "+1",         indian: "Ones",       intl: "Ones"        },
+  { value: 10,      label: "Tens",         short: "+10",        indian: "Tens",       intl: "Tens"        },
+  { value: 100,     label: "Hundreds",     short: "+100",       indian: "Hundreds",   intl: "Hundreds"    },
+  { value: 1000,    label: "Thousands",    short: "+1,000",     indian: "Thousands",  intl: "Thousands"   },
+  { value: 10000,   label: "Ten Thous.",   short: "+10,000",    indian: "Ten Thous.", intl: "Ten Thous."  },
+  { value: 100000,  label: "Lakhs",        short: "+1,00,000",  indian: "Lakhs",      intl: "Hund. Thous."},
+  { value: 1000000, label: "Ten Lakhs",    short: "+10,00,000", indian: "Ten Lakhs",  intl: "Millions"    }
+];
+
+function formatIndian(n) {
+  if (n === 0) return "0";
+  let s = n.toString();
+  if (s.length <= 3) return s;
+  let last3 = s.slice(-3);
+  let rest = s.slice(0, -3);
+  let parts = [];
+  while (rest.length > 2) {
+    parts.unshift(rest.slice(-2));
+    rest = rest.slice(0, -2);
+  }
+  if (rest.length > 0) parts.unshift(rest);
+  return parts.join(",") + "," + last3;
+}
+
+function formatInternational(n) {
+  return n.toLocaleString("en-US");
+}
+
+function numberToIndianWords(n) {
+  if (n === 0) return "Zero";
+  const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
+    "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  
+  function twoDigit(num) {
+    if (num < 20) return ones[num];
+    return tens[Math.floor(num/10)] + (num%10 ? " " + ones[num%10] : "");
+  }
+  
+  function threeDigit(num) {
+    if (num < 100) return twoDigit(num);
+    return ones[Math.floor(num/100)] + " Hundred" + (num%100 ? " " + twoDigit(num%100) : "");
+  }
+  
+  let parts = [];
+  // Crores
+  if (n >= 10000000) {
+    let cr = Math.floor(n / 10000000);
+    parts.push(twoDigit(cr) + " Crore");
+    n %= 10000000;
+  }
+  // Lakhs
+  if (n >= 100000) {
+    let lk = Math.floor(n / 100000);
+    parts.push(twoDigit(lk) + " Lakh");
+    n %= 100000;
+  }
+  // Thousands
+  if (n >= 1000) {
+    let th = Math.floor(n / 1000);
+    parts.push(twoDigit(th) + " Thousand");
+    n %= 1000;
+  }
+  // Hundreds
+  if (n > 0) {
+    parts.push(threeDigit(n));
+  }
+  return parts.join(" ") || "Zero";
+}
+
+function numberToIntlWords(n) {
+  if (n === 0) return "Zero";
+  const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
+    "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  
+  function twoDigit(num) {
+    if (num < 20) return ones[num];
+    return tens[Math.floor(num/10)] + (num%10 ? " " + ones[num%10] : "");
+  }
+  
+  function threeDigit(num) {
+    if (num < 100) return twoDigit(num);
+    return ones[Math.floor(num/100)] + " Hundred" + (num%100 ? " " + twoDigit(num%100) : "");
+  }
+  
+  let parts = [];
+  if (n >= 1000000) {
+    let m = Math.floor(n / 1000000);
+    parts.push(threeDigit(m) + " Million");
+    n %= 1000000;
+  }
+  if (n >= 1000) {
+    let th = Math.floor(n / 1000);
+    parts.push(threeDigit(th) + " Thousand");
+    n %= 1000;
+  }
+  if (n > 0) {
+    parts.push(threeDigit(n));
+  }
+  return parts.join(" ") || "Zero";
+}
+
+function getDigits(n) {
+  // Returns array of place value digits [ones, tens, hundreds, thousands, tenthousands, lakhs, tenlakhs]
+  let digits = [];
+  for (let i = 0; i < PLACE_VALUES.length; i++) {
+    digits.push(Math.floor(n / PLACE_VALUES[i].value) % 10);
+  }
+  return digits;
+}
+
+function digitSum(n) {
+  let s = 0;
+  while (n > 0) { s += n % 10; n = Math.floor(n / 10); }
+  return s;
+}
+
+// ─── Target Numbers (Challenges) ───
+const CHALLENGES = [
+  { target: 5072, hint: "Can you build 5,072 like Creative Chitti?" },
+  { target: 8300, hint: "Try making 8,300 with the fewest clicks!" },
+  { target: 40629, hint: "Build 40,629 — watch the place values!" },
+  { target: 100000, hint: "One Lakh! How many clicks to get there?" },
+  { target: 56354, hint: "Can you reach 56,354?" },
+  { target: 66666, hint: "All sixes! Build 66,666." },
+  { target: 367813, hint: "A big one: 3,67,813. Try it!" },
+  { target: 75000, hint: "Chintamani's population: 75,000" },
+  { target: 106000, hint: "Chintamani in 2024: 1,06,000" },
+  { target: 997, hint: "Make 997 — what's the fewest clicks?" }
+];
+
+// ─── Reference Panel ───
+function createReference(containerId) {
+  const c = document.getElementById(containerId);
+  
+  const EXAMPLES = [
+    { number: 100000,   indian: "1,00,000",     intl: "100,000",      indianName: "One Lakh",                   intlName: "One Hundred Thousand" },
+    { number: 1000000,  indian: "10,00,000",     intl: "1,000,000",    indianName: "Ten Lakhs",                  intlName: "One Million" },
+    { number: 10000000, indian: "1,00,00,000",   intl: "10,000,000",   indianName: "One Crore",                  intlName: "Ten Million" },
+    { number: 75000,    indian: "75,000",        intl: "75,000",       indianName: "Seventy Five Thousand",      intlName: "Seventy Five Thousand" },
+    { number: 106000,   indian: "1,06,000",      intl: "106,000",      indianName: "One Lakh Six Thousand",      intlName: "One Hundred Six Thousand" },
+    { number: 5072,     indian: "5,072",         intl: "5,072",        indianName: "Five Thousand Seventy Two",  intlName: "Five Thousand Seventy Two" }
+  ];
+  
+  let tableRows = EXAMPLES.map(e => `
+    <tr>
+      <td style="font-weight:600">${e.indian}</td>
+      <td>${e.intl}</td>
+      <td>${e.indianName}</td>
+    </tr>
+  `).join("");
+  
+  // Place Value reference
+  const pvRef = [
+    { place: "10,00,000",  name: "Ten Lakhs / Million", zeros: 6 },
+    { place: "1,00,000",   name: "Lakhs / Hund. Thous.", zeros: 5 },
+    { place: "10,000",     name: "Ten Thousands",        zeros: 4 },
+    { place: "1,000",      name: "Thousands",            zeros: 3 },
+    { place: "100",        name: "Hundreds",             zeros: 2 },
+    { place: "10",         name: "Tens",                 zeros: 1 },
+    { place: "1",          name: "Ones",                 zeros: 0 }
+  ];
+  
+  let pvRows = pvRef.map(p => `
+    <tr>
+      <td style="font-weight:600;font-variant-numeric:tabular-nums">${p.place}</td>
+      <td>${p.name}</td>
+      <td style="color:#888">${p.zeros} zeros</td>
+    </tr>
+  `).join("");
+  
+  c.innerHTML = `
+    <div class="number-display">
+      <div class="display-label">Indian vs International Number Systems</div>
+      <div class="display-number" style="font-size:18px">1,00,000 = 100,000</div>
+      <div class="display-words">One Lakh = One Hundred Thousand</div>
+    </div>
+    
+    <div style="font-size:11px;font-weight:600;color:#555;margin:6px 0 4px">Place Value Chart</div>
+    <table class="comparison-table">
+      <tr><th>Value</th><th>Place Name</th><th>Zeros</th></tr>
+      ${pvRows}
+    </table>
+    
+    <div style="font-size:11px;font-weight:600;color:#555;margin:6px 0 4px">Number Comparison</div>
+    <table class="comparison-table">
+      <tr><th>Indian</th><th>International</th><th>Name</th></tr>
+      ${tableRows}
+    </table>
+    
+    <div class="hint-bar">
+      Indian system: commas in 3-2-2-2 pattern from right.<br>
+      International system: commas in 3-3-3 pattern from right.
+    </div>
+  `;
+}
+
+// ─── Experiment Panel ───
+function createExperiment(containerId) {
+  const c = document.getElementById(containerId);
+  
+  let currentNumber = 0;
+  let totalClicks = 0;
+  let clicksPerPlace = [0, 0, 0, 0, 0, 0, 0];
+  let history = [];
+  let useIndian = true;
+  let challengeIdx = 0;
+  let currentChallenge = CHALLENGES[0];
+  let mode = "free"; // "free" or "challenge"
+  
+  function buildHTML() {
+    let pvBarsHtml = PLACE_VALUES.map((pv, i) => `
+      <div class="pv-row">
+        <div class="pv-label">${pv.indian}</div>
+        <div class="pv-bar-track">
+          <div class="pv-bar-fill c${i}" id="exp-bar-${i}" style="width:0%"></div>
+        </div>
+        <div class="pv-digit" id="exp-digit-${i}">0</div>
+      </div>
+    `).reverse().join("");
+    
+    let pvBtnsHtml = PLACE_VALUES.map((pv, i) => `
+      <button class="pv-btn b${i}" data-idx="${i}">
+        <span class="btn-value">${pv.short}</span>
+        <span class="btn-label">${pv.label}</span>
+      </button>
+    `).reverse().join("");
+    
+    c.innerHTML = `
+      <div class="mode-selector">
+        <button class="mode-btn active" data-mode="free">Free Explore</button>
+        <button class="mode-btn" data-mode="challenge">Challenge</button>
+      </div>
+      
+      <div id="exp-challenge" class="challenge-bar" style="display:none">
+        <div class="challenge-left">
+          <span class="challenge-label">Build this number</span>
+          <span class="challenge-number" id="exp-target-num">${formatIndian(currentChallenge.target)}</span>
+        </div>
+        <span class="challenge-status" id="exp-challenge-status"></span>
+        <button class="challenge-btn" id="exp-next-challenge">Next</button>
+      </div>
+      
+      <div class="number-display" style="position:relative" id="exp-display-wrap">
+        <button class="display-system-toggle" id="exp-sys-toggle">Indian</button>
+        <div class="display-label">Your Number</div>
+        <div class="display-number" id="exp-display-num">0</div>
+        <div class="display-words" id="exp-display-words">Zero</div>
+      </div>
+      
+      <div class="pv-bars" id="exp-pv-bars">
+        ${pvBarsHtml}
+      </div>
+      
+      <div class="metrics-row">
+        <div class="metric-chip">
+          <div class="metric-chip-label">Total Clicks</div>
+          <div class="metric-chip-value" id="exp-total-clicks">0</div>
+        </div>
+        <div class="metric-chip">
+          <div class="metric-chip-label">Min Clicks Possible</div>
+          <div class="metric-chip-value" id="exp-min-clicks">0</div>
+        </div>
+        <div class="metric-chip">
+          <div class="metric-chip-label">Digits</div>
+          <div class="metric-chip-value" id="exp-num-digits">1</div>
+        </div>
+      </div>
+      
+      <div class="hint-bar" id="exp-hint">
+        Tap the buttons below to add to your number. Each button adds its place value. Try building numbers with the fewest clicks!
+      </div>
+      
+      <div class="btn-grid" id="exp-btn-grid">
+        ${pvBtnsHtml}
+      </div>
+      
+      <div class="action-row">
+        <button class="action-btn undo" id="exp-undo">Undo</button>
+        <button class="action-btn reset" id="exp-reset">Reset</button>
+      </div>
+      
+      <div style="font-size:10px;font-weight:600;color:#888;margin:4px 0 2px">Click History</div>
+      <div class="history-log" id="exp-history">
+        <div class="history-item" style="color:#aaa">No clicks yet</div>
+      </div>
+    `;
+  }
+  
+  function render() {
+    const digits = getDigits(currentNumber);
+    
+    // Update display
+    const dispNum = document.getElementById("exp-display-num");
+    const dispWords = document.getElementById("exp-display-words");
+    
+    if (useIndian) {
+      dispNum.textContent = formatIndian(currentNumber);
+      dispWords.textContent = numberToIndianWords(currentNumber);
+    } else {
+      dispNum.textContent = formatInternational(currentNumber);
+      dispWords.textContent = numberToIntlWords(currentNumber);
+    }
+    
+    // Update bars
+    for (let i = 0; i < PLACE_VALUES.length; i++) {
+      const bar = document.getElementById("exp-bar-" + i);
+      const digitEl = document.getElementById("exp-digit-" + i);
+      bar.style.width = (digits[i] / 9 * 100) + "%";
+      digitEl.textContent = digits[i];
+    }
+    
+    // Metrics
+    document.getElementById("exp-total-clicks").textContent = totalClicks;
+    document.getElementById("exp-min-clicks").textContent = digitSum(currentNumber);
+    document.getElementById("exp-num-digits").textContent = currentNumber === 0 ? 1 : currentNumber.toString().length;
+    
+    // Challenge status
+    if (mode === "challenge") {
+      const statusEl = document.getElementById("exp-challenge-status");
+      if (currentNumber === currentChallenge.target) {
+        statusEl.textContent = "\u2705";
+        if (totalClicks === digitSum(currentChallenge.target)) {
+          document.getElementById("exp-hint").innerHTML = 
+            "<strong>Perfect!</strong> You did it with the minimum clicks (" + totalClicks + ")! That matches the digit sum.";
+        } else {
+          document.getElementById("exp-hint").innerHTML = 
+            "You reached the target! You used <strong>" + totalClicks + " clicks</strong>. The minimum is <strong>" + digitSum(currentChallenge.target) + "</strong>. Can you do better?";
+        }
+        showConfetti();
+      } else if (currentNumber > currentChallenge.target) {
+        statusEl.textContent = "\u26A0\uFE0F";
+        document.getElementById("exp-hint").textContent = "You went past the target! Try undoing or resetting.";
+      } else {
+        statusEl.textContent = "";
+        const diff = currentChallenge.target - currentNumber;
+        document.getElementById("exp-hint").textContent = currentChallenge.hint + " (" + formatIndian(diff) + " more to go)";
+      }
+    }
+    
+    // History
+    const histEl = document.getElementById("exp-history");
+    if (history.length === 0) {
+      histEl.innerHTML = '<div class="history-item" style="color:#aaa">No clicks yet</div>';
+    } else {
+      histEl.innerHTML = history.slice().reverse().slice(0, 20).map(h => 
+        `<div class="history-item">${h.label} \u2192 ${useIndian ? formatIndian(h.after) : formatInternational(h.after)} (click #${h.clickNum})</div>`
+      ).join("");
+      histEl.scrollTop = 0;
+    }
+  }
+  
+  function addValue(idx) {
+    const pv = PLACE_VALUES[idx];
+    const before = currentNumber;
+    currentNumber += pv.value;
+    
+    // Cap at 99,99,999 (7 digits max for display)
+    if (currentNumber > 9999999) {
+      currentNumber = 9999999;
+    }
+    
+    totalClicks++;
+    clicksPerPlace[idx]++;
+    history.push({
+      label: pv.short,
+      before: before,
+      after: currentNumber,
+      clickNum: totalClicks,
+      idx: idx
+    });
+    
+    render();
+  }
+  
+  function undo() {
+    if (history.length === 0) return;
+    const last = history.pop();
+    currentNumber = last.before;
+    totalClicks--;
+    clicksPerPlace[last.idx]--;
+    render();
+  }
+  
+  function reset() {
+    currentNumber = 0;
+    totalClicks = 0;
+    clicksPerPlace = [0, 0, 0, 0, 0, 0, 0];
+    history = [];
+    render();
+  }
+  
+  function setMode(m) {
+    mode = m;
+    c.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === m));
+    document.getElementById("exp-challenge").style.display = m === "challenge" ? "flex" : "none";
+    
+    if (m === "challenge") {
+      loadChallenge();
+    } else {
+      document.getElementById("exp-hint").textContent = 
+        "Tap the buttons below to add to your number. Each button adds its place value. Try building numbers with the fewest clicks!";
+    }
+    render();
+  }
+  
+  function loadChallenge() {
+    currentChallenge = CHALLENGES[challengeIdx % CHALLENGES.length];
+    document.getElementById("exp-target-num").textContent = formatIndian(currentChallenge.target);
+    reset();
+  }
+  
+  function nextChallenge() {
+    challengeIdx++;
+    loadChallenge();
+  }
+  
+  function showConfetti() {
+    const wrap = document.getElementById("exp-display-wrap");
+    const existing = wrap.querySelector(".confetti-container");
+    if (existing) existing.remove();
+    
+    const container = document.createElement("div");
+    container.className = "confetti-container";
+    const colors = ["#FF6B6B","#FFA502","#FECA57","#48DBFB","#5F27CD","#0ABDE3","#2ECC71"];
+    for (let i = 0; i < 30; i++) {
+      const piece = document.createElement("div");
+      piece.className = "confetti-piece";
+      piece.style.left = Math.random() * 100 + "%";
+      piece.style.top = Math.random() * 40 + "%";
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animationDelay = (Math.random() * 0.5) + "s";
+      piece.style.transform = "rotate(" + Math.random() * 360 + "deg)";
+      container.appendChild(piece);
+    }
+    wrap.appendChild(container);
+    setTimeout(() => container.remove(), 2000);
+  }
+  
+  // Build and wire up
+  buildHTML();
+  
+  // Button click handlers
+  c.querySelector("#exp-btn-grid").addEventListener("click", (e) => {
+    const btn = e.target.closest(".pv-btn");
+    if (!btn) return;
+    addValue(parseInt(btn.dataset.idx));
+  });
+  
+  c.querySelector("#exp-undo").addEventListener("click", undo);
+  c.querySelector("#exp-reset").addEventListener("click", reset);
+  
+  c.querySelector("#exp-sys-toggle").addEventListener("click", () => {
+    useIndian = !useIndian;
+    c.querySelector("#exp-sys-toggle").textContent = useIndian ? "Indian" : "Int'l";
+    render();
+  });
+  
+  c.querySelectorAll(".mode-btn").forEach(btn => {
+    btn.addEventListener("click", () => setMode(btn.dataset.mode));
+  });
+  
+  c.querySelector("#exp-next-challenge").addEventListener("click", nextChallenge);
+  
+  render();
+}
+
+// ─── Initialize ───
+createReference("ref");
+createExperiment("exp");
+</script>
+</body>
+</html>
