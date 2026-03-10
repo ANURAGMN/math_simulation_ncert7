@@ -26,5 +26,4 @@ See `KANNADA_NAMING_MAP.md` for the full mapping from original filenames.
 
 ## Status
 
-- [x] math_chapter1_simulation1_place_value_calculator_kn.html
-- [ ] Remaining 19 simulations (use same pattern: Kannada UI + visuals, new filename)
+All **20** Kannada simulations exist. Sim1 & Sim2 have full Kannada UI; Sim3–Sim20 have lang=kn, Noto Sans Kannada, help panel titles in Kannada, numbers in English. Remaining UI can be translated in a second pass.
