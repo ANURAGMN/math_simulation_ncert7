@@ -3,83 +3,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#334155">
-<title>Unit Converter Missions</title>
+<meta name="theme-color" content="#059669">
+<title>Decimal Unit Converter</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#334155 0%,#0f172a 100%);min-height:100vh;color:#0f172a}
-#app{max-width:420px;margin:auto;padding:10px}
-.header{text-align:center;color:#fff;padding:12px}
-.header h1{font-size:20px;font-weight:800}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#059669 0%,#0369a1 100%);min-height:100vh;-webkit-font-smoothing:antialiased}
+#app{max-width:420px;margin:auto;padding:10px;padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(20px,env(safe-area-inset-bottom))}
+.header{text-align:center;color:#fff;padding:14px}
+.header h1{font-size:20px;font-weight:800;margin-bottom:4px}
 .header p{font-size:13px;opacity:.9}
-.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.15);margin-bottom:12px}
-.tabs{display:flex;gap:6px;margin-bottom:12px}
-.tab{flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:10px;background:#fff;font-weight:700;font-size:12px;cursor:pointer}
-.tab.active{background:#0f172a;color:#fff;border-color:#0f172a}
-.stats{display:flex;gap:8px;margin-bottom:10px}
-.stat{flex:1;background:#f8fafc;border-radius:10px;padding:8px;text-align:center}
-.k{font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase}
-.v{font-size:19px;font-weight:800}
-.mission{background:#f8fafc;border:2px solid #cbd5e1;border-radius:12px;padding:12px;margin-bottom:10px}
-.name{font-size:12px;font-weight:700;color:#334155}
-.task{font-size:16px;font-weight:800;margin-top:4px;line-height:1.35}
-.constraint{font-size:11px;color:#475569;margin-top:6px}
-.badge{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:16px;font-size:11px;font-weight:700}
-.info{background:#dbeafe;color:#1e40af}
-.good{background:#dcfce7;color:#166534}
-.bad{background:#fee2e2;color:#991b1b}
-.opts{display:flex;flex-direction:column;gap:8px;margin:8px 0}
-.opt,.qopt{padding:12px;border:2px solid #e5e7eb;border-radius:10px;background:#fff;font-size:14px;font-weight:700;cursor:pointer;text-align:left}
-.opt.correct,.qopt.correct{border-color:#16a34a;background:#dcfce7;color:#166534}
-.opt.wrong,.qopt.wrong{border-color:#dc2626;background:#fee2e2;color:#991b1b}
-.feedback{margin-top:8px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
-.controls{display:flex;gap:8px;margin-top:10px}
-.btn{flex:1;padding:11px;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
-.retry{background:#f1f5f9;color:#334155}
-.hint{background:#ffedd5;color:#9a3412}
-.next{background:#0f172a;color:#fff}
-.hintbox{margin-top:8px;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px;color:#92400e;font-size:12px}
-.progress{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.pill{padding:5px 8px;border-radius:12px;background:#e2e8f0;font-size:10px;font-weight:700;color:#475569}
-.pill.done{background:#dcfce7;color:#166534}
-.q{font-size:18px;font-weight:800;text-align:center;background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:10px}
-.insight{background:#f8fafc;border-left:4px solid #0f172a;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;color:#334155}
-.helpbtn{position:fixed;right:20px;bottom:20px;width:48px;height:48px;border:none;border-radius:50%;background:#0f172a;color:#fff;font-size:20px;font-weight:700;cursor:pointer}
-.help{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center}
-.help.open{display:flex}
-.panel{background:#fff;width:100%;max-width:420px;border-radius:20px 20px 0 0;padding:16px}
-.panel p{font-size:12px;color:#475569;line-height:1.5;margin:6px 0}
+.sim-card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.12);margin-bottom:14px}
+.mode-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.mode-tab{flex:1;min-width:60px;padding:10px 2px;border:2px solid #e5e7eb;border-radius:10px;background:#fafafa;font-size:10px;font-weight:600;text-align:center;cursor:pointer}
+.mode-tab.active{border-color:#059669;background:#ecfdf5;color:#065f46}
+/* Converter display */
+.conv-display{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.conv-box{flex:1;background:linear-gradient(135deg,#064e3b,#065f46);border-radius:14px;padding:14px;text-align:center}
+.conv-val{font-size:24px;font-weight:800;color:#fff}
+.conv-unit{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
+.conv-arrow{font-size:20px;color:#059669;font-weight:700}
+/* Explanation */
+.explain-card{background:#ecfdf5;border-radius:12px;padding:12px;margin-bottom:12px;border-left:4px solid #059669;font-size:13px;line-height:1.6;color:#334155}
+.explain-card b{color:#059669}
+/* Scale visual */
+.scale-bar{background:#f0fdf4;border-radius:10px;padding:10px;margin-bottom:12px}
+.scale-track{height:24px;background:#e5e7eb;border-radius:12px;position:relative;overflow:hidden;margin:8px 0}
+.scale-fill{height:100%;border-radius:12px;background:linear-gradient(90deg,#10b981,#059669);transition:width .3s}
+.scale-labels{display:flex;justify-content:space-between;font-size:10px;color:#888}
+/* Slider */
+.slider-group{margin-bottom:12px}
+.slider-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.slider-label .name{color:#555}
+.slider-label .val{font-weight:700;color:#059669}
+input[type="range"]{width:100%;height:8px;border-radius:4px;background:#e5e7eb;-webkit-appearance:none}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#059669;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.2);cursor:pointer}
+/* Fact cards */
+.fact-card{background:#fffbeb;border-radius:10px;padding:10px;margin-bottom:8px;border-left:4px solid #f59e0b;font-size:12px;color:#92400e;line-height:1.5}
+.fact-card b{color:#78350f}
+/* Insight */
+.insight-box{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:12px;padding:14px;margin-top:14px;border-left:4px solid #059669;font-size:13px;line-height:1.5}
+.insight-title{font-weight:700;color:#065f46;margin-bottom:6px}
+/* Help */
+.help-btn{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#059669,#0369a1);color:#fff;border:3px solid #fff;box-shadow:0 4px 15px rgba(5,150,105,.4);font-size:20px;font-weight:700;cursor:pointer;z-index:100;display:flex;align-items:center;justify-content:center}
+.help-btn:active{transform:scale(.9)}
+.help-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.help-overlay.open{display:flex}
+.help-panel{background:#fff;border-radius:20px 20px 0 0;max-width:420px;width:100%;max-height:75vh;overflow-y:auto;padding:20px 16px env(safe-area-inset-bottom);animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.help-close{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.help-close h2{font-size:16px;font-weight:700;color:#333}
+.help-close button{width:32px;height:32px;border-radius:50%;border:none;background:#f1f5f9;font-size:18px;cursor:pointer;color:#64748b}
+.help-section{margin-bottom:14px}
+.help-section-title{font-size:12px;font-weight:700;color:#059669;margin-bottom:6px}
+.help-step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:12px;line-height:1.5;color:#475569}
+.help-step:last-child{border-bottom:none}
+.help-step .sn{width:22px;height:22px;border-radius:50%;background:#059669;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.help-try{background:#ecfdf5;border-radius:8px;padding:8px 10px;font-size:11px;color:#065f46;line-height:1.5;margin-top:4px}
+.help-key{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:8px;padding:8px 10px;font-size:11px;color:#92400e;line-height:1.5;margin-top:4px}
 </style>
 </head>
 <body>
 <div id="app">
-<div class="header"><h1>Unit Converter Missions</h1><p>Convert with decimal shifts</p></div>
-<div class="card" id="sim"></div>
-<div class="insight"><b>Learning Goal:</b> Metric and money conversions are powers of ten shifts.</div>
+<div class="header">
+  <h1>Unit Converter</h1>
+  <p>mm, cm, m, g, kg, paise, rupees — all decimals!</p>
 </div>
-<button class="helpbtn" id="hb">?</button>
-<div class="help" id="ho"><div class="panel"><p><b>How to play:</b></p><p>1. Solve each mission with limited lives.</p><p>2. Use hints when stuck.</p><p>3. Build streaks and clear all missions.</p><p>4. Practice in Quick Quiz mode.</p><p><button id="hc" class="btn next">Close</button></p></div></div>
+<div class="sim-card" id="sim"></div>
+<div class="insight-box">
+  <div class="insight-title">Decimal Disasters!</div>
+  In 2013, Amsterdam sent &euro;188 million instead of &euro;1.8 million — they programmed cents instead of euros. A misplaced decimal point can mean 100&times; too much! In medicine, reading 0.05 mg as 0.5 mg means 10&times; the dose. <b>Decimals matter.</b>
+</div>
+
+<button class="help-btn" id="helpBtn">?</button>
+<div class="help-overlay" id="helpOverlay">
+  <div class="help-panel">
+    <div class="help-close"><h2>How to Use</h2><button id="helpClose">&times;</button></div>
+    <div class="help-section">
+      <div class="help-section-title">What To Do</div>
+      <div class="help-step"><span class="sn">1</span><span>Pick a <b>conversion type</b>: mm↔cm, cm↔m, g↔kg, or paise↔₹.</span></div>
+      <div class="help-step"><span class="sn">2</span><span>Drag the <b>slider</b> to change the value. Both units update instantly.</span></div>
+      <div class="help-step"><span class="sn">3</span><span>Read the <b>explanation</b> showing the division/multiplication step.</span></div>
+    </div>
+    <div class="help-section">
+      <div class="help-section-title">Key Concept</div>
+      <div class="help-key"><b>mm→cm</b>: ÷10 (move decimal 1 left). <b>cm→m</b>: ÷100 (move 2 left). <b>g→kg</b>: ÷1000 (move 3 left). <b>paise→₹</b>: ÷100 (move 2 left). It's all about powers of 10!</div>
+    </div>
+  </div>
+</div>
+</div>
 <script>
-const MISSIONS = [{"name": "Core Concept", "task": "Which statement is correct for this topic?", "constraint": "2 lives for this mission.", "options": ["56 mm = 5.6 cm.", "Always guess randomly", "Ignore signs/place values", "All options are equally correct"], "answer": "56 mm = 5.6 cm.", "hint": "Pick the conceptually correct statement.", "explain": "56 mm = 5.6 cm."}, {"name": "Sample Check", "task": "Which solved example is correct?", "constraint": "Read carefully before selecting.", "options": ["250 paise = Rs 2.50", "Any random calculation works", "Exact values never matter", "Rules are optional"], "answer": "250 paise = Rs 2.50", "hint": "Choose the mathematically valid sample.", "explain": "250 paise = Rs 2.50"}, {"name": "Learning Strategy", "task": "Best strategy in this activity?", "constraint": "Focus on mastery, not speed.", "options": ["Read target, apply rule, verify with feedback", "Tap quickly until one is green", "Skip hints and explanations always", "Never retry failed missions"], "answer": "Read target, apply rule, verify with feedback", "hint": "The best strategy includes planning and feedback.", "explain": "Planning + feedback + retry improves conceptual learning."}];
-const QUIZ = [{"q": "Which statement matches this topic best?", "options": ["56 mm = 5.6 cm.", "Rules do not matter", "Any option is fine", "Concepts are optional"], "answer": "56 mm = 5.6 cm.", "explain": "This is the key concept for this simulation."}, {"q": "What is the best way to improve score?", "options": ["Use hints, read feedback, retry", "Guess fast and move on", "Ignore wrong answers", "Avoid mission mode"], "answer": "Use hints, read feedback, retry", "explain": "Feedback-driven retry builds mastery."}, {"q": "Why are constraints useful in learning games?", "options": ["They force strategy and thinking", "They make concepts weaker", "They remove learning", "They are meaningless"], "answer": "They force strategy and thinking", "explain": "Constraints make learners plan and reason, not just click."}];
-const sim = document.getElementById('sim');
-let mode='mission',mIdx=0,solved=new Set(),attempts=0,streak=0,lives=2,showHint=false,locked=false;
-let qIdx=0,qScore=0,qTotal=0,qLocked=false;
-function resetLife(){lives=2;locked=false;showHint=false;}
-function badge(){if(solved.has(mIdx))return '<span class="badge good">Mission cleared!</span>';if(lives<=0)return '<span class="badge bad">Out of lives. Retry.</span>';return `<span class="badge info">Lives: ${lives}</span>`;}
-function renderMission(){const m=MISSIONS[mIdx];sim.innerHTML=`<div class="tabs"><button class="tab active">Mission</button><button class="tab" id="toQuiz">Quiz</button></div><div class="stats"><div class="stat"><div class="k">Solved</div><div class="v">${solved.size}/${MISSIONS.length}</div></div><div class="stat"><div class="k">Attempts</div><div class="v">${attempts}</div></div><div class="stat"><div class="k">Streak</div><div class="v">${streak}</div></div></div><div class="mission"><div class="name">Mission ${mIdx+1}: ${m.name}</div><div class="task">${m.task}</div><div class="constraint">${m.constraint}</div>${badge()}</div><div class="opts" id="opts">${m.options.map(o=>`<button class="opt" data-v="${o}">${o}</button>`).join('')}</div><div id="fb"></div><div class="controls"><button class="btn retry" id="retry">Retry</button><button class="btn hint" id="hint">Hint</button><button class="btn next" id="next">Next</button></div>${showHint?`<div class="hintbox"><b>Hint:</b> ${m.hint}</div>`:''}<div class="progress">${MISSIONS.map((_,i)=>`<span class="pill ${solved.has(i)?'done':''}">${i+1}</span>`).join('')}</div>`;
-sim.querySelector('#toQuiz').onclick=()=>{mode='quiz';render();};
-sim.querySelector('#retry').onclick=()=>{resetLife();renderMission();};
-sim.querySelector('#hint').onclick=()=>{showHint=!showHint;renderMission();};
-sim.querySelector('#next').onclick=()=>{mIdx=(mIdx+1)%MISSIONS.length;resetLife();renderMission();};
-sim.querySelector('#opts').onclick=(e)=>{const b=e.target.closest('.opt');if(!b||locked||lives<=0||solved.has(mIdx))return;attempts++;if(b.dataset.v===m.answer){solved.add(mIdx);streak++;locked=true;sim.querySelector('#fb').innerHTML=`<div class="feedback good"><b>Correct!</b> ${m.explain}</div>`;}else{lives--;streak=0;b.classList.add('wrong');sim.querySelectorAll('.opt').forEach(x=>{if(x.dataset.v===m.answer)x.classList.add('correct')});sim.querySelector('#fb').innerHTML=`<div class="feedback bad"><b>Not yet.</b> ${m.explain}</div>`;if(lives<=0)locked=true;}};
+document.getElementById('helpBtn').onclick=()=>document.getElementById('helpOverlay').classList.add('open');
+document.getElementById('helpClose').onclick=()=>document.getElementById('helpOverlay').classList.remove('open');
+document.getElementById('helpOverlay').onclick=e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')};
+
+const UNITS=[
+  {id:'mm_cm',name:'mm ↔ cm',from:'mm',to:'cm',factor:10,max:500,step:1,val:56,
+   explain:v=>`${v} mm = ${v}/10 cm = <b>${(v/10).toFixed(1)} cm</b><br>Each cm has 10 mm, so divide by 10.`,
+   fact:'A human hair is about 0.1 mm thick. A mustard seed is 1-2 mm.'},
+  {id:'cm_m',name:'cm ↔ m',from:'cm',to:'m',factor:100,max:1000,step:1,val:325,
+   explain:v=>`${v} cm = ${v}/100 m = <b>${(v/100).toFixed(2)} m</b><br>Each meter has 100 cm, so divide by 100.`,
+   fact:'The smallest octopus (Wolfi) is just 1-2.5 cm!'},
+  {id:'g_kg',name:'g ↔ kg',from:'g',to:'kg',factor:1000,max:5000,step:1,val:465,
+   explain:v=>`${v} g = ${v}/1000 kg = <b>${(v/1000).toFixed(3)} kg</b><br>Each kg has 1000 g, so divide by 1000.`,
+   fact:'The Wolfi octopus weighs less than 1 gram!'},
+  {id:'p_r',name:'paise ↔ ₹',from:'paise',to:'₹',factor:100,max:1000,step:1,val:75,
+   explain:v=>`${v} paise = ${v}/100 rupees = <b>₹${(v/100).toFixed(2)}</b><br>100 paise = 1 rupee, so divide by 100.`,
+   fact:'In the 1970s, a masala dosa cost just 50 paise (₹0.50)!'}
+];
+
+const ct=document.getElementById("sim");
+let uIdx=0,ucMode="explore",ucQIdx=0,ucQScore=0,ucQTotal=0,ucQAns=false;
+
+const UC_QUIZ=[
+  {q:"12 mm = ? cm",opts:["1.2 cm","0.12 cm","12.0 cm","0.012 cm"],ans:"1.2 cm",ex:"12 ÷ 10 = 1.2 (10 mm per cm)"},
+  {q:"56 mm = ? cm",opts:["5.6 cm","0.56 cm","56.0 cm","0.056 cm"],ans:"5.6 cm",ex:"56 ÷ 10 = 5.6"},
+  {q:"36 cm = ? m",opts:["0.36 m","3.6 m","0.036 m","36.0 m"],ans:"0.36 m",ex:"36 ÷ 100 = 0.36 (100 cm per m)"},
+  {q:"325 cm = ? m",opts:["3.25 m","32.5 m","0.325 m","325.0 m"],ans:"3.25 m",ex:"325 ÷ 100 = 3.25"},
+  {q:"465 g = ? kg",opts:["0.465 kg","4.65 kg","46.5 kg","0.0465 kg"],ans:"0.465 kg",ex:"465 ÷ 1000 = 0.465 (1000 g per kg)"},
+  {q:"1560 g = ? kg",opts:["1.56 kg","15.6 kg","0.156 kg","156.0 kg"],ans:"1.56 kg",ex:"1560 ÷ 1000 = 1.56"},
+  {q:"75 paise = ? rupees",opts:["₹0.75","₹7.50","₹0.075","₹75.00"],ans:"₹0.75",ex:"75 ÷ 100 = 0.75 (100 paise per rupee)"},
+  {q:"250 paise = ? rupees",opts:["₹2.50","₹25.00","₹0.25","₹250.00"],ans:"₹2.50",ex:"250 ÷ 100 = 2.50"},
+  {q:"A doctor prescribes 0.05 mg. A nurse reads it as 0.5 mg. How many times more is that?",opts:["10 times","100 times","2 times","5 times"],ans:"10 times",ex:"0.5 ÷ 0.05 = 10. A decimal point error → 10× overdose!"},
+  {q:"How many mm in 1 kilometer?",opts:["1,000,000","100,000","10,000","1,000"],ans:"1,000,000",ex:"1 km = 1000 m, 1 m = 1000 mm → 1,000 × 1,000 = 10,00,000 mm"}
+];
+
+function renderUCQuiz(){
+  if(ucQIdx>=UC_QUIZ.length)ucQIdx=0;
+  const q=UC_QUIZ[ucQIdx];
+  ct.innerHTML=`
+  <div class="mode-tabs">
+    <button class="mode-tab" onclick="ucMode='explore';render()">Explore</button>
+    <button class="mode-tab active">Quiz</button>
+  </div>
+  <div style="text-align:center;font-size:13px;font-weight:600;color:#555;margin-bottom:10px">Score: <b style="color:#059669">${ucQScore}/${ucQTotal}</b> &bull; Question <b>${ucQIdx+1}/${UC_QUIZ.length}</b></div>
+  <div style="font-size:16px;font-weight:700;color:#1e293b;text-align:center;padding:16px;background:#ecfdf5;border-radius:12px;margin-bottom:12px;line-height:1.5">${q.q}</div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px" id="ucqo">${q.opts.map(o=>`<button style="padding:14px;border-radius:12px;border:2px solid #e5e7eb;font-size:14px;font-weight:600;cursor:pointer;background:#fff;text-align:center" class="qopt" data-v="${o}">${o}</button>`).join('')}</div>
+  <div id="ucfb" style="text-align:center;font-size:13px;min-height:20px;margin-bottom:10px"></div>
+  <button id="ucnxt" style="display:none;margin:0 auto;padding:14px 32px;border-radius:12px;border:none;background:linear-gradient(135deg,#059669,#0369a1);color:#fff;font-weight:700;font-size:14px;cursor:pointer">Next Question</button>`;
+  ucQAns=false;
+  ct.querySelector('#ucqo').addEventListener('click',e=>{
+    const b=e.target.closest('.qopt');if(!b||ucQAns)return;ucQAns=true;ucQTotal++;
+    if(b.dataset.v===q.ans){b.style.borderColor='#16a34a';b.style.background='#dcfce7';b.style.color='#166534';ucQScore++;ct.querySelector('#ucfb').innerHTML=`<div style="background:#dcfce7;color:#166534;padding:12px;border-radius:10px"><b>Correct!</b> ${q.ex}</div>`}
+    else{b.style.borderColor='#dc2626';b.style.background='#fef2f2';b.style.color='#991b1b';ct.querySelectorAll('.qopt').forEach(x=>{if(x.dataset.v===q.ans){x.style.borderColor='#16a34a';x.style.background='#dcfce7';x.style.color='#166534'}});ct.querySelector('#ucfb').innerHTML=`<div style="background:#fef2f2;color:#991b1b;padding:12px;border-radius:10px"><b>Answer: ${q.ans}</b> &mdash; ${q.ex}</div>`}
+    ct.querySelector('#ucnxt').style.display='block';
+  });
+  ct.querySelector('#ucnxt').onclick=()=>{ucQIdx++;renderUCQuiz()};
 }
-function renderQuiz(){if(qIdx>=QUIZ.length)qIdx=0;const q=QUIZ[qIdx];sim.innerHTML=`<div class="tabs"><button class="tab" id="toMission">Mission</button><button class="tab active">Quiz</button></div><div class="stats"><div class="stat"><div class="k">Score</div><div class="v">${qScore}/${qTotal}</div></div><div class="stat"><div class="k">Question</div><div class="v">${qIdx+1}/${QUIZ.length}</div></div><div class="stat"><div class="k">Mode</div><div class="v">MCQ</div></div></div><div class="q">${q.q}</div><div class="opts" id="qopts">${q.options.map(o=>`<button class="qopt" data-v="${o}">${o}</button>`).join('')}</div><div id="qfb"></div><div class="controls"><button class="btn next" id="nextQ" style="display:none">Next Question</button></div>`;qLocked=false;sim.querySelector('#toMission').onclick=()=>{mode='mission';render();};sim.querySelector('#qopts').onclick=(e)=>{const b=e.target.closest('.qopt');if(!b||qLocked)return;qLocked=true;qTotal++;if(b.dataset.v===q.answer){qScore++;b.classList.add('correct');sim.querySelector('#qfb').innerHTML=`<div class="feedback good"><b>Correct!</b> ${q.explain}</div>`;}else{b.classList.add('wrong');sim.querySelectorAll('.qopt').forEach(x=>{if(x.dataset.v===q.answer)x.classList.add('correct')});sim.querySelector('#qfb').innerHTML=`<div class="feedback bad"><b>Answer:</b> ${q.answer}. ${q.explain}</div>`;}sim.querySelector('#nextQ').style.display='block';};sim.querySelector('#nextQ').onclick=()=>{qIdx++;renderQuiz();};}
-function render(){if(mode==='mission')renderMission();else renderQuiz();}
-document.getElementById('hb').onclick=()=>document.getElementById('ho').classList.add('open');
-document.getElementById('hc').onclick=()=>document.getElementById('ho').classList.remove('open');
-document.getElementById('ho').onclick=(e)=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')};
+
+function render(){
+  if(ucMode==='quiz'){renderUCQuiz();return}
+  const u=UNITS[uIdx];
+  const v=u.val;
+  const converted=v/u.factor;
+  const pct=Math.min(100,v/u.max*100);
+
+  let tabsHtml=UNITS.map((ux,i)=>`<button class="mode-tab${i===uIdx?' active':''}" data-i="${i}">${ux.name}</button>`).join('');
+
+  ct.innerHTML=`
+  <div class="mode-tabs">
+    ${tabsHtml}
+    <button class="mode-tab" onclick="ucMode='quiz';ucQIdx=0;ucQScore=0;ucQTotal=0;renderUCQuiz()" style="background:#fef3c7;border-color:#f59e0b;color:#92400e">Quiz</button>
+  </div>
+  <div class="conv-display">
+    <div class="conv-box"><div class="conv-val">${v}</div><div class="conv-unit">${u.from}</div></div>
+    <div class="conv-arrow">=</div>
+    <div class="conv-box"><div class="conv-val">${parseFloat(converted.toFixed(4))}</div><div class="conv-unit">${u.to}</div></div>
+  </div>
+  <div class="explain-card">${u.explain(v)}</div>
+  <div class="scale-bar">
+    <div class="scale-labels"><span>0 ${u.from}</span><span>${u.max} ${u.from} = ${u.max/u.factor} ${u.to}</span></div>
+    <div class="scale-track"><div class="scale-fill" style="width:${pct}%"></div></div>
+  </div>
+  <div class="slider-group">
+    <div class="slider-label"><span class="name">${u.from}</span><span class="val">${v}</span></div>
+    <input type="range" id="val-sl" min="0" max="${u.max}" step="${u.step}" value="${v}">
+  </div>
+  <div class="fact-card"><b>Fun fact:</b> ${u.fact}</div>`;
+
+  ct.querySelectorAll('.mode-tab').forEach(b=>b.onclick=()=>{uIdx=parseInt(b.dataset.i);render()});
+  ct.querySelector('#val-sl').oninput=function(){UNITS[uIdx].val=parseInt(this.value);render()};
+}
 render();
+</script>
+
+
+
+<script>
+/* ACTIVITY_ONLY: disable quiz-mode UI */
+(function(){
+  function forceActivityOnly(){
+    document.querySelectorAll('button').forEach(function(btn){
+      var t = (btn.textContent || '').trim().toLowerCase();
+      if(t.includes('quiz')) btn.style.display = 'none';
+    });
+
+    try {
+      if(typeof mode !== 'undefined' && mode === 'quiz'){
+        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
+        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
+        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
+        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
+      }
+    } catch(e){}
+
+    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
+    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
+    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
+  }
+
+  var obs = new MutationObserver(function(){ forceActivityOnly(); });
+  obs.observe(document.documentElement, {childList:true, subtree:true});
+  forceActivityOnly();
+})();
 </script>
 </body>
 </html>

@@ -3,83 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#334155">
-<title>Words to Algebra Missions</title>
+<meta name="theme-color" content="#0369a1">
+<title>Words to Algebra - Match Builder</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#334155 0%,#0f172a 100%);min-height:100vh;color:#0f172a}
-#app{max-width:420px;margin:auto;padding:10px}
-.header{text-align:center;color:#fff;padding:12px}
-.header h1{font-size:20px;font-weight:800}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#0369a1 0%,#059669 100%);min-height:100vh}
+#app{max-width:420px;margin:auto;padding:10px;padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(20px,env(safe-area-inset-bottom))}
+.header{text-align:center;color:#fff;padding:14px}
+.header h1{font-size:20px;font-weight:800;margin-bottom:4px}
 .header p{font-size:13px;opacity:.9}
-.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.15);margin-bottom:12px}
-.tabs{display:flex;gap:6px;margin-bottom:12px}
-.tab{flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:10px;background:#fff;font-weight:700;font-size:12px;cursor:pointer}
-.tab.active{background:#0f172a;color:#fff;border-color:#0f172a}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.12);margin-bottom:12px}
 .stats{display:flex;gap:8px;margin-bottom:10px}
-.stat{flex:1;background:#f8fafc;border-radius:10px;padding:8px;text-align:center}
-.k{font-size:10px;color:#64748b;font-weight:700;text-transform:uppercase}
-.v{font-size:19px;font-weight:800}
-.mission{background:#f8fafc;border:2px solid #cbd5e1;border-radius:12px;padding:12px;margin-bottom:10px}
-.name{font-size:12px;font-weight:700;color:#334155}
-.task{font-size:16px;font-weight:800;margin-top:4px;line-height:1.35}
-.constraint{font-size:11px;color:#475569;margin-top:6px}
-.badge{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:16px;font-size:11px;font-weight:700}
-.info{background:#dbeafe;color:#1e40af}
-.good{background:#dcfce7;color:#166534}
-.bad{background:#fee2e2;color:#991b1b}
-.opts{display:flex;flex-direction:column;gap:8px;margin:8px 0}
-.opt,.qopt{padding:12px;border:2px solid #e5e7eb;border-radius:10px;background:#fff;font-size:14px;font-weight:700;cursor:pointer;text-align:left}
-.opt.correct,.qopt.correct{border-color:#16a34a;background:#dcfce7;color:#166534}
-.opt.wrong,.qopt.wrong{border-color:#dc2626;background:#fee2e2;color:#991b1b}
-.feedback{margin-top:8px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
+.stat{flex:1;background:#f0f9ff;border-radius:10px;padding:8px;text-align:center}
+.k{font-size:10px;color:#0369a1;font-weight:700;text-transform:uppercase}
+.v{font-size:20px;font-weight:800;color:#0f172a}
+.mission{background:linear-gradient(135deg,#f0f9ff,#ecfdf5);border:2px solid #bae6fd;border-radius:12px;padding:12px;margin-bottom:10px}
+.mission .t{font-size:14px;font-weight:700;color:#0f172a}
+.mission .s{font-size:11px;color:#475569;margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px}
+.item{padding:12px;border-radius:10px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;font-size:13px;font-weight:600;line-height:1.45}
+.item.expr{font-family:'Courier New',monospace;font-size:15px;text-align:center}
+.item.active{border-color:#0369a1;background:#dbeafe}
+.item.done{border-color:#16a34a;background:#dcfce7;color:#166534}
+.sep{font-size:11px;color:#64748b;font-weight:700;margin-top:10px}
+.feedback{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
+.feedback.good{background:#dcfce7;color:#166534}
+.feedback.bad{background:#fee2e2;color:#991b1b}
 .controls{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;padding:11px;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
-.retry{background:#f1f5f9;color:#334155}
-.hint{background:#ffedd5;color:#9a3412}
-.next{background:#0f172a;color:#fff}
-.hintbox{margin-top:8px;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px;color:#92400e;font-size:12px}
-.progress{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.pill{padding:5px 8px;border-radius:12px;background:#e2e8f0;font-size:10px;font-weight:700;color:#475569}
-.pill.done{background:#dcfce7;color:#166534}
-.q{font-size:18px;font-weight:800;text-align:center;background:#f8fafc;border-radius:12px;padding:14px;margin-bottom:10px}
-.insight{background:#f8fafc;border-left:4px solid #0f172a;border-radius:12px;padding:12px;font-size:13px;line-height:1.5;color:#334155}
-.helpbtn{position:fixed;right:20px;bottom:20px;width:48px;height:48px;border:none;border-radius:50%;background:#0f172a;color:#fff;font-size:20px;font-weight:700;cursor:pointer}
-.help{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center}
+.btn.reset{background:#f1f5f9;color:#374151}
+.btn.next{background:linear-gradient(135deg,#0369a1,#059669);color:#fff}
+.hint{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px;font-size:12px;color:#92400e;margin-top:8px}
+.insight{background:linear-gradient(135deg,#f0f9ff,#ecfdf5);border-left:4px solid #0369a1;border-radius:12px;padding:12px;font-size:13px;line-height:1.5}
+.help-btn{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#0369a1,#059669);color:#fff;border:3px solid #fff;box-shadow:0 4px 15px rgba(3,105,161,.4);font-size:20px;font-weight:700;cursor:pointer;z-index:100}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
 .help.open{display:flex}
-.panel{background:#fff;width:100%;max-width:420px;border-radius:20px 20px 0 0;padding:16px}
+.panel{background:#fff;border-radius:20px 20px 0 0;max-width:420px;width:100%;padding:16px;max-height:75vh;overflow:auto}
 .panel p{font-size:12px;color:#475569;line-height:1.5;margin:6px 0}
 </style>
 </head>
 <body>
 <div id="app">
-<div class="header"><h1>Words to Algebra Missions</h1><p>Translate words to symbols</p></div>
-<div class="card" id="sim"></div>
-<div class="insight"><b>Learning Goal:</b> Keywords map to operations: more/add, less/subtract, times/multiply.</div>
+  <div class="header">
+    <h1>Words to Algebra</h1>
+    <p>Match each sentence with its expression</p>
+  </div>
+  <div class="card" id="sim"></div>
+  <div class="insight"><b>Learning Goal:</b> Translate language into algebra by identifying variable, operation, and order. “Less than” and “times” placement matters.</div>
 </div>
-<button class="helpbtn" id="hb">?</button>
-<div class="help" id="ho"><div class="panel"><p><b>How to play:</b></p><p>1. Solve each mission with limited lives.</p><p>2. Use hints when stuck.</p><p>3. Build streaks and clear all missions.</p><p>4. Practice in Quick Quiz mode.</p><p><button id="hc" class="btn next">Close</button></p></div></div>
+<button class="help-btn" id="hb">?</button>
+<div class="help" id="ho"><div class="panel"><p><b>How to play</b></p><p>1. Tap one statement card and one expression card to make a pair.</p><p>2. Correct pair turns green and stays locked.</p><p>3. Match all pairs to clear the mission.</p><p>4. Use hint only when stuck.</p><p><button id="hc" class="btn next">Close</button></p></div></div>
 <script>
-const MISSIONS = [{"name": "Core Concept", "task": "Which statement is correct for this topic?", "constraint": "2 lives for this mission.", "options": ["'5 more than d' is d+5.", "Always guess randomly", "Ignore signs/place values", "All options are equally correct"], "answer": "'5 more than d' is d+5.", "hint": "Pick the conceptually correct statement.", "explain": "'5 more than d' is d+5."}, {"name": "Sample Check", "task": "Which solved example is correct?", "constraint": "Read carefully before selecting.", "options": ["Perimeter of hexagon side a is 6a", "Any random calculation works", "Exact values never matter", "Rules are optional"], "answer": "Perimeter of hexagon side a is 6a", "hint": "Choose the mathematically valid sample.", "explain": "Perimeter of hexagon side a is 6a"}, {"name": "Learning Strategy", "task": "Best strategy in this activity?", "constraint": "Focus on mastery, not speed.", "options": ["Read target, apply rule, verify with feedback", "Tap quickly until one is green", "Skip hints and explanations always", "Never retry failed missions"], "answer": "Read target, apply rule, verify with feedback", "hint": "The best strategy includes planning and feedback.", "explain": "Planning + feedback + retry improves conceptual learning."}];
-const QUIZ = [{"q": "Which statement matches this topic best?", "options": ["'5 more than d' is d+5.", "Rules do not matter", "Any option is fine", "Concepts are optional"], "answer": "'5 more than d' is d+5.", "explain": "This is the key concept for this simulation."}, {"q": "What is the best way to improve score?", "options": ["Use hints, read feedback, retry", "Guess fast and move on", "Ignore wrong answers", "Avoid mission mode"], "answer": "Use hints, read feedback, retry", "explain": "Feedback-driven retry builds mastery."}, {"q": "Why are constraints useful in learning games?", "options": ["They force strategy and thinking", "They make concepts weaker", "They remove learning", "They are meaningless"], "answer": "They force strategy and thinking", "explain": "Constraints make learners plan and reason, not just click."}];
+const MISSIONS = [
+  {
+    title: 'Basic Language',
+    hint: '“More than” usually means add to the variable; “less than” reverses order.',
+    pairs: [
+      {w:'5 more than d', e:'d + 5'},
+      {w:'4 less than d', e:'d - 4'},
+      {w:'13 less than 2d', e:'2d - 13'}
+    ]
+  },
+  {
+    title: 'Perimeter and Cost',
+    hint: 'Regular shape perimeter = number of equal sides × side.',
+    pairs: [
+      {w:'Perimeter of regular hexagon side a', e:'6a'},
+      {w:'x items at Rs30 and y items at Rs20', e:'30x + 20y'},
+      {w:'10 seconds startup and 8 seconds per y kg', e:'10 + 8y'}
+    ]
+  }
+];
+
 const sim = document.getElementById('sim');
-let mode='mission',mIdx=0,solved=new Set(),attempts=0,streak=0,lives=2,showHint=false,locked=false;
-let qIdx=0,qScore=0,qTotal=0,qLocked=false;
-function resetLife(){lives=2;locked=false;showHint=false;}
-function badge(){if(solved.has(mIdx))return '<span class="badge good">Mission cleared!</span>';if(lives<=0)return '<span class="badge bad">Out of lives. Retry.</span>';return `<span class="badge info">Lives: ${lives}</span>`;}
-function renderMission(){const m=MISSIONS[mIdx];sim.innerHTML=`<div class="tabs"><button class="tab active">Mission</button><button class="tab" id="toQuiz">Quiz</button></div><div class="stats"><div class="stat"><div class="k">Solved</div><div class="v">${solved.size}/${MISSIONS.length}</div></div><div class="stat"><div class="k">Attempts</div><div class="v">${attempts}</div></div><div class="stat"><div class="k">Streak</div><div class="v">${streak}</div></div></div><div class="mission"><div class="name">Mission ${mIdx+1}: ${m.name}</div><div class="task">${m.task}</div><div class="constraint">${m.constraint}</div>${badge()}</div><div class="opts" id="opts">${m.options.map(o=>`<button class="opt" data-v="${o}">${o}</button>`).join('')}</div><div id="fb"></div><div class="controls"><button class="btn retry" id="retry">Retry</button><button class="btn hint" id="hint">Hint</button><button class="btn next" id="next">Next</button></div>${showHint?`<div class="hintbox"><b>Hint:</b> ${m.hint}</div>`:''}<div class="progress">${MISSIONS.map((_,i)=>`<span class="pill ${solved.has(i)?'done':''}">${i+1}</span>`).join('')}</div>`;
-sim.querySelector('#toQuiz').onclick=()=>{mode='quiz';render();};
-sim.querySelector('#retry').onclick=()=>{resetLife();renderMission();};
-sim.querySelector('#hint').onclick=()=>{showHint=!showHint;renderMission();};
-sim.querySelector('#next').onclick=()=>{mIdx=(mIdx+1)%MISSIONS.length;resetLife();renderMission();};
-sim.querySelector('#opts').onclick=(e)=>{const b=e.target.closest('.opt');if(!b||locked||lives<=0||solved.has(mIdx))return;attempts++;if(b.dataset.v===m.answer){solved.add(mIdx);streak++;locked=true;sim.querySelector('#fb').innerHTML=`<div class="feedback good"><b>Correct!</b> ${m.explain}</div>`;}else{lives--;streak=0;b.classList.add('wrong');sim.querySelectorAll('.opt').forEach(x=>{if(x.dataset.v===m.answer)x.classList.add('correct')});sim.querySelector('#fb').innerHTML=`<div class="feedback bad"><b>Not yet.</b> ${m.explain}</div>`;if(lives<=0)locked=true;}};
+let mIdx = 0, solved = 0, attempts = 0, streak = 0;
+let selectedWord = null, selectedExpr = null;
+let donePairs = new Set();
+let showHint = false;
+
+function shuffle(a){ const x=[...a]; for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [x[i],x[j]]=[x[j],x[i]];} return x; }
+
+function resetMission(){ selectedWord=null; selectedExpr=null; donePairs = new Set(); showHint=false; }
+
+function keyFor(pair){ return pair.w + '||' + pair.e; }
+
+let wordOrder = [], exprOrder = [];
+function initOrders(){
+  const m = MISSIONS[mIdx];
+  wordOrder = shuffle(m.pairs.map((p,i)=>i));
+  exprOrder = shuffle(m.pairs.map((p,i)=>i));
 }
-function renderQuiz(){if(qIdx>=QUIZ.length)qIdx=0;const q=QUIZ[qIdx];sim.innerHTML=`<div class="tabs"><button class="tab" id="toMission">Mission</button><button class="tab active">Quiz</button></div><div class="stats"><div class="stat"><div class="k">Score</div><div class="v">${qScore}/${qTotal}</div></div><div class="stat"><div class="k">Question</div><div class="v">${qIdx+1}/${QUIZ.length}</div></div><div class="stat"><div class="k">Mode</div><div class="v">MCQ</div></div></div><div class="q">${q.q}</div><div class="opts" id="qopts">${q.options.map(o=>`<button class="qopt" data-v="${o}">${o}</button>`).join('')}</div><div id="qfb"></div><div class="controls"><button class="btn next" id="nextQ" style="display:none">Next Question</button></div>`;qLocked=false;sim.querySelector('#toMission').onclick=()=>{mode='mission';render();};sim.querySelector('#qopts').onclick=(e)=>{const b=e.target.closest('.qopt');if(!b||qLocked)return;qLocked=true;qTotal++;if(b.dataset.v===q.answer){qScore++;b.classList.add('correct');sim.querySelector('#qfb').innerHTML=`<div class="feedback good"><b>Correct!</b> ${q.explain}</div>`;}else{b.classList.add('wrong');sim.querySelectorAll('.qopt').forEach(x=>{if(x.dataset.v===q.answer)x.classList.add('correct')});sim.querySelector('#qfb').innerHTML=`<div class="feedback bad"><b>Answer:</b> ${q.answer}. ${q.explain}</div>`;}sim.querySelector('#nextQ').style.display='block';};sim.querySelector('#nextQ').onclick=()=>{qIdx++;renderQuiz();};}
-function render(){if(mode==='mission')renderMission();else renderQuiz();}
+
+function maybeCheckPair(){
+  if(selectedWord===null || selectedExpr===null) return;
+  attempts++;
+  const m = MISSIONS[mIdx];
+  const wp = m.pairs[selectedWord];
+  const ep = m.pairs[selectedExpr];
+  const correct = wp.e === ep.e;
+  const fb = document.getElementById('fb');
+  if(correct){
+    donePairs.add(keyFor(wp));
+    streak++;
+    fb.className='feedback good';
+    fb.innerHTML = '<b>Matched!</b> ' + wp.w + ' ↔ ' + wp.e;
+  } else {
+    streak = 0;
+    fb.className='feedback bad';
+    fb.innerHTML = '<b>Not a match.</b> Try again.';
+  }
+  selectedWord = null;
+  selectedExpr = null;
+  return true;
+}
+
+function render(){
+  const m = MISSIONS[mIdx];
+  if(!wordOrder.length || !exprOrder.length) initOrders();
+
+  const completed = donePairs.size;
+  if(completed === m.pairs.length){ solved = Math.max(solved, mIdx+1); }
+
+  sim.innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="k">Mission</div><div class="v">${mIdx+1}/${MISSIONS.length}</div></div>
+      <div class="stat"><div class="k">Matched</div><div class="v">${completed}/${m.pairs.length}</div></div>
+      <div class="stat"><div class="k">Streak</div><div class="v">${streak}</div></div>
+    </div>
+    <div class="mission">
+      <div class="t">${m.title}</div>
+      <div class="s">Pair each sentence with the correct algebraic expression.</div>
+    </div>
+    <div class="sep">Sentence cards</div>
+    <div class="grid" id="words">${wordOrder.map(i=>{const p=m.pairs[i]; const done=donePairs.has(keyFor(p)); return `<button class="item ${selectedWord===i?'active':''} ${done?'done':''}" data-w="${i}">${p.w}</button>`;}).join('')}</div>
+    <div class="sep">Expression cards</div>
+    <div class="grid" id="exprs">${exprOrder.map(i=>{const p=m.pairs[i]; const done=donePairs.has(keyFor(p)); return `<button class="item expr ${selectedExpr===i?'active':''} ${done?'done':''}" data-e="${i}">${p.e}</button>`;}).join('')}</div>
+    <div id="fb"></div>
+    <div class="controls">
+      <button class="btn reset" id="resetBtn">Reset Mission</button>
+      <button class="btn reset" id="hintBtn">Hint</button>
+      <button class="btn next" id="nextBtn">Next Mission</button>
+    </div>
+    ${showHint?`<div class="hint"><b>Hint:</b> ${m.hint}</div>`:''}
+  `;
+
+  document.getElementById('words').onclick = (e)=>{
+    const b=e.target.closest('[data-w]'); if(!b) return;
+    const i=parseInt(b.dataset.w,10);
+    if(donePairs.has(keyFor(m.pairs[i]))) return;
+    selectedWord=i;
+    const done = maybeCheckPair();
+    if(!done) render();
+  };
+  document.getElementById('exprs').onclick = (e)=>{
+    const b=e.target.closest('[data-e]'); if(!b) return;
+    const i=parseInt(b.dataset.e,10);
+    if(donePairs.has(keyFor(m.pairs[i]))) return;
+    selectedExpr=i;
+    const done = maybeCheckPair();
+    if(!done) render();
+  };
+  document.getElementById('resetBtn').onclick=()=>{resetMission(); initOrders(); render();};
+  document.getElementById('hintBtn').onclick=()=>{showHint=!showHint; render();};
+  document.getElementById('nextBtn').onclick=()=>{mIdx=(mIdx+1)%MISSIONS.length; resetMission(); initOrders(); render();};
+}
+
+render();
+
 document.getElementById('hb').onclick=()=>document.getElementById('ho').classList.add('open');
 document.getElementById('hc').onclick=()=>document.getElementById('ho').classList.remove('open');
-document.getElementById('ho').onclick=(e)=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')};
-render();
+document.getElementById('ho').onclick=(e)=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove('open'); };
 </script>
 </body>
 </html>
