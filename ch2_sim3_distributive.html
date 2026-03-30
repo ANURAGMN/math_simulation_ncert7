@@ -109,7 +109,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;hei
       <div class="help-step"><span class="sn">1</span><span><b>Dot Array</b>: See colored dots arranged in rows. The blue and green groups show how a product splits into two parts.</span></div>
       <div class="help-step"><span class="sn">2</span><span><b>Area Model</b>: A rectangle split into blue and green halves. Grid lines show unit squares you can count.</span></div>
       <div class="help-step"><span class="sn">3</span><span><b>Mental Math</b>: Real multiplication shortcuts using the distributive property.</span></div>
-      <div class="help-step"><span class="sn">4</span><span><b>Quiz</b>: Fill in missing operators or numbers in distributive equations.</span></div>
+      <div class="help-step"><span class="sn">4</span><span>Switch between visual models and mental-math missions to verify distributive reasoning.</span></div>
     </div>
     <div class="help-section">
       <div class="help-section-title">Try This</div>
@@ -154,10 +154,10 @@ const QUIZ=[
 
 // ═══════ TABS ═══════
 function tabs(active){
-  return['dots','area','mental','quiz'].map(m=>`<button class="mode-tab${m===active?' active':''}" data-m="${m}">${{dots:'Dot Array',area:'Area Model',mental:'Mental Math',quiz:'Quiz'}[m]}</button>`).join('');
+  return['dots','area','mental'].map(m=>`<button class="mode-tab${m===active?' active':''}" data-m="${m}">${{dots:'Dot Array',area:'Area Model',mental:'Mental Math'}[m]}</button>`).join('');
 }
 function wireMode(){ct.querySelectorAll('.mode-tab').forEach(b=>b.onclick=()=>{mode=b.dataset.m;go()})}
-function go(){if(mode==='dots')renderDots();else if(mode==='area')renderArea();else if(mode==='mental')renderMental();else{qIdx=0;qScore=0;qTotal=0;renderQuiz()}}
+function go(){if(mode==='dots')renderDots();else if(mode==='area')renderArea();else renderMental()}
 
 // ═══════ 1. DOT ARRAY ═══════
 function renderDots(){
@@ -345,33 +345,5 @@ renderDots();
 
 
 
-<script>
-/* ACTIVITY_ONLY: disable quiz-mode UI */
-(function(){
-  function forceActivityOnly(){
-    document.querySelectorAll('button').forEach(function(btn){
-      var t = (btn.textContent || '').trim().toLowerCase();
-      if(t.includes('quiz')) btn.style.display = 'none';
-    });
-
-    try {
-      if(typeof mode !== 'undefined' && mode === 'quiz'){
-        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
-        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
-        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
-        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
-      }
-    } catch(e){}
-
-    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
-  }
-
-  var obs = new MutationObserver(function(){ forceActivityOnly(); });
-  obs.observe(document.documentElement, {childList:true, subtree:true});
-  forceActivityOnly();
-})();
-</script>
 </body>
 </html>

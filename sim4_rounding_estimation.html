@@ -95,8 +95,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;hei
       <div class="help-section-title">What To Do</div>
       <div class="help-step"><span class="help-step-num">1</span><span>In <b>Explore Rounding</b>, drag the slider to set any large number. Five number lines appear — one for each rounding level.</span></div>
       <div class="help-step"><span class="help-step-num">2</span><span>The <b>red marker</b> shows where your number falls between the two nearest round numbers. The <b>blue marker</b> shows which side it rounds to.</span></div>
-      <div class="help-step"><span class="help-step-num">3</span><span>In <b>Estimation Quiz</b>, read each question and estimate the answer <i>before</i> tapping. Try to reason, not calculate!</span></div>
-      <div class="help-step"><span class="help-step-num">4</span><span>After answering, read the explanation to understand why. The goal is building <b>number sense</b>, not memorization.</span></div>
+      <div class="help-step"><span class="help-step-num">3</span><span>Use the number slider to run estimation missions: predict first, then verify by rounding.</span></div>
+      <div class="help-step"><span class="help-step-num">4</span><span>After checking each mission, explain why it rounds up/down. Build <b>number sense</b>, not memorization.</span></div>
     </div>
     <div class="help-section">
       <div class="help-section-title">Try This</div>
@@ -161,7 +161,7 @@ function renderExplore(){
   c.innerHTML=`
   <div class="mode-tabs">
     <button class="mode-tab active" data-m="explore">Explore Rounding</button>
-    <button class="mode-tab" data-m="quiz">Estimation Quiz</button>
+    
   </div>
   <div style="text-align:center;font-size:18px;font-weight:800;color:#1e293b;margin-bottom:10px">${fmtI(n)}</div>
   ${rowsHtml}
@@ -178,7 +178,7 @@ function renderExplore(){
   </div>`;
   c.querySelector("#num-sl").oninput=function(){currentNum=parseInt(this.value);renderExplore()};
   c.querySelectorAll(".preset-btn").forEach(b=>b.onclick=()=>{currentNum=parseInt(b.dataset.v);renderExplore()});
-  c.querySelectorAll(".mode-tab").forEach(b=>b.onclick=()=>{if(b.dataset.m==="quiz"){mode="quiz";qIdx=0;score=0;total=0;renderQuiz()}});
+
 }
 
 function renderQuiz(){
@@ -210,33 +210,5 @@ renderExplore();
 
 
 
-<script>
-/* ACTIVITY_ONLY: disable quiz-mode UI */
-(function(){
-  function forceActivityOnly(){
-    document.querySelectorAll('button').forEach(function(btn){
-      var t = (btn.textContent || '').trim().toLowerCase();
-      if(t.includes('quiz')) btn.style.display = 'none';
-    });
-
-    try {
-      if(typeof mode !== 'undefined' && mode === 'quiz'){
-        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
-        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
-        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
-        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
-      }
-    } catch(e){}
-
-    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
-  }
-
-  var obs = new MutationObserver(function(){ forceActivityOnly(); });
-  obs.observe(document.documentElement, {childList:true, subtree:true});
-  forceActivityOnly();
-})();
-</script>
 </body>
 </html>

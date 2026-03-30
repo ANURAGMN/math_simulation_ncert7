@@ -88,7 +88,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;hei
     <div class="help-section">
       <div class="help-section-title">What To Do</div>
       <div class="help-step"><span class="sn">1</span><span><b>Explore</b>: Drag sliders to change variable values. The expression evaluates in real-time showing each step.</span></div>
-      <div class="help-step"><span class="sn">2</span><span><b>Spot the Error</b>: Find mistakes in evaluations — common student errors from the textbook's "Mind the Mistake" section.</span></div>
+      <div class="help-step"><span class="sn">2</span><span>Use variable sliders to complete evaluation missions and catch common textbook mistakes.</span></div>
     </div>
     <div class="help-section">
       <div class="help-section-title">Key Concept</div>
@@ -147,7 +147,7 @@ function renderExplore(){
   ct.innerHTML=`
   <div class="mode-tabs">
     <button class="mode-tab active" data-m="explore">Explore</button>
-    <button class="mode-tab" data-m="quiz">Spot the Error</button>
+
   </div>
   <div class="expr-panel">
     <div class="expr-text">${e.expr}</div>
@@ -162,7 +162,7 @@ function renderExplore(){
 
   ct.querySelectorAll('input[type="range"]').forEach(sl=>{sl.oninput=function(){vals[this.dataset.k]=parseInt(this.value);renderExplore()}});
   ct.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{eIdx=parseInt(b.dataset.i);renderExplore()});
-  ct.querySelectorAll('.mode-tab').forEach(b=>b.onclick=()=>{if(b.dataset.m==='quiz'){mode='quiz';qIdx=0;qScore=0;qTotal=0;renderQuiz()}});
+
 }
 
 function renderQuiz(){
@@ -194,33 +194,5 @@ renderExplore();
 
 
 
-<script>
-/* ACTIVITY_ONLY: disable quiz-mode UI */
-(function(){
-  function forceActivityOnly(){
-    document.querySelectorAll('button').forEach(function(btn){
-      var t = (btn.textContent || '').trim().toLowerCase();
-      if(t.includes('quiz')) btn.style.display = 'none';
-    });
-
-    try {
-      if(typeof mode !== 'undefined' && mode === 'quiz'){
-        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
-        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
-        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
-        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
-      }
-    } catch(e){}
-
-    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
-  }
-
-  var obs = new MutationObserver(function(){ forceActivityOnly(); });
-  obs.observe(document.documentElement, {childList:true, subtree:true});
-  forceActivityOnly();
-})();
-</script>
 </body>
 </html>

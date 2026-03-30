@@ -83,7 +83,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;hei
       <div class="help-section-title">What To Do</div>
       <div class="help-step"><span class="sn">1</span><span><b>Matchsticks</b>: See how triangle patterns grow. The formula 2y+1 predicts matchsticks at any step.</span></div>
       <div class="help-step"><span class="sn">2</span><span><b>Calendar</b>: Discover why 2×2 square diagonal sums are always equal (2a+8).</span></div>
-      <div class="help-step"><span class="sn">3</span><span><b>Quiz</b>: Find formulas from patterns and predict values.</span></div>
+      <div class="help-step"><span class="sn">3</span><span>Run prediction missions: set n, compute with formula, and verify quickly.</span></div>
     </div>
     <div class="help-section">
       <div class="help-section-title">Key Concept</div>
@@ -167,41 +167,13 @@ function renderQuiz(){
   ct.querySelector('#nxt').onclick=()=>{qIdx++;renderQuiz()};
 }
 
-function tabs(a){return['match','calendar','quiz'].map(m=>`<button class="mode-tab${m===a?' active':''}" data-m="${m}">${{match:'Matchsticks',calendar:'Calendar',quiz:'Quiz'}[m]}</button>`).join('')}
-function wireMode(){ct.querySelectorAll('.mode-tab').forEach(b=>b.onclick=()=>{mode=b.dataset.m;if(mode==='match')renderMatch();else if(mode==='calendar')renderCalendar();else{qIdx=0;qScore=0;qTotal=0;renderQuiz()}})}
+function tabs(a){return['match','calendar'].map(m=>`<button class="mode-tab${m===a?' active':''}" data-m="${m}">${{match:'Matchsticks',calendar:'Calendar'}[m]}</button>`).join('')}
+function wireMode(){ct.querySelectorAll('.mode-tab').forEach(b=>b.onclick=()=>{mode=b.dataset.m;if(mode==='match')renderMatch();else renderCalendar()})}
 
 renderMatch();
 </script>
 
 
 
-<script>
-/* ACTIVITY_ONLY: disable quiz-mode UI */
-(function(){
-  function forceActivityOnly(){
-    document.querySelectorAll('button').forEach(function(btn){
-      var t = (btn.textContent || '').trim().toLowerCase();
-      if(t.includes('quiz')) btn.style.display = 'none';
-    });
-
-    try {
-      if(typeof mode !== 'undefined' && mode === 'quiz'){
-        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
-        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
-        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
-        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
-      }
-    } catch(e){}
-
-    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
-  }
-
-  var obs = new MutationObserver(function(){ forceActivityOnly(); });
-  obs.observe(document.documentElement, {childList:true, subtree:true});
-  forceActivityOnly();
-})();
-</script>
 </body>
 </html>

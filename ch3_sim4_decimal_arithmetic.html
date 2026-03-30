@@ -99,7 +99,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
     <div class="help-step">2. Tap operation cards like <b>+5.3</b> or <b>-1.2</b>. Each card can be used once.</div>
     <div class="help-step">3. Reach the exact target before moves run out. Some missions require subtraction cards.</div>
     <div class="help-step">4. Use <b>Show Hint</b> if stuck, then retry to improve your streak.</div>
-    <div class="help-step">5. In <b>Quick Quiz</b>, solve MCQs to reinforce decimal arithmetic rules.</div>
+    <div class="help-step">5. Re-run missions with fewer moves and no hints to improve strategy.</div>
   </div>
 </div>
 
@@ -227,7 +227,7 @@ function renderMission(){
   sim.innerHTML = `
   <div class="tabs">
     <button class="tab active" id="toMission">Mission Mode</button>
-    <button class="tab" id="toQuiz">Quick Quiz</button>
+
   </div>
 
   <div class="score-row">
@@ -282,7 +282,7 @@ function renderMission(){
   </div>
   `;
 
-  sim.querySelector("#toQuiz").onclick = () => { mode = "quiz"; render(); };
+
   sim.querySelectorAll(".op-card").forEach((b)=>b.onclick = () => applyCard(parseInt(b.dataset.id,10)));
   sim.querySelector("#retryBtn").onclick = () => { resetMissionState(); render(); };
   sim.querySelector("#hintBtn").onclick = () => { showHint = !showHint; render(); };
@@ -342,41 +342,12 @@ function renderQuiz(){
 }
 
 function render(){
-  if(mode === "mission") renderMission();
-  else renderQuiz();
+  renderMission();
 }
 render();
 </script>
 
 
 
-<script>
-/* ACTIVITY_ONLY: disable quiz-mode UI */
-(function(){
-  function forceActivityOnly(){
-    document.querySelectorAll('button').forEach(function(btn){
-      var t = (btn.textContent || '').trim().toLowerCase();
-      if(t.includes('quiz')) btn.style.display = 'none';
-    });
-
-    try {
-      if(typeof mode !== 'undefined' && mode === 'quiz'){
-        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
-        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
-        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
-        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
-      }
-    } catch(e){}
-
-    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
-  }
-
-  var obs = new MutationObserver(function(){ forceActivityOnly(); });
-  obs.observe(document.documentElement, {childList:true, subtree:true});
-  forceActivityOnly();
-})();
-</script>
 </body>
 </html>

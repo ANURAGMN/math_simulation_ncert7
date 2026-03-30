@@ -100,7 +100,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;hei
     <div class="help-section">
       <div class="help-section-title">What To Do</div>
       <div class="help-step"><span class="help-step-num">1</span><span>In <b>Learn mode</b>, browse examples showing bracket removal step by step.</span></div>
-      <div class="help-step"><span class="help-step-num">2</span><span>In <b>Quiz mode</b>, you're given an expression with brackets. Pick the correct version without brackets.</span></div>
+      <div class="help-step"><span class="help-step-num">2</span><span>Solve each bracket mission by predicting the bracket-free expression and checking sign flips.</span></div>
       <div class="help-step"><span class="help-step-num">3</span><span>Check if there's a <b>minus</b> or <b>plus</b> before the bracket — this tells you whether signs flip.</span></div>
     </div>
     <div class="help-section">
@@ -161,7 +161,7 @@ function renderLearn(){
   c.innerHTML=`
   <div class="mode-tabs">
     <button class="mode-tab active" data-m="learn">Learn</button>
-    <button class="mode-tab" data-m="quiz">Quiz</button>
+
   </div>
   <div class="expr-box">
     <div class="expr-label">With brackets</div>
@@ -178,7 +178,7 @@ function renderLearn(){
 
   c.querySelector("#prob-sl").oninput=function(){pIdx=parseInt(this.value);renderLearn()};
   c.querySelectorAll(".preset-btn").forEach(b=>b.onclick=()=>{pIdx=parseInt(b.dataset.i);renderLearn()});
-  c.querySelectorAll(".mode-tab").forEach(b=>b.onclick=()=>{if(b.dataset.m==="quiz"){mode="quiz";qIdx=0;score=0;total=0;renderQuiz()}});
+
 }
 
 function renderQuiz(){
@@ -219,33 +219,5 @@ renderLearn();
 
 
 
-<script>
-/* ACTIVITY_ONLY: disable quiz-mode UI */
-(function(){
-  function forceActivityOnly(){
-    document.querySelectorAll('button').forEach(function(btn){
-      var t = (btn.textContent || '').trim().toLowerCase();
-      if(t.includes('quiz')) btn.style.display = 'none';
-    });
-
-    try {
-      if(typeof mode !== 'undefined' && mode === 'quiz'){
-        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
-        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
-        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
-        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
-      }
-    } catch(e){}
-
-    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
-  }
-
-  var obs = new MutationObserver(function(){ forceActivityOnly(); });
-  obs.observe(document.documentElement, {childList:true, subtree:true});
-  forceActivityOnly();
-})();
-</script>
 </body>
 </html>

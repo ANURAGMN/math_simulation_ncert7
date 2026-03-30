@@ -133,8 +133,7 @@ function renderUCQuiz(){
   const q=UC_QUIZ[ucQIdx];
   ct.innerHTML=`
   <div class="mode-tabs">
-    <button class="mode-tab" onclick="ucMode='explore';render()">Explore</button>
-    <button class="mode-tab active">Quiz</button>
+    <button class="mode-tab active">Mission Mode</button>
   </div>
   <div style="text-align:center;font-size:13px;font-weight:600;color:#555;margin-bottom:10px">Score: <b style="color:#059669">${ucQScore}/${ucQTotal}</b> &bull; Question <b>${ucQIdx+1}/${UC_QUIZ.length}</b></div>
   <div style="font-size:16px;font-weight:700;color:#1e293b;text-align:center;padding:16px;background:#ecfdf5;border-radius:12px;margin-bottom:12px;line-height:1.5">${q.q}</div>
@@ -152,7 +151,7 @@ function renderUCQuiz(){
 }
 
 function render(){
-  if(ucMode==='quiz'){renderUCQuiz();return}
+  
   const u=UNITS[uIdx];
   const v=u.val;
   const converted=v/u.factor;
@@ -163,7 +162,7 @@ function render(){
   ct.innerHTML=`
   <div class="mode-tabs">
     ${tabsHtml}
-    <button class="mode-tab" onclick="ucMode='quiz';ucQIdx=0;ucQScore=0;ucQTotal=0;renderUCQuiz()" style="background:#fef3c7;border-color:#f59e0b;color:#92400e">Quiz</button>
+
   </div>
   <div class="conv-display">
     <div class="conv-box"><div class="conv-val">${v}</div><div class="conv-unit">${u.from}</div></div>
@@ -189,33 +188,5 @@ render();
 
 
 
-<script>
-/* ACTIVITY_ONLY: disable quiz-mode UI */
-(function(){
-  function forceActivityOnly(){
-    document.querySelectorAll('button').forEach(function(btn){
-      var t = (btn.textContent || '').trim().toLowerCase();
-      if(t.includes('quiz')) btn.style.display = 'none';
-    });
-
-    try {
-      if(typeof mode !== 'undefined' && mode === 'quiz'){
-        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
-        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
-        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
-        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
-      }
-    } catch(e){}
-
-    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
-  }
-
-  var obs = new MutationObserver(function(){ forceActivityOnly(); });
-  obs.observe(document.documentElement, {childList:true, subtree:true});
-  forceActivityOnly();
-})();
-</script>
 </body>
 </html>

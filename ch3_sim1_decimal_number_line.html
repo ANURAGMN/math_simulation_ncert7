@@ -96,7 +96,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;hei
       <div class="help-step"><span class="sn">1</span><span><b>Explore</b>: Drag the slider to pick any decimal. Watch 3 zoom levels show where it sits on the number line.</span></div>
       <div class="help-step"><span class="sn">2</span><span>Each <b>zoom level</b> splits the previous section into 10 equal parts — that's how tenths, hundredths, thousandths work.</span></div>
       <div class="help-step"><span class="sn">3</span><span><b>Sequence</b>: Find the pattern in decimal sequences and predict the next terms.</span></div>
-      <div class="help-step"><span class="sn">4</span><span><b>Quiz</b>: Locate decimals, compare them, and find the closest to a target.</span></div>
+      <div class="help-step"><span class="sn">4</span><span>Run target-location missions: move to the asked decimal as precisely as possible.</span></div>
     </div>
     <div class="help-section">
       <div class="help-section-title">Try This</div>
@@ -260,41 +260,13 @@ function renderQuiz(){
 }
 
 // ═══ TABS ═══
-function tabs(a){return['explore','sequence','quiz'].map(m=>`<button class="mode-tab${m===a?' active':''}" data-m="${m}">${{explore:'Explore',sequence:'Sequences',quiz:'Quiz'}[m]}</button>`).join('')}
-function wireMode(){ct.querySelectorAll('.mode-tab').forEach(b=>b.onclick=()=>{mode=b.dataset.m;if(mode==='explore')renderExplore();else if(mode==='sequence')renderSequence();else renderQuiz()})}
+function tabs(a){return['explore','sequence'].map(m=>`<button class="mode-tab${m===a?' active':''}" data-m="${m}">${{explore:'Explore',sequence:'Sequences'}[m]}</button>`).join('')}
+function wireMode(){ct.querySelectorAll('.mode-tab').forEach(b=>b.onclick=()=>{mode=b.dataset.m;if(mode==='explore')renderExplore();else renderSequence()})}
 
 renderExplore();
 </script>
 
 
 
-<script>
-/* ACTIVITY_ONLY: disable quiz-mode UI */
-(function(){
-  function forceActivityOnly(){
-    document.querySelectorAll('button').forEach(function(btn){
-      var t = (btn.textContent || '').trim().toLowerCase();
-      if(t.includes('quiz')) btn.style.display = 'none';
-    });
-
-    try {
-      if(typeof mode !== 'undefined' && mode === 'quiz'){
-        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
-        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
-        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
-        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
-      }
-    } catch(e){}
-
-    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
-  }
-
-  var obs = new MutationObserver(function(){ forceActivityOnly(); });
-  obs.observe(document.documentElement, {childList:true, subtree:true});
-  forceActivityOnly();
-})();
-</script>
 </body>
 </html>

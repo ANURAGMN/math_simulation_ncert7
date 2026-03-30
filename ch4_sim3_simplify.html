@@ -73,7 +73,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
     <div class="help-section">
       <div class="help-section-title">What To Do</div>
       <div class="help-step"><span class="sn">1</span><span><b>Learn</b>: See step-by-step simplification of textbook expressions.</span></div>
-      <div class="help-step"><span class="sn">2</span><span><b>Quiz</b>: Pick the correct simplified form. Covers "Mind the Mistake" problems too.</span></div>
+      <div class="help-step"><span class="sn">2</span><span>Use the simplification missions to combine like terms and verify each step.</span></div>
     </div>
     <div class="help-section">
       <div class="help-section-title">Key Concept</div>
@@ -118,13 +118,13 @@ function renderLearn(){
   let stepsHtml=p.steps.map((s,i)=>`<div class="step-card"><b>Step ${i+1}:</b> ${s}</div>`).join('');
   let presets=PROBS.map((pr,i)=>`<button class="preset-btn${i===pIdx?' active':''}" data-i="${i}">${pr.expr}</button>`).join('');
   ct.innerHTML=`
-  <div class="mode-tabs"><button class="mode-tab active" data-m="learn">Learn</button><button class="mode-tab" data-m="quiz">Quiz</button></div>
+  <div class="mode-tabs"><button class="mode-tab active" data-m="learn">Learn</button></div>
   <div class="expr-panel"><div class="expr-sub">Simplify:</div><div class="expr-text">${p.expr}</div></div>
   ${stepsHtml}
   <div class="result-panel"><div class="result-label">Simplified form</div><div class="result-value">${p.result}</div></div>
   <div class="presets">${presets}</div>`;
   ct.querySelectorAll('.preset-btn').forEach(b=>b.onclick=()=>{pIdx=parseInt(b.dataset.i);renderLearn()});
-  ct.querySelectorAll('.mode-tab').forEach(b=>b.onclick=()=>{if(b.dataset.m==='quiz'){mode='quiz';qIdx=0;qScore=0;qTotal=0;renderQuiz()}});
+
 }
 
 function renderQuiz(){
@@ -151,33 +151,5 @@ renderLearn();
 
 
 
-<script>
-/* ACTIVITY_ONLY: disable quiz-mode UI */
-(function(){
-  function forceActivityOnly(){
-    document.querySelectorAll('button').forEach(function(btn){
-      var t = (btn.textContent || '').trim().toLowerCase();
-      if(t.includes('quiz')) btn.style.display = 'none';
-    });
-
-    try {
-      if(typeof mode !== 'undefined' && mode === 'quiz'){
-        if(typeof renderExplore === 'function'){ mode = 'explore'; renderExplore(); return; }
-        if(typeof renderLearn === 'function'){ mode = 'learn'; renderLearn(); return; }
-        if(typeof renderMatch === 'function'){ mode = 'match'; renderMatch(); return; }
-        if(typeof renderMission === 'function'){ mode = 'mission'; renderMission(); return; }
-      }
-    } catch(e){}
-
-    try { if(typeof pvMode !== 'undefined' && pvMode === 'quiz' && typeof render === 'function'){ pvMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof ucMode !== 'undefined' && ucMode === 'quiz' && typeof render === 'function'){ ucMode = 'explore'; render(); return; } } catch(e){}
-    try { if(typeof expMode !== 'undefined' && expMode === 'quiz' && typeof renderExplore === 'function'){ expMode = 'explore'; renderExplore(); return; } } catch(e){}
-  }
-
-  var obs = new MutationObserver(function(){ forceActivityOnly(); });
-  obs.observe(document.documentElement, {childList:true, subtree:true});
-  forceActivityOnly();
-})();
-</script>
 </body>
 </html>
