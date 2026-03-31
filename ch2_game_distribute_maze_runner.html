@@ -21,6 +21,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .expr{font-family:'Courier New',monospace;font-size:20px;font-weight:800;text-align:center;color:#111827;margin-top:6px}
 .maze{display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px}
 .lane{padding:10px;border:2px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer;text-align:center;font-family:'Courier New',monospace;font-weight:800}
+.lane.sel{border-color:#0369a1;background:#dbeafe;color:#1e3a8a}
 .lane.ok{border-color:#16a34a;background:#dcfce7;color:#166534}
 .lane.bad{border-color:#dc2626;background:#fef2f2;color:#991b1b}
 .actions{display:flex;gap:8px;margin-top:10px}
@@ -52,13 +53,18 @@ const MISSIONS = [
   {expr:'(14−6)×10', ok:'14×10 − 6×10', bad:['14×10 + 6×10','14−6+10','14×6−10']},
   {expr:'7(20+5)', ok:'7×20 + 7×5', bad:['7+20+5','20×5+7','7×20−7×5']}
 ];
-let st = {run:false, idx:0, score:0, lives:3, msg:'', msgType:'info', resolved:false};
+let st = {run:false, idx:0, score:0, lives:3, msg:'', msgType:'info', resolved:false, pick:'', lanes:[]};
 
 function shuffle(a){const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]];}return x;}
-function start(){ st={...st, run:true, idx:0, score:0, lives:3, resolved:false, msg:''}; render(); }
+function prepare(){
+  const m = MISSIONS[Math.min(st.idx, MISSIONS.length - 1)];
+  st.lanes = shuffle([m.ok, ...m.bad]);
+}
+function start(){ st={...st, run:true, idx:0, score:0, lives:3, resolved:false, msg:'', pick:'', lanes:[]}; prepare(); render(); }
 function choose(v){
   if(!st.run || st.resolved) return;
   const m = MISSIONS[st.idx];
+  st.pick = v;
   st.resolved = true;
   if(v===m.ok){ st.score+=12; st.msg='Correct lane! Distribution preserved.'; st.msgType='good'; }
   else { st.lives--; st.msg='Wrong lane. Check sign and multiplier distribution.'; st.msgType='bad'; if(st.lives<=0) st.run=false; }
@@ -68,13 +74,14 @@ function next(){
   if(!st.resolved) return;
   st.idx++;
   if(st.idx>=MISSIONS.length){ st.run=false; st.msg='Maze cleared!'; st.msgType='good'; }
-  st.resolved=false;
+  st.resolved=false; st.pick=''; prepare();
   render();
 }
 function render(chosen=''){
   const done = !st.run;
   const m = MISSIONS[Math.min(st.idx, MISSIONS.length-1)];
-  const lanes = shuffle([m.ok, ...m.bad]);
+  if(st.lanes.length===0) prepare();
+  const lanes = st.lanes;
   sim.innerHTML = `
     <div class="stats">
       <div class="stat"><div class="k">Level</div><div class="v">${Math.min(st.idx+1, MISSIONS.length)}/${MISSIONS.length}</div></div>
@@ -87,7 +94,7 @@ function render(chosen=''){
       <div class="expr">${m.expr}</div>
     </div>
     <div class="maze">
-      ${lanes.map(l=>`<button class="lane ${st.resolved?(l===m.ok?'ok':(l===chosen?'bad':'')):''}" data-v="${l}">${l}</button>`).join('')}
+      ${lanes.map(l=>`<button class="lane ${st.resolved?(l===m.ok?'ok':(l===chosen?'bad':'')):(l===st.pick?'sel':'')}" data-v="${l}">${l}</button>`).join('')}
     </div>
     <div class="actions">
       ${done ? `<button class="btn start" id="startBtn">Start Maze Run</button>` : (st.resolved ? `<button class="btn next" id="nextBtn">Next Maze</button>` : '')}
@@ -98,7 +105,7 @@ function render(chosen=''){
   const s=sim.querySelector('#startBtn'); if(s) s.onclick=start;
   const n=sim.querySelector('#nextBtn'); if(n) n.onclick=next;
 }
-render();
+start();
 </script>
 </body>
 </html>

@@ -23,6 +23,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .big{font-size:24px;font-weight:900;color:#0f172a;font-family:'Courier New',monospace;text-align:center;margin:8px 0}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .opt{padding:11px;border:2px solid #dbeafe;border-radius:10px;background:#fff;font-family:'Courier New',monospace;font-weight:800;color:#1e3a8a;cursor:pointer}
+.opt.sel{background:#dbeafe;border-color:#2563eb;color:#1e3a8a}
 .opt.correct{background:#dcfce7;border-color:#22c55e;color:#166534}
 .opt.wrong{background:#fee2e2;border-color:#ef4444;color:#991b1b}
 .actions{display:flex;gap:8px;margin-top:10px}
@@ -57,7 +58,7 @@ const MISSIONS = [
   {city:"Chennai", pop:4646732, place:1000000, label:"nearest ten lakh"}
 ];
 
-let st = {run:false,idx:0,score:0,lives:3,resolved:false,msg:"",msgType:"info",opts:[]};
+let st = {run:false,idx:0,score:0,lives:3,resolved:false,msg:"",msgType:"info",opts:[],picked:null};
 
 function fmtI(n){
   let s=String(Math.round(n)); if(s.length<=3) return s;
@@ -78,14 +79,15 @@ function buildOptions(m){
 }
 
 function setupRound(){
-  st.resolved=false; st.msg=""; st.msgType="info";
+  st.resolved=false; st.msg=""; st.msgType="info"; st.picked=null;
   st.opts=buildOptions(MISSIONS[st.idx]);
 }
-function start(){ st={...st,run:true,idx:0,score:0,lives:3}; setupRound(); render(); }
+function start(){ st={...st,run:true,idx:0,score:0,lives:3,picked:null}; setupRound(); render(); }
 function retry(){ if(!st.run) return; setupRound(); render(); }
 
 function choose(v){
   if(!st.run || st.resolved) return;
+  st.picked = v;
   const m = MISSIONS[st.idx];
   const ans = roundTo(m.pop,m.place);
   st.resolved=true;
@@ -117,13 +119,13 @@ function render(){
       <div class="big">${fmtI(m.pop)}</div>
     </div>
     <div class="opts">
-      ${st.opts.map(v=>`<button class="opt" data-v="${v}">${fmtI(v)}</button>`).join("")}
+      ${st.opts.map(v=>`<button class="opt ${(!st.resolved && st.picked===v)?'sel':''}" data-v="${v}">${fmtI(v)}</button>`).join("")}
     </div>
     <div class="actions">
       ${done?`<button class="btn start" id="startBtn">Start Radar Run</button>`:
       (st.resolved?`<button class="btn retry" id="retryBtn">Retry</button><button class="btn next" id="nextBtn">Next</button>`:``)}
     </div>
-    ${st.msg?`<div class="msg ${st.msgType}">${st.msg}</div>`:`<div class="msg info">Compare nearest neighbors around the rounding place.</div>`}
+    ${st.msg?`<div class="msg ${st.msgType}">${st.msg}</div>`:`<div class="msg info">Selected: <b>${st.picked===null?'-':fmtI(st.picked)}</b>. Compare nearest neighbors around the rounding place.</div>`}
   `;
   sim.querySelectorAll(".opt").forEach(b=>b.onclick=()=>choose(Number(b.dataset.v)));
   const s=sim.querySelector("#startBtn"); if(s) s.onclick=start;
@@ -131,8 +133,7 @@ function render(){
   const n=sim.querySelector("#nextBtn"); if(n) n.onclick=next;
 }
 
-setupRound();
-render();
+start();
 </script>
 </body>
 </html>

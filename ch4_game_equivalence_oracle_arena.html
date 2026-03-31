@@ -29,6 +29,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .probe input{width:100%;margin-top:7px;padding:9px;border:2px solid #cbd5e1;border-radius:8px;font-size:14px;font-weight:700}
 .choices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
 .choice{padding:10px;border:2px solid #d1d5db;border-radius:10px;background:#fff;font-weight:800;cursor:pointer}
+.choice.sel{border-color:#be123c;background:#ffe4e6;color:#9f1239;box-shadow:0 0 0 2px rgba(190,18,60,.12) inset}
 .choice.ok{border-color:#16a34a;background:#dcfce7;color:#166534}
 .choice.bad{border-color:#dc2626;background:#fef2f2;color:#991b1b}
 .actions{display:flex;gap:8px;margin-top:10px}
@@ -145,7 +146,7 @@ function render(){
     <div class="choices">
       ${['always','sometimes','never'].map(v => {
         const label = v[0].toUpperCase() + v.slice(1);
-        const cls = st.resolved ? (v===c.answer ? 'ok' : (v===st.pick ? 'bad' : '')) : '';
+        const cls = st.resolved ? (v===c.answer ? 'ok' : (v===st.pick ? 'bad' : '')) : (v===st.pick ? 'sel' : '');
         return `<button class="choice ${cls}" data-v="${v}">${label}</button>`;
       }).join('')}
     </div>
@@ -158,7 +159,7 @@ function render(){
             : `<button class="btn check" id="checkBtn">Submit Judgment</button>`)}
     </div>
 
-    ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Pick one relation and submit your judgment.</div>`}
+    ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Selected: <b>${st.pick || "-"}</b>. Pick one relation and submit your judgment.</div>`}
   `;
 
   const px = sim.querySelector('#probeX');
@@ -172,7 +173,7 @@ function render(){
   const n = sim.querySelector('#nextBtn'); if(n) n.onclick = nextCase;
 }
 
-render();
+startArena();
 </script>
 </body>
 </html>
