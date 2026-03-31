@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#7c3aed">
+<title>Intersection Angle Forge</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#7c3aed,#2563eb);min-height:100vh}
+#app{max-width:430px;margin:auto;padding:10px}
+.header{text-align:center;color:#fff;padding:12px}
+.header h1{font-size:20px;font-weight:800}
+.header p{font-size:12px;opacity:.92}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.stat{background:#f5f3ff;border-radius:10px;padding:8px;text-align:center}
+.k{font-size:10px;color:#6d28d9;font-weight:700;text-transform:uppercase}
+.v{font-size:18px;font-weight:800;color:#111827}
+.mission{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid #c4b5fd;border-radius:12px;padding:10px;margin-bottom:10px}
+.mission h3{font-size:14px;color:#4c1d95}
+.mission p{font-size:12px;color:#5b21b6;line-height:1.45;margin-top:4px}
+.face{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.box{background:#f8fafc;border:2px solid #cbd5e1;border-radius:10px;padding:10px;text-align:center}
+.box .l{font-size:11px;color:#334155}
+.box .n{font-size:20px;font-weight:900;font-family:'Courier New',monospace;color:#0f172a}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.opt{padding:10px;border:2px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer;font-weight:800}
+.opt.sel{border-color:#7c3aed;background:#ede9fe;color:#4c1d95}
+.opt.ok{border-color:#16a34a;background:#dcfce7;color:#166534}
+.opt.bad{border-color:#dc2626;background:#fef2f2;color:#991b1b}
+.actions{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.check{background:#7c3aed;color:#fff}
+.btn.next{background:#0ea5e9;color:#fff}
+.msg{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
+.msg.good{background:#dcfce7;color:#166534}
+.msg.bad{background:#fef2f2;color:#991b1b}
+.msg.info{background:#eff6ff;color:#1e3a8a}
+.insight{margin-top:12px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-left:4px solid #7c3aed;border-radius:12px;padding:12px;font-size:12px;color:#111827;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>Intersection Angle Forge</h1>
+    <p>Use vertically opposite and linear-pair relations</p>
+  </div>
+  <div class="card" id="sim"></div>
+  <div class="insight"><b>Chapter 7 focus:</b> when lines intersect, opposite angles are equal and adjacent pairs sum to 180°.</div>
+</div>
+<script>
+const sim = document.getElementById('sim');
+const ROUNDS = [
+  {given:35, ask:'opposite', ans:35},
+  {given:48, ask:'adjacent', ans:132},
+  {given:110, ask:'opposite', ans:110},
+  {given:125, ask:'adjacent', ans:55},
+  {given:72, ask:'adjacent', ans:108},
+  {given:160, ask:'opposite', ans:160}
+];
+let st={run:true,idx:0,score:0,lives:3,pick:null,resolved:false,msg:'',msgType:'info'};
+function options(ans){ return [ans, ans+10, Math.max(0,ans-10), 180-ans].slice(0,4); }
+function choose(v){ if(!st.run||st.resolved) return; st.pick=v; render(); }
+function check(){
+  if(!st.run||st.resolved||st.pick===null) return;
+  const r=ROUNDS[st.idx];
+  st.resolved=true;
+  if(st.pick===r.ans){ st.score+=12; st.msg='Correct angle forged.'; st.msgType='good'; }
+  else { st.lives--; st.msg=`Correct answer: ${r.ans}°.`; st.msgType='bad'; if(st.lives<=0) st.run=false; }
+  render();
+}
+function next(){
+  if(!st.resolved) return;
+  st.idx++;
+  if(st.idx>=ROUNDS.length){ st.run=false; st.msg='Forge complete!'; st.msgType='good'; render(); return; }
+  st.pick=null; st.resolved=false; st.msg=''; st.msgType='info'; render();
+}
+function restart(){ st={run:true,idx:0,score:0,lives:3,pick:null,resolved:false,msg:'',msgType:'info'}; render(); }
+function render(){
+  const done=!st.run;
+  const r=ROUNDS[Math.min(st.idx,ROUNDS.length-1)];
+  const opts=[...new Set(options(r.ans))];
+  sim.innerHTML=`
+    <div class="stats">
+      <div class="stat"><div class="k">Round</div><div class="v">${Math.min(st.idx+1,ROUNDS.length)}/${ROUNDS.length}</div></div>
+      <div class="stat"><div class="k">Score</div><div class="v">${st.score}</div></div>
+      <div class="stat"><div class="k">Lives</div><div class="v">${st.lives}</div></div>
+      <div class="stat"><div class="k">Rule</div><div class="v" style="font-size:11px">${r.ask==='opposite'?'Opp.':'Adj.'}</div></div>
+    </div>
+    <div class="mission">
+      <h3>Find unknown angle</h3>
+      <p>Given one angle is ${r.given}°, find the ${r.ask} angle.</p>
+    </div>
+    <div class="face">
+      <div class="box"><div class="l">Given</div><div class="n">${r.given}°</div></div>
+      <div class="box"><div class="l">Target</div><div class="n">?°</div></div>
+    </div>
+    <div class="opts">
+      ${opts.map(v=>{
+        const cls=st.resolved?(v===r.ans?'ok':(v===st.pick?'bad':'')):(v===st.pick?'sel':'');
+        return `<button class="opt ${cls}" data-v="${v}">${v}°</button>`;
+      }).join('')}
+    </div>
+    <div class="actions">
+      ${done?`<button class="btn next" id="restartBtn">Restart</button>`:(st.resolved?`<button class="btn next" id="nextBtn">${st.idx===ROUNDS.length-1?'Finish':'Next Round'}</button>`:`<button class="btn check" id="checkBtn">Check Angle</button>`)}
+    </div>
+    ${st.msg?`<div class="msg ${st.msgType}">${st.msg}</div>`:`<div class="msg info">Opposite angles are equal; adjacent pair totals 180°.</div>`}
+  `;
+  sim.querySelectorAll('.opt').forEach(b=>b.onclick=()=>choose(Number(b.dataset.v)));
+  const c=sim.querySelector('#checkBtn'); if(c) c.onclick=check;
+  const n=sim.querySelector('#nextBtn'); if(n) n.onclick=next;
+  const rbtn=sim.querySelector('#restartBtn'); if(rbtn) rbtn.onclick=restart;
+}
+render();
+</script>
+</body>
+</html>
