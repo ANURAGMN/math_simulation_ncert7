@@ -73,6 +73,30 @@ function setup(){
   st.resolved = false;
   st.msg = '';
 }
+function retryRound(){
+  if(!st.run) return;
+  setup();
+  st.msg = 'Retry this round. Compare from the leftmost place and move right.';
+  st.msgType = 'info';
+  render();
+}
+function mismatchHint(placed){
+  for(let i=1;i<placed.length;i++){
+    if(parseD(placed[i]) < parseD(placed[i-1])){
+      const a = Number(placed[i-1]).toFixed(6);
+      const b = Number(placed[i]).toFixed(6);
+      const names = ['ones','tenths','hundredths','thousandths','ten-thousandths','hundred-thousandths'];
+      let pos = 'leftmost differing';
+      for(let k=0,j=0;k<a.length && k<b.length;k++){
+        if(a[k]==='.') continue;
+        if(a[k]!==b[k]){ pos = names[j] || pos; break; }
+        j++;
+      }
+      return `Mismatch at ${placed[i-1]} and ${placed[i]} — compare from ${pos} (left to right).`;
+    }
+  }
+  return 'Order mismatch. Compare from leftmost decimal place.';
+}
 function place(token){
   if(st.resolved || !st.run) return;
   const ti = st.tray.findIndex(x=>x===token);
@@ -110,7 +134,7 @@ function check(){
     st.msgType='good';
   } else {
     st.lives -= 1;
-    st.msg='Order mismatch. Compare from leftmost decimal place.';
+    st.msg=mismatchHint(st.placed);
     st.msgType='bad';
     if(st.lives<=0) st.run = false;
   }
@@ -148,7 +172,9 @@ function render(){
     <div class="slots">${st.placed.map((s,i)=>`<div class="slot ${s?'fill':''}">${s||`#${i+1}`}</div>`).join('')}</div>
     <div class="ops">
       ${done ? `<button class="btn start" id="startBtn">Start Rescue Run</button>` :
-      (st.resolved ? `<button class="btn next" id="nextBtn">Next Round</button>` :
+      (st.resolved ? (st.msgType==='bad'
+        ? `<button class="btn clear" id="retryBtn">Retry Round</button><button class="btn next" id="nextBtn">Next Round</button>`
+        : `<button class="btn next" id="nextBtn">Next Round</button>`) :
       `<button class="btn clear" id="clearBtn">Reset Slots</button><button class="btn check" id="checkBtn">Check Order</button>`)}
     </div>
     ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Tip: 0.2 = 0.20 but both are greater than 0.02.</div>`}
@@ -156,6 +182,7 @@ function render(){
   sim.querySelectorAll('.token').forEach(b=>b.onclick=()=>place(b.dataset.t));
   const s = sim.querySelector('#startBtn'); if(s) s.onclick=start;
   const c = sim.querySelector('#clearBtn'); if(c) c.onclick=clearAll;
+  const rr = sim.querySelector('#retryBtn'); if(rr) rr.onclick=retryRound;
   const ch = sim.querySelector('#checkBtn'); if(ch) ch.onclick=check;
   const n = sim.querySelector('#nextBtn'); if(n) n.onclick=next;
 }
