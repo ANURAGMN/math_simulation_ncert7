@@ -18,19 +18,14 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .k{font-size:10px;color:#6d28d9;font-weight:700;text-transform:uppercase}
 .v{font-size:18px;font-weight:800;color:#111827}
 .mission{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid #c4b5fd;border-radius:12px;padding:10px;margin-bottom:10px}
-.face{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
-.box{background:#f8fafc;border:2px solid #cbd5e1;border-radius:10px;padding:8px;text-align:center}
-.box .l{font-size:11px;color:#334155}
-.box .n{font-size:20px;font-family:'Courier New',monospace;font-weight:900;color:#1f2937}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.opt{padding:10px;border:2px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer;font-weight:800}
-.opt.sel{border-color:#7c3aed;background:#ede9fe;color:#4c1d95}
-.opt.ok{border-color:#16a34a;background:#dcfce7;color:#166534}
-.opt.bad{border-color:#dc2626;background:#fef2f2;color:#991b1b}
-.actions{display:flex;gap:8px;margin-top:10px}
+.mission p{font-size:12px;color:#4c1d95;line-height:1.45}
+.canvas{background:#f8fafc;border:2px solid #cbd5e1;border-radius:12px;padding:6px;margin-top:8px}
+svg{width:100%;height:auto;display:block;touch-action:none}
+.row{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
 .btn.check{background:#7c3aed;color:#fff}
 .btn.next{background:#0ea5e9;color:#fff}
+.btn.reset{background:#e2e8f0;color:#334155}
 .msg{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
 .msg.good{background:#dcfce7;color:#166534}
 .msg.bad{background:#fef2f2;color:#991b1b}
@@ -42,74 +37,201 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 <div id="app">
   <div class="header">
     <h1>Angle Sum Puzzle Wheel</h1>
-    <p>Use angle-sum rules to unlock missing sector values</p>
+    <p>Drag spokes to satisfy target 180° or 360° sums</p>
   </div>
   <div class="card" id="sim"></div>
-  <div class="insight"><b>Chapter 7 focus:</b> around a point sum is 360°; linear pair sum is 180°.</div>
+  <div class="insight"><b>Geometry:</b> angle around a point totals 360°; adjacent straight-line pair totals 180°.</div>
 </div>
 <script>
 const sim = document.getElementById('sim');
 const ROUNDS = [
-  {a:110,b:140,type:'around',ans:110,opts:[110,90,120,100]},
-  {a:65,b:70,type:'line',ans:45,opts:[45,35,55,65]},
-  {a:120,b:150,type:'around',ans:90,opts:[80,90,100,110]},
-  {a:40,b:95,type:'line',ans:45,opts:[45,55,35,65]},
-  {a:130,b:100,type:'around',ans:130,opts:[120,130,110,140]},
-  {a:72,b:68,type:'line',ans:40,opts:[40,30,50,60]}
+  {type:'line', target:180, fixedA:65, fixedB:40, variable:'x', goal:75, title:'Straight-line sum'},
+  {type:'around', target:360, fixedA:120, fixedB:95, variable:'x', goal:145, title:'Around-point sum'},
+  {type:'line', target:180, fixedA:48, fixedB:62, variable:'x', goal:70, title:'Straight-line sum'},
+  {type:'around', target:360, fixedA:85, fixedB:130, variable:'x', goal:145, title:'Around-point sum'},
+  {type:'line', target:180, fixedA:98, fixedB:32, variable:'x', goal:50, title:'Straight-line sum'},
+  {type:'around', target:360, fixedA:140, fixedB:80, variable:'x', goal:140, title:'Around-point sum'}
 ];
 
-let st={run:true,idx:0,score:0,lives:3,pick:null,resolved:false,msg:'',msgType:'info'};
-function choose(v){ if(!st.run||st.resolved) return; st.pick=v; render(); }
-function check(){
-  if(!st.run||st.resolved||st.pick===null) return;
-  const r=ROUNDS[st.idx];
-  st.resolved=true;
-  if(st.pick===r.ans){ st.score+=12; st.msg='Angle wheel solved.'; st.msgType='good'; }
-  else { st.lives--; st.msg=`Correct angle is ${r.ans}°.`; st.msgType='bad'; if(st.lives<=0) st.run=false; }
+let st = {run:true, idx:0, score:0, lives:3, x:30, resolved:false, msg:'', msgType:'info'};
+let drag = {active:false};
+
+function setupRound(){
+  st.x = 30;
+  st.resolved = false;
+  st.msg = '';
+  st.msgType = 'info';
+}
+
+function current(){ return ROUNDS[Math.min(st.idx, ROUNDS.length-1)]; }
+function sumNow(){ const r=current(); return r.fixedA + r.fixedB + st.x; }
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+function updateFromDrag(clientX, clientY){
+  if(!drag.active || st.resolved || !st.run) return;
+  const svg = sim.querySelector('#wheelSvg');
+  if(!svg) return;
+  const rect = svg.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+  const ang = Math.atan2(clientY-cy, clientX-cx) * 180/Math.PI;
+  const theta = (ang + 360) % 360;
+  const r = current();
+
+  if(r.type === 'line'){
+    const x = clamp(Math.round(theta), 1, 179);
+    st.x = x;
+  } else {
+    const x = clamp(Math.round(theta), 5, 300);
+    st.x = x;
+  }
   render();
 }
+
+function check(){
+  if(!st.run || st.resolved) return;
+  const r = current();
+  st.resolved = true;
+  if(st.x === r.goal){
+    st.score += 12;
+    st.msg = `Perfect lock! x = ${r.goal}°`;
+    st.msgType = 'good';
+  } else {
+    st.lives -= 1;
+    st.msg = `Not exact. Need x = ${r.goal}°`;
+    st.msgType = 'bad';
+    if(st.lives<=0) st.run=false;
+  }
+  render();
+}
+
 function next(){
   if(!st.resolved) return;
   st.idx++;
-  if(st.idx>=ROUNDS.length){ st.run=false; st.msg='Puzzle wheel complete!'; st.msgType='good'; render(); return; }
-  st.pick=null; st.resolved=false; st.msg=''; st.msgType='info'; render();
+  if(st.idx >= ROUNDS.length){
+    st.run = false;
+    st.msg = 'Puzzle wheel complete!';
+    st.msgType = 'good';
+    render();
+    return;
+  }
+  setupRound();
+  render();
 }
-function restart(){ st={run:true,idx:0,score:0,lives:3,pick:null,resolved:false,msg:'',msgType:'info'}; render(); }
+
+function resetDrag(){
+  if(!st.run || st.resolved) return;
+  setupRound();
+  render();
+}
+
+function restart(){
+  st = {run:true, idx:0, score:0, lives:3, x:30, resolved:false, msg:'', msgType:'info'};
+  setupRound();
+  render();
+}
 
 function render(){
-  const done=!st.run;
-  const r=ROUNDS[Math.min(st.idx,ROUNDS.length-1)];
-  sim.innerHTML=`
+  const done = !st.run;
+  const r = current();
+  const total = sumNow();
+  const remaining = r.target - (r.fixedA + r.fixedB);
+  const valid = total === r.target;
+
+  const arcA = r.fixedA, arcB = r.fixedB, arcX = st.x;
+  const endA = arcA;
+  const endB = arcA + arcB;
+  const endX = arcA + arcB + arcX;
+
+  sim.innerHTML = `
     <div class="stats">
       <div class="stat"><div class="k">Round</div><div class="v">${Math.min(st.idx+1,ROUNDS.length)}/${ROUNDS.length}</div></div>
       <div class="stat"><div class="k">Score</div><div class="v">${st.score}</div></div>
       <div class="stat"><div class="k">Lives</div><div class="v">${st.lives}</div></div>
-      <div class="stat"><div class="k">Rule</div><div class="v" style="font-size:11px">${r.type==='around'?'360°':'180°'}</div></div>
+      <div class="stat"><div class="k">Target</div><div class="v">${r.target}°</div></div>
     </div>
+
     <div class="mission">
-      <div style="font-size:12px;color:#4c1d95">${r.type==='around'?'Angles around point sum to 360°':'Linear pair sums to 180°'}</div>
-      <div class="face">
-        <div class="box"><div class="l">A</div><div class="n">${r.a}°</div></div>
-        <div class="box"><div class="l">B</div><div class="n">${r.b}°</div></div>
-        <div class="box"><div class="l">?</div><div class="n">?°</div></div>
+      <p><b>${r.title}:</b> fixed sectors are A=${r.fixedA}°, B=${r.fixedB}°. Drag the magenta spoke to set x so total becomes ${r.target}°.</p>
+      <p>Current total: <b>${total}°</b> | Required x: <b>${remaining}°</b> | Your x: <b>${st.x}°</b></p>
+      <div class="canvas">
+        <svg id="wheelSvg" viewBox="0 0 320 260">
+          <g transform="translate(160,130)">
+            <circle cx="0" cy="0" r="92" fill="#fff"/>
+            <path d="${sectorPath(0,endA,92)}" fill="rgba(59,130,246,.22)" stroke="#2563eb" stroke-width="2"></path>
+            <path d="${sectorPath(endA,endB,92)}" fill="rgba(16,185,129,.22)" stroke="#059669" stroke-width="2"></path>
+            <path d="${sectorPath(endB,endX,92)}" fill="rgba(236,72,153,.22)" stroke="#be185d" stroke-width="2"></path>
+
+            <line x1="0" y1="0" x2="${pt(endA,92).x}" y2="${pt(endA,92).y}" stroke="#2563eb" stroke-width="3"/>
+            <line x1="0" y1="0" x2="${pt(endB,92).x}" y2="${pt(endB,92).y}" stroke="#059669" stroke-width="3"/>
+            <line id="dragSpoke" x1="0" y1="0" x2="${pt(endX,92).x}" y2="${pt(endX,92).y}" stroke="#be185d" stroke-width="4"/>
+            <circle id="dragHandle" cx="${pt(endX,92).x}" cy="${pt(endX,92).y}" r="10" fill="#be185d" stroke="#fff" stroke-width="3"/>
+
+            <text x="${pt(endA/2,60).x}" y="${pt(endA/2,60).y}" font-size="12" fill="#1e3a8a" font-weight="700">${r.fixedA}°</text>
+            <text x="${pt(endA+arcB/2,60).x}" y="${pt(endA+arcB/2,60).y}" font-size="12" fill="#065f46" font-weight="700">${r.fixedB}°</text>
+            <text x="${pt(endB+arcX/2,60).x}" y="${pt(endB+arcX/2,60).y}" font-size="12" fill="#9d174d" font-weight="700">${st.x}°</text>
+
+            <circle cx="0" cy="0" r="5" fill="#111827"/>
+          </g>
+        </svg>
       </div>
     </div>
-    <div class="opts">
-      ${r.opts.map(v=>{
-        const cls=st.resolved?(v===r.ans?'ok':(v===st.pick?'bad':'')):(v===st.pick?'sel':'');
-        return `<button class="opt ${cls}" data-v="${v}">${v}°</button>`;
-      }).join('')}
+
+    <div class="row">
+      ${done
+        ? `<button class="btn next" id="restartBtn">Restart</button>`
+        : (st.resolved
+          ? `<button class="btn next" id="nextBtn">${st.idx===ROUNDS.length-1?'Finish':'Next Round'}</button>`
+          : `<button class="btn reset" id="resetBtn">Reset x</button><button class="btn check" id="checkBtn">Check Sum</button>`)}
     </div>
-    <div class="actions">
-      ${done?`<button class="btn next" id="restartBtn">Restart</button>`:(st.resolved?`<button class="btn next" id="nextBtn">${st.idx===ROUNDS.length-1?'Finish':'Next Round'}</button>`:`<button class="btn check" id="checkBtn">Lock Angle</button>`)}
-    </div>
-    ${st.msg?`<div class="msg ${st.msgType}">${st.msg}</div>`:`<div class="msg info">Choose one value and lock.</div>`}
+
+    ${st.msg
+      ? `<div class="msg ${st.msgType}">${st.msg}</div>`
+      : `<div class="msg info">${valid?'Sum target hit. Press Check.':'Drag handle to tune x and hit target sum.'}</div>`}
   `;
-  sim.querySelectorAll('.opt').forEach(b=>b.onclick=()=>choose(Number(b.dataset.v)));
-  const c=sim.querySelector('#checkBtn'); if(c) c.onclick=check;
-  const n=sim.querySelector('#nextBtn'); if(n) n.onclick=next;
-  const rbtn=sim.querySelector('#restartBtn'); if(rbtn) rbtn.onclick=restart;
+
+  const handle = sim.querySelector('#dragHandle');
+  if(handle && !st.resolved && !done){
+    const startDrag = (e)=>{
+      drag.active = true;
+      const t = e.touches ? e.touches[0] : e;
+      updateFromDrag(t.clientX, t.clientY);
+      if(e.cancelable) e.preventDefault();
+    };
+    handle.addEventListener('mousedown', startDrag);
+    handle.addEventListener('touchstart', startDrag, {passive:false});
+  }
+
+  const move = (e)=>{
+    if(!drag.active) return;
+    const t = e.touches ? e.touches[0] : e;
+    updateFromDrag(t.clientX, t.clientY);
+    if(e.cancelable) e.preventDefault();
+  };
+  const stop = ()=>{ drag.active=false; };
+  window.onmousemove = move;
+  window.onmouseup = stop;
+  window.ontouchmove = move;
+  window.ontouchend = stop;
+
+  const ck = sim.querySelector('#checkBtn'); if(ck) ck.onclick = check;
+  const nx = sim.querySelector('#nextBtn'); if(nx) nx.onclick = next;
+  const rs = sim.querySelector('#resetBtn'); if(rs) rs.onclick = resetDrag;
+  const rr = sim.querySelector('#restartBtn'); if(rr) rr.onclick = restart;
 }
+
+function pt(deg, r){
+  const rad = deg * Math.PI / 180;
+  return {x: Math.cos(rad)*r, y: Math.sin(rad)*r};
+}
+
+function sectorPath(startDeg, endDeg, r){
+  const s = pt(startDeg, r), e = pt(endDeg, r);
+  const large = (endDeg-startDeg) > 180 ? 1 : 0;
+  return `M 0 0 L ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y} Z`;
+}
+
+setupRound();
 render();
 </script>
 </body>
