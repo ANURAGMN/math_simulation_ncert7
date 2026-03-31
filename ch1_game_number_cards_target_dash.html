@@ -75,7 +75,12 @@ function resetRound(){ st.tokens=[]; st.used=new Set(); st.op="+"; st.solved=fal
 function addCard(n){
   if(!st.run || st.solved || st.used.has(n)) return;
   const last = st.tokens[st.tokens.length-1];
-  if(typeof last === "number"){ st.msg="Pick an operator first."; st.msgType="info"; render(); return; }
+  if(st.tokens.length>0 && typeof last !== "number"){
+    st.msg="Pick a number card after operator.";
+    st.msgType="info";
+    render();
+    return;
+  }
   if(st.tokens.length>0) st.tokens.push(st.op);
   st.tokens.push(n);
   st.used.add(n);

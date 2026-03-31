@@ -29,6 +29,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .btn{padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
 .btn.good{background:#0ea5e9;color:#fff}
 .btn.next{background:#059669;color:#fff}
+.btn.retry{background:#e2e8f0;color:#334155}
 .btn.start{background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff}
 .msg{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
 .msg.good{background:#dcfce7;color:#166534}
@@ -79,6 +80,13 @@ function next(){
   else {st.resolved=false;st.msg='';}
   render();
 }
+function retry(){
+  if(!st.resolved || !st.run) return;
+  st.resolved=false;
+  st.msg='Retry this mission with the better range choice.';
+  st.msgType='info';
+  render();
+}
 function fmt(n){return Math.round(n).toLocaleString('en-IN');}
 function render(){
   const done=!st.run;
@@ -100,14 +108,15 @@ function render(){
     <div class="line"><div class="fill" style="width:${pct}%"></div><div class="marker" style="left:calc(${pct}% - 7px)"></div></div>
     <div class="labels"><span>0 km</span><span>${fmt(m.dist)} km target</span></div>
   </div>
-  <div class="controls">
-    ${done?`<button class="btn start" id="startBtn">Start Journey Run</button>`:(st.resolved?`<button class="btn next" id="nextBtn">Next Mission</button>`:m.options.map(v=>`<button class="btn good" data-v="${v}">${v} km/day</button>`).join(''))}
-  </div>
+    <div class="controls">
+      ${done?`<button class="btn start" id="startBtn">Start Journey Run</button>`:(st.resolved?`<button class="btn retry" id="retryBtn">Retry Mission</button><button class="btn next" id="nextBtn">Next Mission</button>`:m.options.map(v=>`<button class="btn good" data-v="${v}">${v} km/day</button>`).join(''))}
+    </div>
   ${st.msg?`<div class="msg ${st.msgType}">${st.msg}</div>`:`<div class="msg info">Think with multiplication and compare against target distance.</div>`}
   `;
   sim.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>choose(parseInt(b.dataset.v,10)));
   const s=sim.querySelector('#startBtn'); if(s) s.onclick=start;
   const n=sim.querySelector('#nextBtn'); if(n) n.onclick=next;
+  const r=sim.querySelector('#retryBtn'); if(r) r.onclick=retry;
 }
 render();
 </script>
