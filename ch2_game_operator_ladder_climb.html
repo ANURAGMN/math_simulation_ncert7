@@ -61,7 +61,7 @@ const MISSIONS = [
   {expr:"90 ÷ 10 + 13", first:"90 ÷ 10", value:22, decoys:["10 + 13 = 103","90 + 10","90 ÷ 13"]}
 ];
 
-let st = {run:false, idx:0, score:0, lives:3, streak:0, pick:"", answer:"", resolved:false, msg:"", msgType:"info"};
+let st = {run:true, idx:0, score:0, lives:3, streak:0, pick:"", answer:"", resolved:false, msg:"", msgType:"info"};
 
 function startGame(){
   st = {run:true, idx:0, score:0, lives:3, streak:0, pick:"", answer:"", resolved:false, msg:"", msgType:"info"};
@@ -180,7 +180,7 @@ function render(){
   const n = sim.querySelector("#nextBtn"); if(n) n.onclick = nextMission;
 }
 
-render();
+startGame();
 </script>
 </body>
 </html>
