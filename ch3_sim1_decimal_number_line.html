@@ -23,6 +23,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .line{background:#f5f3ff;border-radius:12px;padding:8px;margin-bottom:10px}
 svg{width:100%;display:block}
 .readout{display:flex;justify-content:space-between;font-size:12px;color:#475569;margin:6px 0}
+.guess-badge{padding:4px 8px;border-radius:8px;background:#ede9fe;color:#5b21b6;font-weight:800;border:1px solid #c4b5fd}
 .slider{margin-top:6px}
 input[type=range]{width:100%}
 .actions{display:flex;gap:8px;margin-top:10px}
@@ -116,7 +117,11 @@ function check(){
       st.msgType = 'bad';
       if(st.lives<=0) st.run = false;
     } else {
-      st.msg = `Off by ${d.toFixed(4)}. Shots left: ${st.shots}.`;
+      if(d > 0.05 && st.zoomLeft > 0){
+        st.msg = `Off by ${d.toFixed(4)}. Shots left: ${st.shots}. Hint: use Zoom In for finer control.`;
+      } else {
+        st.msg = `Off by ${d.toFixed(4)}. Shots left: ${st.shots}.`;
+      }
       st.msgType = 'info';
     }
   }
@@ -168,7 +173,7 @@ function render(){
 
     <div class="line">${drawLine(st.lo,st.hi,st.guess)}</div>
 
-    <div class="readout"><span>Range: ${st.lo.toFixed(3)} to ${st.hi.toFixed(3)}</span><span>Your guess: ${st.guess.toFixed(3)}</span></div>
+    <div class="readout"><span>Range: ${st.lo.toFixed(3)} to ${st.hi.toFixed(3)}</span><span class="guess-badge">Your guess: ${st.guess.toFixed(3)}</span></div>
     <div class="slider"><input type="range" id="guess" min="${st.lo}" max="${st.hi}" step="${(st.hi-st.lo)/1000}" value="${st.guess}"></div>
 
     <div class="actions">
@@ -178,7 +183,7 @@ function render(){
     ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Tolerance now: ${tol()} | Shots: ${st.shots}</div>`}
   `;
 
-  const g = sim.querySelector('#guess'); if(g) g.oninput=()=>{st.guess=parseFloat(g.value); sim.querySelector('.readout').innerHTML=`<span>Range: ${st.lo.toFixed(3)} to ${st.hi.toFixed(3)}</span><span>Your guess: ${st.guess.toFixed(3)}</span>`;};
+  const g = sim.querySelector('#guess'); if(g) g.oninput=()=>{st.guess=parseFloat(g.value); sim.querySelector('.readout').innerHTML=`<span>Range: ${st.lo.toFixed(3)} to ${st.hi.toFixed(3)}</span><span class="guess-badge">Your guess: ${st.guess.toFixed(3)}</span>`;};
   const s = sim.querySelector('#startBtn'); if(s) s.onclick=start;
   const c = sim.querySelector('#checkBtn'); if(c) c.onclick=check;
   const z = sim.querySelector('#zoomBtn'); if(z) z.onclick=zoomIn;

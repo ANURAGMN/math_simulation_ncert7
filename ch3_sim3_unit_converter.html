@@ -30,6 +30,10 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .fill{height:100%;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);width:0%}
 .read{display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-top:6px}
 input[type=range]{width:100%;margin-top:8px}
+.fine{display:flex;gap:6px;margin-top:8px}
+.fine input{flex:1;padding:9px;border:2px solid #cbd5e1;border-radius:10px;font-size:13px;font-weight:700}
+.step-btn{width:46px;border:none;border-radius:10px;background:#e2e8f0;color:#0f172a;font-weight:900;cursor:pointer}
+.step-note{font-size:11px;color:#64748b;margin-top:6px;text-align:center}
 .actions{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
 .btn.start{background:linear-gradient(135deg,#059669,#0369a1);color:#fff}
@@ -71,6 +75,11 @@ const CASES = [
 ];
 
 let st = {run:false, idx:0, score:0, lives:3, answer:0, resolved:false, msg:'', msgType:'info'};
+
+function clampAnswer(v, maxRange){
+  if(!Number.isFinite(v)) return 0;
+  return Math.max(0, Math.min(maxRange, v));
+}
 
 function roundTarget(){
   const c = CASES[st.idx];
@@ -131,6 +140,7 @@ function render(){
 
   const maxRange = Math.max(Math.abs(target)*2.2, target+1, 1);
   const step = maxRange<1 ? 0.0001 : maxRange<10 ? 0.001 : 0.01;
+  const fineStep = maxRange<1 ? 0.0001 : maxRange<10 ? 0.001 : 0.01;
 
   sim.innerHTML = `
     <div class="stats">
@@ -155,6 +165,12 @@ function render(){
       <div class="line"><div class="fill" style="width:${q}%"></div></div>
       <div class="read"><span>Conversion quality</span><span>|error| = ${err.toFixed(6)}</span></div>
       <input type="range" id="ans" min="0" max="${maxRange}" step="${step}" value="${st.answer}">
+      <div class="fine">
+        <button class="step-btn" id="minusBtn">−</button>
+        <input id="ansInput" type="number" step="${fineStep}" min="0" max="${maxRange}" value="${st.answer}">
+        <button class="step-btn" id="plusBtn">+</button>
+      </div>
+      <div class="step-note">Use +/- and counter for precise values like 0.0005</div>
     </div>
 
     <div class="actions">
@@ -164,7 +180,26 @@ function render(){
     ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Tune the slider until error is tiny, then stabilize.</div>`}
   `;
 
-  const a = sim.querySelector('#ans'); if(a) a.oninput=()=>{st.answer=parseFloat(a.value); render();};
+  const a = sim.querySelector('#ans');
+  if(a) a.oninput=()=>{
+    st.answer = clampAnswer(parseFloat(a.value), maxRange);
+    render();
+  };
+  const input = sim.querySelector('#ansInput');
+  if(input) input.onchange=()=>{
+    st.answer = clampAnswer(parseFloat(input.value), maxRange);
+    render();
+  };
+  const minus = sim.querySelector('#minusBtn');
+  if(minus) minus.onclick=()=>{
+    st.answer = clampAnswer(st.answer - fineStep, maxRange);
+    render();
+  };
+  const plus = sim.querySelector('#plusBtn');
+  if(plus) plus.onclick=()=>{
+    st.answer = clampAnswer(st.answer + fineStep, maxRange);
+    render();
+  };
   const s = sim.querySelector('#startBtn'); if(s) s.onclick=start;
   const o = sim.querySelector('#okBtn'); if(o) o.onclick=stabilize;
   const n = sim.querySelector('#nextBtn'); if(n) n.onclick=next;
