@@ -23,6 +23,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .expr{font-family:'Courier New',monospace;font-size:22px;font-weight:900;color:#312e81;text-align:center;margin-top:8px}
 .steps{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
 .step{padding:10px;border:2px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer;font-size:13px;font-weight:700;text-align:left}
+.step.sel{border-color:#7c3aed;background:#ede9fe;color:#4c1d95;box-shadow:0 0 0 2px rgba(124,58,237,.15) inset}
 .step.ok{border-color:#16a34a;background:#dcfce7;color:#166534}
 .step.bad{border-color:#dc2626;background:#fef2f2;color:#991b1b}
 .calc{margin-top:10px;background:#f8fafc;border-radius:10px;padding:10px}
@@ -61,10 +62,11 @@ const MISSIONS = [
   {expr:"90 ÷ 10 + 13", first:"90 ÷ 10", value:22, decoys:["10 + 13 = 103","90 + 10","90 ÷ 13"]}
 ];
 
-let st = {run:true, idx:0, score:0, lives:3, streak:0, pick:"", answer:"", resolved:false, msg:"", msgType:"info"};
+let st = {run:true, idx:0, score:0, lives:3, streak:0, pick:"", answer:"", resolved:false, msg:"", msgType:"info", currentOptions:[]};
 
 function startGame(){
-  st = {run:true, idx:0, score:0, lives:3, streak:0, pick:"", answer:"", resolved:false, msg:"", msgType:"info"};
+  st = {run:true, idx:0, score:0, lives:3, streak:0, pick:"", answer:"", resolved:false, msg:"", msgType:"info", currentOptions:[]};
+  prepareOptions();
   render();
 }
 
@@ -85,6 +87,11 @@ function chooseStep(v){
   if(!st.run || st.resolved) return;
   st.pick = v;
   render();
+}
+
+function prepareOptions(){
+  const m = MISSIONS[st.idx];
+  st.currentOptions = options(m);
 }
 
 function check(){
@@ -122,15 +129,18 @@ function nextMission(){
   st.pick = "";
   st.answer = "";
   st.resolved = false;
+  st.currentOptions = [];
   st.msg = "";
   st.msgType = "info";
+  prepareOptions();
   render();
 }
 
 function render(){
   const done = !st.run;
   const m = MISSIONS[Math.min(st.idx, MISSIONS.length - 1)];
-  const stepOptions = options(m);
+  if(st.currentOptions.length===0) prepareOptions();
+  const stepOptions = st.currentOptions;
 
   sim.innerHTML = `
     <div class="stats">
@@ -148,7 +158,7 @@ function render(){
 
     <div class="steps">
       ${stepOptions.map(v => {
-        const cls = st.resolved ? (v===m.first ? "ok" : (v===st.pick ? "bad" : "")) : "";
+        const cls = st.resolved ? (v===m.first ? "ok" : (v===st.pick ? "bad" : "")) : (v===st.pick ? "sel" : "");
         return `<button class="step ${cls}" data-v="${v}">${v}</button>`;
       }).join("")}
     </div>
@@ -156,6 +166,7 @@ function render(){
     <div class="calc">
       <p>Final value</p>
       <input id="ans" type="number" value="${st.answer}" placeholder="Enter final answer">
+      <p style="margin-top:6px">Selected first step: <b>${st.pick || "-"}</b></p>
     </div>
 
     <div class="actions">

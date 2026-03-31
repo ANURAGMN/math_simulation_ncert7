@@ -24,6 +24,7 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .pill{background:#0f172a;color:#fff;border-radius:999px;padding:6px 10px;font-family:'Courier New',monospace;font-weight:700;font-size:13px}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .opt{padding:10px;border:2px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer;font-weight:700;font-size:13px}
+.opt.sel{border-color:#0369a1;background:#dbeafe;color:#1e3a8a}
 .opt.ok{border-color:#16a34a;background:#dcfce7;color:#166534}
 .opt.bad{border-color:#dc2626;background:#fef2f2;color:#991b1b}
 .digits{margin-top:10px;background:#f8fafc;border-radius:10px;padding:10px}
@@ -139,7 +140,9 @@ function render(){
 
     <div class="options">
       ${round.options.map(v => {
-        const cls = st.resolved ? (v===round.next ? "ok" : (v===st.picked ? "bad" : "")) : "";
+        const cls = st.resolved
+          ? (v===round.next ? "ok" : (v===st.picked ? "bad" : ""))
+          : (v===st.picked ? "sel" : "");
         return `<button class="opt ${cls}" data-v="${v}">${v}</button>`;
       }).join("")}
     </div>
@@ -157,7 +160,9 @@ function render(){
             : `<button class="btn check" id="checkBtn">Check Pulse</button>`)}
     </div>
 
-    ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Pick a term and enter digit count before checking.</div>`}
+    ${st.msg
+      ? `<div class="msg ${st.msgType}">${st.msg}</div>`
+      : `<div class="msg info">Selected term: <b>${st.picked===null ? "-" : st.picked}</b>. Enter digit count, then check.</div>`}
   `;
 
   sim.querySelectorAll(".opt").forEach(b => b.onclick = () => choose(parseInt(b.dataset.v, 10)));
