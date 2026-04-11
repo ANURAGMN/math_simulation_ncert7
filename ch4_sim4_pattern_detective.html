@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#ea580c">
+<title>Rule Decoder — Pattern Detective</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#ea580c 0%,#b45309 100%);min-height:100vh}
+#app{max-width:420px;margin:auto;padding:10px}
+.header{text-align:center;color:#fff;padding:12px}
+.header h1{font-size:20px;font-weight:800}
+.header p{font-size:12px;opacity:.9}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.stat{background:#fff7ed;border-radius:10px;padding:8px;text-align:center}
+.k{font-size:10px;color:#9a3412;font-weight:700;text-transform:uppercase}
+.v{font-size:18px;font-weight:800;color:#0f172a}
+.mission{background:linear-gradient(135deg,#fff7ed,#fed7aa);border:2px solid #fdba74;border-radius:12px;padding:10px;margin-bottom:10px}
+.mission h3{font-size:14px;color:#9a3412}
+.mission p{font-size:12px;color:#7c2d12;line-height:1.45;margin-top:4px}
+.table{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.cell{background:#f8fafc;border-radius:10px;padding:8px;text-align:center;font-size:12px;font-weight:700;color:#334155}
+.cell .n{font-size:10px;color:#64748b;display:block}
+.builder{background:#fff7ed;border-radius:12px;padding:10px;margin-bottom:10px}
+.formula{font-size:24px;text-align:center;font-weight:900;color:#7c2d12;margin-bottom:6px}
+.read{display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:4px}
+input[type=range]{width:100%}
+.preview{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.p{background:#ffedd5;border-radius:8px;padding:6px;text-align:center;font-size:12px;font-weight:700;color:#9a3412}
+.target{margin-top:8px;background:#fef3c7;border-radius:10px;padding:8px;text-align:center;font-size:13px;color:#92400e;font-weight:700}
+.actions{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.start{background:linear-gradient(135deg,#ea580c,#b45309);color:#fff}
+.btn.decode{background:#c2410c;color:#fff}
+.btn.next{background:#059669;color:#fff}
+.msg{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
+.msg.good{background:#dcfce7;color:#166534}
+.msg.bad{background:#fef2f2;color:#991b1b}
+.msg.info{background:#eff6ff;color:#1e3a8a}
+.insight{margin-top:12px;background:linear-gradient(135deg,#fff7ed,#fed7aa);border-left:4px solid #ea580c;border-radius:12px;padding:12px;font-size:12px;color:#0f172a;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>Rule Decoder</h1>
+    <p>Tune m and b to crack each linear pattern</p>
+  </div>
+  <div class="card" id="sim"></div>
+  <div class="insight"><b>Decoder rule:</b> if your generated first 4 terms match the clues, and target term matches too, you cracked the pattern formula.</div>
+</div>
+<script>
+const sim = document.getElementById('sim');
+
+const MISSIONS = [
+  {title:'Matchstick growth', context:'Each step adds 2 sticks after first 3.', m:2, b:1, targetN:33},
+  {title:'Design B positions', context:'B appears at positions 2,5,8,11,...', m:3, b:-1, targetN:40},
+  {title:'Grid column C=3', context:'Rows map to values 3,7,11,15,...', m:4, b:-1, targetN:25},
+  {title:'Fast lane counts', context:'Sequence: 7,12,17,22,...', m:5, b:2, targetN:20},
+  {title:'Reverse drain', context:'Sequence: 18,16,14,12,...', m:-2, b:20, targetN:30}
+];
+
+let st = {run:false, idx:0, score:0, lives:3, m:1, b:0, resolved:false, msg:'', msgType:'info'};
+
+function f(m,b,n){return m*n+b;}
+
+function setupRound(){
+  st.m = 1;
+  st.b = 0;
+  st.resolved = false;
+  st.msg = '';
+}
+
+function start(){
+  st = {...st, run:true, idx:0, score:0, lives:3};
+  setupRound();
+  render();
+}
+
+function decode(){
+  if(!st.run || st.resolved) return;
+  const m = MISSIONS[st.idx];
+  const ok = st.m===m.m && st.b===m.b;
+  st.resolved = true;
+  if(ok){
+    st.score += 20;
+    st.msg = `Rule cracked! Correct formula: ${m.m}n ${m.b>=0?'+':''}${m.b}.`;
+    st.msgType = 'good';
+  } else {
+    st.lives -= 1;
+    const d2 = f(st.m,st.b,2) - f(m.m,m.b,2);
+    st.msg = `Not yet. At n=2 your value differs by ${d2}.`;
+    st.msgType = 'bad';
+    if(st.lives<=0) st.run=false;
+  }
+  render();
+}
+
+function next(){
+  if(!st.resolved) return;
+  st.idx += 1;
+  if(st.idx>=MISSIONS.length){
+    st.run = false;
+    st.msg = 'All rules decoded!';
+    st.msgType = 'good';
+  } else setupRound();
+  render();
+}
+
+function render(){
+  const done = !st.run;
+  const m = MISSIONS[Math.min(st.idx, MISSIONS.length-1)];
+  const clues = [1,2,3,4].map(n=>f(m.m,m.b,n));
+  const your = [1,2,3,4].map(n=>f(st.m,st.b,n));
+  const targetTrue = f(m.m,m.b,m.targetN);
+  const targetYours = f(st.m,st.b,m.targetN);
+
+  sim.innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="k">Mission</div><div class="v">${Math.min(st.idx+1,MISSIONS.length)}/${MISSIONS.length}</div></div>
+      <div class="stat"><div class="k">Score</div><div class="v">${st.score}</div></div>
+      <div class="stat"><div class="k">Lives</div><div class="v">${st.lives}</div></div>
+      <div class="stat"><div class="k">Target n</div><div class="v">${m.targetN}</div></div>
+    </div>
+
+    <div class="mission">
+      <h3>${m.title}</h3>
+      <p>${m.context}</p>
+    </div>
+
+    <div class="table">
+      ${clues.map((v,i)=>`<div class="cell"><span class="n">n=${i+1}</span>${v}</div>`).join('')}
+    </div>
+
+    <div class="builder">
+      <div class="formula">a(n) = ${st.m}n ${st.b>=0?'+':''}${st.b}</div>
+      <div class="read"><span>m = ${st.m}</span><span>b = ${st.b}</span></div>
+      <input type="range" id="m" min="-5" max="10" step="1" value="${st.m}">
+      <input type="range" id="b" min="-10" max="20" step="1" value="${st.b}">
+      <div class="preview">${your.map(v=>`<div class="p">${v}</div>`).join('')}</div>
+      <div class="target">n=${m.targetN}: your ${targetYours} | expected ${st.resolved ? targetTrue : '?'}</div>
+    </div>
+
+    <div class="actions">
+      ${done ? `<button class="btn start" id="startBtn">Start Decoder Run</button>` : (st.resolved ? `<button class="btn next" id="nextBtn">Next Rule</button>` : `<button class="btn decode" id="decodeBtn">Decode Rule</button>`)}
+    </div>
+
+    ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Adjust m and b until your first four terms match the clues.</div>`}
+  `;
+
+  const ms = sim.querySelector('#m'); if(ms) ms.oninput=()=>{st.m=parseInt(ms.value,10); render();};
+  const bs = sim.querySelector('#b'); if(bs) bs.oninput=()=>{st.b=parseInt(bs.value,10); render();};
+  const s = sim.querySelector('#startBtn'); if(s) s.onclick=start;
+  const d = sim.querySelector('#decodeBtn'); if(d) d.onclick=decode;
+  const n = sim.querySelector('#nextBtn'); if(n) n.onclick=next;
+}
+
+setupRound();
+render();
+</script>
+</body>
+</html>

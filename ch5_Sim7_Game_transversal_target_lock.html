@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#7c3aed">
+<title>Transversal Target Lock</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(135deg,#7c3aed,#5b21b6);min-height:100vh}
+#app{max-width:430px;margin:auto;padding:10px}
+.header{text-align:center;color:#fff;padding:12px}.header h1{font-size:20px;font-weight:800}.header p{font-size:12px;opacity:.92}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.16)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.stat{background:#f5f3ff;border-radius:10px;padding:8px;text-align:center}.k{font-size:10px;color:#6d28d9;font-weight:700;text-transform:uppercase}.v{font-size:17px;font-weight:800;color:#0f172a}
+.mission{background:#faf5ff;border:2px solid #ddd6fe;border-radius:12px;padding:10px;font-size:12px;color:#5b21b6;margin-bottom:10px}
+.stage{height:250px;background:#fafafa;border:2px solid #cbd5e1;border-radius:12px;overflow:hidden}
+svg{width:100%;height:100%;display:block;touch-action:none}
+.control{margin-top:8px;background:#fff;border:2px solid #ddd6fe;border-radius:10px;padding:8px}
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mini{padding:8px;border:none;border-radius:8px;background:#ede9fe;color:#5b21b6;font-weight:800;cursor:pointer}
+.slider{width:100%;margin-top:8px}
+.actions{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.check{background:#7c3aed;color:#fff}.next{background:#0f766e;color:#fff}
+.msg{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.4}
+.good{background:#dcfce7;color:#166534}.bad{background:#fef2f2;color:#991b1b}.info{background:#eff6ff;color:#1e3a8a}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>Transversal Target Lock</h1>
+    <p>Rotate transversal and lock the target angle type</p>
+  </div>
+  <div class="card" id="sim"></div>
+</div>
+<script>
+const sim=document.getElementById('sim');
+const ROUNDS=[
+  {name:'Corresponding',mode:'acute',target:52,tol:2},
+  {name:'Alternate interior',mode:'obtuse',target:128,tol:2},
+  {name:'Corresponding',mode:'acute',target:68,tol:2},
+  {name:'Alternate interior',mode:'obtuse',target:114,tol:2},
+  {name:'Co-interior (single angle)',mode:'obtuse',target:140,tol:2}
+];
+let st={run:true,idx:0,score:0,lives:3,phi:38,resolved:false,msg:'',msgType:'info'};
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function setPhi(v){st.phi=clamp(v,15,165)}
+function acute(){return Math.min(st.phi,180-st.phi)}
+function obtuse(){return 180-acute()}
+function val(){const r=ROUNDS[Math.min(st.idx,ROUNDS.length-1)];return r.mode==='acute'?acute():obtuse()}
+function setup(){setPhi(25+Math.random()*130);st.resolved=false;st.msg='';st.msgType='info'}
+function nudge(d){if(!st.run||st.resolved)return;setPhi(st.phi+d);render()}
+function check(){
+  if(!st.run||st.resolved) return;
+  const r=ROUNDS[st.idx], cur=val();
+  st.resolved=true;
+  if(Math.abs(cur-r.target)<=r.tol){st.score+=14;st.msg='Target lock achieved.';st.msgType='good';}
+  else{st.lives--;st.msg=`Lock missed. Need ${r.target}°`;st.msgType='bad';if(st.lives<=0)st.run=false;}
+  render();
+}
+function next(){
+  if(!st.resolved)return;
+  st.idx++;
+  if(st.idx>=ROUNDS.length){st.run=false;st.msg='All locks complete!';st.msgType='good';render();return;}
+  setup();render();
+}
+function restart(){st={run:true,idx:0,score:0,lives:3,phi:38,resolved:false,msg:'',msgType:'info'};setup();render()}
+function render(){
+  const done=!st.run, r=ROUNDS[Math.min(st.idx,ROUNDS.length-1)];
+  const cx=200, cy=125, L=220, rad=st.phi*Math.PI/180, ux=Math.cos(rad), uy=Math.sin(rad);
+  const x1=cx-ux*L, y1=cy-uy*L, x2=cx+ux*L, y2=cy+uy*L;
+  const cur=val();
+  sim.innerHTML=`
+    <div class="stats">
+      <div class="stat"><div class="k">Round</div><div class="v">${Math.min(st.idx+1,ROUNDS.length)}/${ROUNDS.length}</div></div>
+      <div class="stat"><div class="k">Score</div><div class="v">${st.score}</div></div>
+      <div class="stat"><div class="k">Lives</div><div class="v">${st.lives}</div></div>
+      <div class="stat"><div class="k">Target</div><div class="v">${r.target}°</div></div>
+    </div>
+    <div class="mission">
+      Mission: set <b>${r.name}</b> angle to <b>${r.target}° ± ${r.tol}°</b>.<br>
+      Acute=${acute().toFixed(1)}°, Obtuse=${obtuse().toFixed(1)}°, Focus=${cur.toFixed(1)}°
+    </div>
+    <div class="stage">
+      <svg id="svg" viewBox="0 0 400 250">
+        <line x1="20" y1="55" x2="380" y2="55" stroke="#334155" stroke-width="4"/>
+        <line x1="20" y1="195" x2="380" y2="195" stroke="#334155" stroke-width="4"/>
+        <line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#7c3aed" stroke-width="4"/>
+        <circle cx="${(cx+ux*100).toFixed(1)}" cy="${(cy+uy*100).toFixed(1)}" r="10" fill="#7c3aed" stroke="#fff" stroke-width="3"/>
+        <text x="16" y="22" font-size="13" fill="#111827">Drag purple line or use precision controls</text>
+      </svg>
+    </div>
+    <div class="control">
+      <div class="row">
+        <button class="mini" data-d="-5">-5°</button><button class="mini" data-d="-1">-1°</button>
+        <button class="mini" data-d="1">+1°</button><button class="mini" data-d="5">+5°</button>
+      </div>
+      <input class="slider" id="phiRange" type="range" min="15" max="165" value="${st.phi.toFixed(1)}" step="0.1">
+    </div>
+    <div class="actions">
+      ${done?`<button class="btn next" id="restartBtn">Restart</button>`:(st.resolved?`<button class="btn next" id="nextBtn">${st.idx===ROUNDS.length-1?'Finish':'Next'}</button>`:`<button class="btn check" id="checkBtn">Lock Angle</button>`)}
+    </div>
+    ${st.msg?`<div class="msg ${st.msgType}">${st.msg}</div>`:`<div class="msg info">Use drag + nudge to hit exact target.</div>`}
+  `;
+  const svg=sim.querySelector('#svg'); let drag=false;
+  const pointerToPhi=(e)=>{const r=svg.getBoundingClientRect();const x=(e.clientX-r.left)*(400/r.width);const y=(e.clientY-r.top)*(250/r.height);setPhi(Math.atan2(cy-y,x-cx)*180/Math.PI);};
+  if(!done&&!st.resolved){
+    svg.addEventListener('pointerdown',e=>{drag=true;svg.setPointerCapture(e.pointerId);pointerToPhi(e);render();});
+    svg.addEventListener('pointermove',e=>{if(!drag)return;pointerToPhi(e);render();});
+    svg.addEventListener('pointerup',()=>drag=false);svg.addEventListener('pointercancel',()=>drag=false);
+  }
+  sim.querySelectorAll('.mini').forEach(b=>b.onclick=()=>nudge(parseFloat(b.dataset.d)));
+  const pr=sim.querySelector('#phiRange'); if(pr) pr.oninput=e=>{setPhi(parseFloat(e.target.value));render();};
+  const c=sim.querySelector('#checkBtn'); if(c)c.onclick=check;
+  const n=sim.querySelector('#nextBtn'); if(n)n.onclick=next;
+  const rs=sim.querySelector('#restartBtn'); if(rs)rs.onclick=restart;
+}
+setup();render();
+</script>
+</body>
+</html>

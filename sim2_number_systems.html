@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0ea5e9">
+<title>Comma Relay Builder</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#0ea5e9 0%,#6366f1 100%);min-height:100vh}
+#app{max-width:420px;margin:auto;padding:10px}
+.header{text-align:center;color:#fff;padding:12px}
+.header h1{font-size:20px;font-weight:800}
+.header p{font-size:12px;opacity:.9}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.stat{background:#f0f9ff;border-radius:10px;padding:8px;text-align:center}
+.k{font-size:10px;color:#0369a1;font-weight:700;text-transform:uppercase}
+.v{font-size:18px;font-weight:800;color:#0f172a}
+.mission{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #93c5fd;border-radius:12px;padding:10px;margin-bottom:10px;text-align:center}
+.raw{font-family:'Courier New',monospace;font-size:24px;font-weight:800;color:#0f172a;margin-top:4px}
+.prompt{font-size:12px;color:#1e3a8a;margin-top:2px}
+.section{margin-top:10px}
+.section h3{font-size:12px;color:#334155;margin-bottom:6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.opt{padding:10px;border:2px solid #e2e8f0;border-radius:10px;background:#fff;font-family:'Courier New',monospace;font-size:13px;font-weight:700;cursor:pointer}
+.opt.sel{border-color:#0ea5e9;background:#e0f2fe;color:#0c4a6e}
+.actions{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.start{background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff}
+.btn.submit{background:#0369a1;color:#fff}
+.btn.next{background:#059669;color:#fff}
+.msg{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
+.msg.good{background:#dcfce7;color:#166534}
+.msg.bad{background:#fef2f2;color:#991b1b}
+.msg.info{background:#eff6ff;color:#1e3a8a}
+.insight{margin-top:12px;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-left:4px solid #0ea5e9;border-radius:12px;padding:12px;font-size:12px;color:#0f172a;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>Comma Relay Builder</h1>
+    <p>Pick both Indian and International formatting correctly</p>
+  </div>
+  <div class="card" id="sim"></div>
+  <div class="insight"><b>Mission idea:</b> every relay step needs <i>both lanes</i> correct — Indian and International comma placement for the same number.</div>
+</div>
+<script>
+const sim = document.getElementById('sim');
+
+const MISSIONS = [4050678,48121620,20022002,246813579,345000543,1020304050,987650123,6400000000];
+
+let state = {
+  running:false,
+  idx:0,
+  score:0,
+  lives:3,
+  timeLeft:120,
+  selectedI:null,
+  selectedX:null,
+  optsI:[],
+  optsX:[],
+  resolved:false,
+  msg:''
+};
+let timer = null;
+
+function shuffle(a){const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]];}return x;}
+
+function formatPattern(num, first, repeat){
+  let s = String(num);
+  if(s.length<=first) return s;
+  let out = s.slice(-first);
+  s = s.slice(0,-first);
+  while(s.length>repeat){out = s.slice(-repeat)+','+out; s=s.slice(0,-repeat);}
+  if(s.length) out = s + ',' + out;
+  return out;
+}
+
+function fmtIndian(n){return formatPattern(n,3,2);}
+function fmtIntl(n){return formatPattern(n,3,3);}
+
+function buildOptions(num, kind){
+  const correct = kind==='I' ? fmtIndian(num) : fmtIntl(num);
+  const patterns = kind==='I' ? [[3,3],[2,2],[4,2],[3,4]] : [[3,2],[2,2],[4,2],[3,4]];
+  const set = new Set([correct, String(num)]);
+  patterns.forEach(([f,r])=>set.add(formatPattern(num,f,r)));
+  const wrong = shuffle([...set].filter(x=>x!==correct)).slice(0,3);
+  return shuffle([...wrong, correct]);
+}
+
+function startRelay(){
+  state = {...state, running:true, idx:0, score:0, lives:3, timeLeft:120, resolved:false, msg:''};
+  prepareRound();
+  if(timer) clearInterval(timer);
+  timer = setInterval(()=>{
+    if(!state.running) return;
+    state.timeLeft -= 1;
+    if(state.timeLeft<=0){
+      state.timeLeft = 0;
+      state.running = false;
+      state.msg = 'Time up! Relay ended.';
+      state.resolved = true;
+      clearInterval(timer);
+    }
+    render();
+  },1000);
+  render();
+}
+
+function prepareRound(){
+  const n = MISSIONS[state.idx];
+  state.selectedI = null;
+  state.selectedX = null;
+  state.optsI = buildOptions(n,'I');
+  state.optsX = buildOptions(n,'X');
+  state.resolved = false;
+}
+
+function submitRound(){
+  if(state.selectedI===null || state.selectedX===null) return;
+  const n = MISSIONS[state.idx];
+  const okI = state.selectedI === fmtIndian(n);
+  const okX = state.selectedX === fmtIntl(n);
+  state.resolved = true;
+
+  if(okI && okX){
+    state.score += 10;
+    state.msg = 'Perfect handoff! Both lanes are correct.';
+    state.msgType = 'good';
+  } else {
+    state.lives -= 1;
+    state.msg = 'Relay drop! Review both comma rules and continue.';
+    state.msgType = 'bad';
+  }
+
+  if(state.lives<=0){
+    state.running = false;
+    state.msg = 'No lives left. Relay ended.';
+    clearInterval(timer);
+  }
+}
+
+function nextRound(){
+  if(!state.running) return;
+  state.idx += 1;
+  if(state.idx>=MISSIONS.length){
+    state.running = false;
+    state.msg = 'Relay complete! Great conversion stamina.';
+    state.msgType = 'good';
+    clearInterval(timer);
+  } else {
+    prepareRound();
+  }
+  render();
+}
+
+function render(){
+  const done = !state.running;
+  const n = MISSIONS[Math.min(state.idx, MISSIONS.length-1)];
+  const msgType = state.msgType || 'info';
+
+  sim.innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="k">Round</div><div class="v">${Math.min(state.idx+1, MISSIONS.length)}/${MISSIONS.length}</div></div>
+      <div class="stat"><div class="k">Score</div><div class="v">${state.score}</div></div>
+      <div class="stat"><div class="k">Lives</div><div class="v">${state.lives}</div></div>
+      <div class="stat"><div class="k">Time</div><div class="v">${state.timeLeft}s</div></div>
+    </div>
+
+    <div class="mission">
+      <div class="prompt">Raw number token</div>
+      <div class="raw">${String(n)}</div>
+      <div class="prompt">Pick correct formatting in both lanes</div>
+    </div>
+
+    <div class="section">
+      <h3>Lane A — Indian format</h3>
+      <div class="grid" id="gridI">
+        ${state.optsI.map(o=>`<button class="opt ${state.selectedI===o?'sel':''}" data-lane="I" data-v="${o}">${o}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Lane B — International format</h3>
+      <div class="grid" id="gridX">
+        ${state.optsX.map(o=>`<button class="opt ${state.selectedX===o?'sel':''}" data-lane="X" data-v="${o}">${o}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="actions">
+      ${done ? `<button class="btn start" id="startBtn">Start New Relay</button>` : (state.resolved ? `<button class="btn next" id="nextBtn">Next Relay Step</button>` : `<button class="btn submit" id="submitBtn">Submit Handoff</button>`)}
+    </div>
+
+    ${state.msg ? `<div class="msg ${msgType}">${state.msg}</div>` : `<div class="msg info">Tip: Indian commas use 3-2-2..., International uses 3-3-3...</div>`}
+  `;
+
+  sim.querySelectorAll('.opt').forEach(btn=>btn.onclick=()=>{
+    if(done || state.resolved) return;
+    const lane = btn.dataset.lane;
+    if(lane==='I') state.selectedI = btn.dataset.v;
+    else state.selectedX = btn.dataset.v;
+    render();
+  });
+
+  const s = sim.querySelector('#startBtn'); if(s) s.onclick=startRelay;
+  const sub = sim.querySelector('#submitBtn'); if(sub) sub.onclick=()=>{submitRound();render();};
+  const nxt = sim.querySelector('#nextBtn'); if(nxt) nxt.onclick=nextRound;
+}
+
+prepareRound();
+render();
+</script>
+</body>
+</html>

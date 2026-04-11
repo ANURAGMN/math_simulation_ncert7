@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#059669">
+<title>Unit Emergency Room</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#059669 0%,#0369a1 100%);min-height:100vh}
+#app{max-width:420px;margin:auto;padding:10px}
+.header{text-align:center;color:#fff;padding:12px}
+.header h1{font-size:20px;font-weight:800}
+.header p{font-size:12px;opacity:.9}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.stat{background:#ecfdf5;border-radius:10px;padding:8px;text-align:center}
+.k{font-size:10px;color:#065f46;font-weight:700;text-transform:uppercase}
+.v{font-size:18px;font-weight:800;color:#0f172a}
+.case{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #86efac;border-radius:12px;padding:10px;margin-bottom:10px}
+.case h3{font-size:14px;color:#065f46}
+.case p{font-size:12px;color:#166534;margin-top:4px;line-height:1.45}
+.rx{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.box{flex:1;background:#064e3b;border-radius:12px;padding:12px;text-align:center;color:#fff}
+.big{font-size:24px;font-weight:800}
+.unit{font-size:12px;opacity:.75}
+.arrow{font-size:22px;color:#059669;font-weight:900}
+.monitor{background:#f8fafc;border-radius:12px;padding:10px;margin-bottom:10px}
+.line{height:18px;background:#e5e7eb;border-radius:10px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);width:0%}
+.read{display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-top:6px}
+input[type=range]{width:100%;margin-top:8px}
+.fine{display:flex;gap:6px;margin-top:8px}
+.fine input{flex:1;padding:9px;border:2px solid #cbd5e1;border-radius:10px;font-size:13px;font-weight:700}
+.step-btn{width:46px;border:none;border-radius:10px;background:#e2e8f0;color:#0f172a;font-weight:900;cursor:pointer}
+.step-note{font-size:11px;color:#64748b;margin-top:6px;text-align:center}
+.actions{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.start{background:linear-gradient(135deg,#059669,#0369a1);color:#fff}
+.btn.ok{background:#16a34a;color:#fff}
+.btn.next{background:#0ea5e9;color:#fff}
+.msg{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
+.msg.good{background:#dcfce7;color:#166534}
+.msg.bad{background:#fef2f2;color:#991b1b}
+.msg.info{background:#eff6ff;color:#1e3a8a}
+.insight{margin-top:12px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-left:4px solid #059669;border-radius:12px;padding:12px;font-size:12px;line-height:1.5;color:#0f172a}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>Unit Emergency Room</h1>
+    <p>Tune conversions correctly to stabilize each case</p>
+  </div>
+  <div class="card" id="sim"></div>
+  <div class="insight"><b>Game rule:</b> if your converted value is close enough, patient is stable. Wrong dose/weight conversions cost lives.</div>
+</div>
+<script>
+const sim = document.getElementById('sim');
+
+const FACTOR = {
+  mm:0.001, cm:0.01, m:1,
+  mg:0.001, g:1, kg:1000,
+  paise:0.01, rupee:1
+};
+function convert(v, from, to){ return v*FACTOR[from]/FACTOR[to]; }
+
+const CASES = [
+  {title:'Pediatric Dose', text:'Order: convert 0.05 mg into grams.', fromV:0.05, from:'mg', to:'g'},
+  {title:'IV Nutrition', text:'Convert 465 g into kilograms.', fromV:465, from:'g', to:'kg'},
+  {title:'Lab Strip', text:'Convert 56 mm into centimeters.', fromV:56, from:'mm', to:'cm'},
+  {title:'Travel Chart', text:'Convert 325 cm into meters.', fromV:325, from:'cm', to:'m'},
+  {title:'Billing Desk', text:'Convert 250 paise into rupees.', fromV:250, from:'paise', to:'rupee'},
+  {title:'Micro dose', text:'Convert 0.8 mg into grams.', fromV:0.8, from:'mg', to:'g'}
+];
+
+let st = {run:false, idx:0, score:0, lives:3, answer:0, resolved:false, msg:'', msgType:'info'};
+
+function clampAnswer(v, maxRange){
+  if(!Number.isFinite(v)) return 0;
+  return Math.max(0, Math.min(maxRange, v));
+}
+
+function roundTarget(){
+  const c = CASES[st.idx];
+  return convert(c.fromV,c.from,c.to);
+}
+
+function setupRound(){
+  const t = roundTarget();
+  st.answer = t*0.6;
+  st.resolved = false;
+  st.msg = '';
+}
+
+function start(){
+  st = {...st, run:true, idx:0, score:0, lives:3};
+  setupRound();
+  render();
+}
+
+function stabilize(){
+  if(!st.run || st.resolved) return;
+  const t = roundTarget();
+  const err = Math.abs(st.answer - t);
+  const tol = Math.max(Math.abs(t)*0.02, 0.0005);
+  st.resolved = true;
+  if(err<=tol){
+    st.score += 15;
+    st.msg = `Stable! error ${err.toFixed(6)} within tolerance ${tol.toFixed(6)}.`;
+    st.msgType = 'good';
+  } else {
+    st.lives -= 1;
+    st.msg = `Not stable. error ${err.toFixed(6)}. Correct value: ${t.toFixed(6)}.`;
+    st.msgType = 'bad';
+    if(st.lives<=0) st.run=false;
+  }
+  render();
+}
+
+function next(){
+  if(!st.resolved) return;
+  st.idx += 1;
+  if(st.idx>=CASES.length){
+    st.run = false;
+    st.msg = 'All emergency cases resolved!';
+    st.msgType = 'good';
+  } else {
+    setupRound();
+  }
+  render();
+}
+
+function render(){
+  const done = !st.run;
+  const c = CASES[Math.min(st.idx, CASES.length-1)];
+  const target = roundTarget();
+  const err = Math.abs(st.answer-target);
+  const q = Math.max(0, 100 - Math.min(100, (err/(Math.abs(target)+0.0001))*300));
+
+  const maxRange = Math.max(Math.abs(target)*2.2, target+1, 1);
+  const step = maxRange<1 ? 0.0001 : maxRange<10 ? 0.001 : 0.01;
+  const fineStep = maxRange<1 ? 0.0001 : maxRange<10 ? 0.001 : 0.01;
+
+  sim.innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="k">Case</div><div class="v">${Math.min(st.idx+1,CASES.length)}/${CASES.length}</div></div>
+      <div class="stat"><div class="k">Score</div><div class="v">${st.score}</div></div>
+      <div class="stat"><div class="k">Lives</div><div class="v">${st.lives}</div></div>
+      <div class="stat"><div class="k">Quality</div><div class="v">${Math.round(q)}%</div></div>
+    </div>
+
+    <div class="case">
+      <h3>${c.title}</h3>
+      <p>${c.text}</p>
+    </div>
+
+    <div class="rx">
+      <div class="box"><div class="big">${c.fromV}</div><div class="unit">${c.from}</div></div>
+      <div class="arrow">→</div>
+      <div class="box"><div class="big">${st.answer.toFixed(6).replace(/0+$/,'').replace(/\.$/,'')}</div><div class="unit">${c.to}</div></div>
+    </div>
+
+    <div class="monitor">
+      <div class="line"><div class="fill" style="width:${q}%"></div></div>
+      <div class="read"><span>Conversion quality</span><span>|error| = ${err.toFixed(6)}</span></div>
+      <input type="range" id="ans" min="0" max="${maxRange}" step="${step}" value="${st.answer}">
+      <div class="fine">
+        <button class="step-btn" id="minusBtn">−</button>
+        <input id="ansInput" type="number" step="${fineStep}" min="0" max="${maxRange}" value="${st.answer}">
+        <button class="step-btn" id="plusBtn">+</button>
+      </div>
+      <div class="step-note">Use +/- and counter for precise values like 0.0005</div>
+    </div>
+
+    <div class="actions">
+      ${done ? `<button class="btn start" id="startBtn">Start ER Shift</button>` : (st.resolved ? `<button class="btn next" id="nextBtn">Next Case</button>` : `<button class="btn ok" id="okBtn">Stabilize Patient</button>`)}
+    </div>
+
+    ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Tune the slider until error is tiny, then stabilize.</div>`}
+  `;
+
+  const a = sim.querySelector('#ans');
+  if(a) a.oninput=()=>{
+    st.answer = clampAnswer(parseFloat(a.value), maxRange);
+    render();
+  };
+  const input = sim.querySelector('#ansInput');
+  if(input) input.onchange=()=>{
+    st.answer = clampAnswer(parseFloat(input.value), maxRange);
+    render();
+  };
+  const minus = sim.querySelector('#minusBtn');
+  if(minus) minus.onclick=()=>{
+    st.answer = clampAnswer(st.answer - fineStep, maxRange);
+    render();
+  };
+  const plus = sim.querySelector('#plusBtn');
+  if(plus) plus.onclick=()=>{
+    st.answer = clampAnswer(st.answer + fineStep, maxRange);
+    render();
+  };
+  const s = sim.querySelector('#startBtn'); if(s) s.onclick=start;
+  const o = sim.querySelector('#okBtn'); if(o) o.onclick=stabilize;
+  const n = sim.querySelector('#nextBtn'); if(n) n.onclick=next;
+}
+
+setupRound();
+render();
+</script>
+</body>
+</html>

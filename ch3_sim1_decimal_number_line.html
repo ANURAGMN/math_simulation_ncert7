@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#7c3aed">
+<title>Zoom Hunt — Decimal Number Line</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);min-height:100vh}
+#app{max-width:420px;margin:auto;padding:10px}
+.header{text-align:center;color:#fff;padding:12px}
+.header h1{font-size:20px;font-weight:800}
+.header p{font-size:12px;opacity:.9}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.stat{background:#f5f3ff;border-radius:10px;padding:8px;text-align:center}
+.k{font-size:10px;color:#6d28d9;font-weight:700;text-transform:uppercase}
+.v{font-size:18px;font-weight:800;color:#1f2937}
+.mission{background:linear-gradient(135deg,#ede9fe,#ddd6fe);border:2px solid #c4b5fd;border-radius:12px;padding:10px;margin-bottom:10px}
+.mission h3{font-size:14px;color:#4c1d95}
+.mission p{font-size:12px;color:#5b21b6;margin-top:4px}
+.line{background:#f5f3ff;border-radius:12px;padding:8px;margin-bottom:10px}
+svg{width:100%;display:block}
+.readout{display:flex;justify-content:space-between;font-size:12px;color:#475569;margin:6px 0}
+.guess-badge{padding:4px 8px;border-radius:8px;background:#ede9fe;color:#5b21b6;font-weight:800;border:1px solid #c4b5fd}
+.slider{margin-top:6px}
+input[type=range]{width:100%}
+.actions{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.check{background:#7c3aed;color:#fff}
+.btn.zoom{background:#c4b5fd;color:#4c1d95}
+.btn.next{background:#059669;color:#fff}
+.btn.start{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.msg{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
+.msg.good{background:#dcfce7;color:#166534}
+.msg.bad{background:#fef2f2;color:#991b1b}
+.msg.info{background:#eff6ff;color:#1e3a8a}
+.insight{margin-top:12px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-left:4px solid #7c3aed;border-radius:12px;padding:12px;font-size:12px;color:#0f172a}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>Zoom Hunt</h1>
+    <p>Find hidden decimals with limited zoom tokens</p>
+  </div>
+  <div class="card" id="sim"></div>
+  <div class="insight"><b>Mission strategy:</b> start broad, test guess, then zoom into tenths and hundredths. Use zoom tokens wisely.</div>
+</div>
+<script>
+const sim = document.getElementById('sim');
+const TARGETS = [4.185,0.274,9.876,1.509,3.042,7.333,2.718,5.405];
+
+let st = {
+  run:false, idx:0, score:0, lives:3,
+  lo:0, hi:1, guess:0.5, zoom:1, zoomLeft:2, shots:3,
+  resolved:false, success:false, msg:'', msgType:'info'
+};
+
+function setupRound(){
+  const t = TARGETS[st.idx];
+  st.lo = Math.floor(t);
+  st.hi = st.lo + 1;
+  st.guess = (st.lo + st.hi)/2;
+  st.zoom = 1;
+  st.zoomLeft = 2;
+  st.shots = 3;
+  st.resolved = false;
+  st.success = false;
+  st.msg = '';
+}
+
+function tol(){return st.zoom===1?0.1:st.zoom===2?0.01:0.001;}
+
+function drawLine(lo,hi,guess){
+  const W=360,H=70,p=20,y=30;
+  const line = hi-lo;
+  let ticks='';
+  for(let i=0;i<=10;i++){
+    const x=p + (W-2*p)*i/10;
+    const v=(lo + line*i/10).toFixed(3).replace(/0+$/,'').replace(/\.$/,'');
+    ticks += `<line x1="${x}" y1="${y-8}" x2="${x}" y2="${y+8}" stroke="#8b5cf6" stroke-width="${i===0||i===10?2:1}"/>`;
+    if(i%2===0) ticks += `<text x="${x}" y="${y+22}" text-anchor="middle" font-size="9" fill="#475569">${v}</text>`;
+  }
+  const pct=(guess-lo)/(hi-lo);
+  const gx=p + (W-2*p)*Math.max(0,Math.min(1,pct));
+  return `<svg viewBox="0 0 ${W} ${H}">
+    <line x1="${p}" y1="${y}" x2="${W-p}" y2="${y}" stroke="#c4b5fd" stroke-width="4" stroke-linecap="round"/>
+    ${ticks}
+    <circle cx="${gx}" cy="${y}" r="7" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+  </svg>`;
+}
+
+function start(){
+  st = {...st, run:true, idx:0, score:0, lives:3};
+  setupRound();
+  render();
+}
+
+function check(){
+  if(!st.run || st.resolved) return;
+  const t = TARGETS[st.idx];
+  const d = Math.abs(st.guess - t);
+  if(d <= tol()){
+    st.success = true;
+    st.resolved = true;
+    st.score += 12 + st.shots + st.zoomLeft;
+    st.msg = `Target locked! |error| = ${d.toFixed(4)} within tolerance ${tol()}.`;
+    st.msgType = 'good';
+  } else {
+    st.shots -= 1;
+    if(st.shots<=0){
+      st.lives -= 1;
+      st.resolved = true;
+      st.msg = `Missed. Hidden target was ${t.toFixed(3)}.`;
+      st.msgType = 'bad';
+      if(st.lives<=0) st.run = false;
+    } else {
+      if(d > 0.05 && st.zoomLeft > 0){
+        st.msg = `Off by ${d.toFixed(4)}. Shots left: ${st.shots}. Hint: use Zoom In for finer control.`;
+      } else {
+        st.msg = `Off by ${d.toFixed(4)}. Shots left: ${st.shots}.`;
+      }
+      st.msgType = 'info';
+    }
+  }
+  render();
+}
+
+function zoomIn(){
+  if(!st.run || st.resolved || st.zoomLeft<=0 || st.zoom>=3) return;
+  const t = TARGETS[st.idx];
+  if(st.zoom===1){ st.lo = Math.floor(t*10)/10; st.hi = st.lo + 0.1; }
+  else if(st.zoom===2){ st.lo = Math.floor(t*100)/100; st.hi = st.lo + 0.01; }
+  st.zoom += 1;
+  st.zoomLeft -= 1;
+  st.guess = (st.lo + st.hi)/2;
+  st.msg = `Zoomed in. New tolerance target: ${tol()}.`;
+  st.msgType = 'info';
+  render();
+}
+
+function next(){
+  if(!st.resolved) return;
+  st.idx += 1;
+  if(st.idx>=TARGETS.length){
+    st.run = false;
+    st.msg = 'Hunt complete!';
+    st.msgType = 'good';
+    render();
+    return;
+  }
+  setupRound();
+  render();
+}
+
+function render(){
+  const done = !st.run;
+  const t = TARGETS[Math.min(st.idx, TARGETS.length-1)];
+  sim.innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="k">Round</div><div class="v">${Math.min(st.idx+1,TARGETS.length)}/${TARGETS.length}</div></div>
+      <div class="stat"><div class="k">Score</div><div class="v">${st.score}</div></div>
+      <div class="stat"><div class="k">Lives</div><div class="v">${st.lives}</div></div>
+      <div class="stat"><div class="k">Zoom</div><div class="v">${st.zoomLeft}</div></div>
+    </div>
+
+    <div class="mission">
+      <h3>Hidden target #${Math.min(st.idx+1,TARGETS.length)}</h3>
+      <p>${st.resolved ? `Target: ${t.toFixed(3)}` : 'Find the hidden decimal using checks + zoom.'}</p>
+    </div>
+
+    <div class="line">${drawLine(st.lo,st.hi,st.guess)}</div>
+
+    <div class="readout"><span>Range: ${st.lo.toFixed(3)} to ${st.hi.toFixed(3)}</span><span class="guess-badge">Your guess: ${st.guess.toFixed(3)}</span></div>
+    <div class="slider"><input type="range" id="guess" min="${st.lo}" max="${st.hi}" step="${(st.hi-st.lo)/1000}" value="${st.guess}"></div>
+
+    <div class="actions">
+      ${done ? `<button class="btn start" id="startBtn">Start Hunt</button>` : (st.resolved ? `<button class="btn next" id="nextBtn">Next Target</button>` : `<button class="btn check" id="checkBtn">Check Guess</button><button class="btn zoom" id="zoomBtn">Zoom In</button>`)}
+    </div>
+
+    ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Tolerance now: ${tol()} | Shots: ${st.shots}</div>`}
+  `;
+
+  const g = sim.querySelector('#guess'); if(g) g.oninput=()=>{st.guess=parseFloat(g.value); sim.querySelector('.readout').innerHTML=`<span>Range: ${st.lo.toFixed(3)} to ${st.hi.toFixed(3)}</span><span class="guess-badge">Your guess: ${st.guess.toFixed(3)}</span>`;};
+  const s = sim.querySelector('#startBtn'); if(s) s.onclick=start;
+  const c = sim.querySelector('#checkBtn'); if(c) c.onclick=check;
+  const z = sim.querySelector('#zoomBtn'); if(z) z.onclick=zoomIn;
+  const n = sim.querySelector('#nextBtn'); if(n) n.onclick=next;
+}
+
+setupRound();
+render();
+</script>
+</body>
+</html>

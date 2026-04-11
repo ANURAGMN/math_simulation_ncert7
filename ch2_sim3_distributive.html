@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#059669">
+<title>Area Split Architect</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#059669 0%,#2563eb 100%);min-height:100vh}
+#app{max-width:420px;margin:auto;padding:10px}
+.header{text-align:center;color:#fff;padding:12px}
+.header h1{font-size:20px;font-weight:800}
+.header p{font-size:12px;opacity:.9}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.stat{background:#ecfdf5;border-radius:10px;padding:8px;text-align:center}
+.k{font-size:10px;color:#065f46;font-weight:700;text-transform:uppercase}
+.v{font-size:18px;font-weight:800;color:#0f172a}
+.mission{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #86efac;border-radius:12px;padding:10px;margin-bottom:10px}
+.mission h3{font-size:14px;color:#065f46}
+.mission p{font-size:12px;color:#166534;margin-top:4px;line-height:1.45}
+.viz{background:#f8fafc;border-radius:12px;padding:10px;margin-bottom:10px}
+svg{width:100%;display:block}
+.read{display:flex;justify-content:space-between;font-size:12px;color:#475569;margin-bottom:6px}
+input[type=range]{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{padding:6px 10px;border-radius:16px;background:#dcfce7;color:#166534;font-size:11px;font-weight:700}
+.actions{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.lock{background:#059669;color:#fff}
+.btn.next{background:#0ea5e9;color:#fff}
+.btn.start{background:linear-gradient(135deg,#059669,#2563eb);color:#fff}
+.msg{margin-top:10px;padding:10px;border-radius:10px;font-size:12px;line-height:1.45}
+.msg.good{background:#dcfce7;color:#166534}
+.msg.bad{background:#fef2f2;color:#991b1b}
+.msg.info{background:#eff6ff;color:#1e3a8a}
+.insight{margin-top:12px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-left:4px solid #059669;border-radius:12px;padding:12px;font-size:12px;color:#0f172a;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>Area Split Architect</h1>
+    <p>Discover multiple distributive decompositions</p>
+  </div>
+  <div class="card" id="sim"></div>
+  <div class="insight"><b>Mission:</b> for each rectangle a×(b+c), find several different valid splits. Each unique split proves distributive thinking.</div>
+</div>
+<script>
+const sim = document.getElementById('sim');
+
+const MISSIONS = [
+  {a:4, n:9, need:3, attempts:5},
+  {a:3, n:10, need:4, attempts:6},
+  {a:5, n:8, need:3, attempts:5},
+  {a:6, n:11, need:4, attempts:6}
+];
+
+let st = {run:false, idx:0, score:0, lives:3, b:3, used:new Set(), left:5, resolved:false, msg:'', msgType:'info'};
+
+function setupRound(){
+  const m = MISSIONS[st.idx];
+  st.b = Math.max(1, Math.floor(m.n/2));
+  st.used = new Set();
+  st.left = m.attempts;
+  st.resolved = false;
+  st.msg = '';
+}
+
+function start(){
+  st = {...st, run:true, idx:0, score:0, lives:3};
+  setupRound();
+  render();
+}
+
+function lockSplit(){
+  if(!st.run || st.resolved) return;
+  const m = MISSIONS[st.idx];
+  const key = `${st.b}|${m.n-st.b}`;
+  if(st.b<=0 || st.b>=m.n){
+    st.msg = 'Invalid split. b and c must both be positive.';
+    st.msgType = 'bad';
+    render();
+    return;
+  }
+  st.left -= 1;
+  if(st.used.has(key)){
+    st.msg = 'That split was already used. Try a new partition.';
+    st.msgType = 'bad';
+  } else {
+    st.used.add(key);
+    st.msg = `Saved split: ${m.a}×${st.b} + ${m.a}×${m.n-st.b}`;
+    st.msgType = 'good';
+  }
+
+  if(st.used.size >= m.need){
+    st.score += 18;
+    st.resolved = true;
+    st.msg = `Mission clear! Found ${m.need} unique splits.`;
+    st.msgType = 'good';
+  } else if(st.left<=0){
+    st.lives -= 1;
+    st.resolved = true;
+    st.msg = `Attempts over. Needed ${m.need}, found ${st.used.size}.`;
+    st.msgType = 'bad';
+    if(st.lives<=0) st.run = false;
+  }
+  render();
+}
+
+function next(){
+  if(!st.resolved) return;
+  st.idx += 1;
+  if(st.idx>=MISSIONS.length){
+    st.run = false;
+    st.msg = 'All architecture missions complete!';
+    st.msgType = 'good';
+  } else setupRound();
+  render();
+}
+
+function rectSvg(a,b,c){
+  const W=360,H=120,p=20;
+  const w1=(W-2*p)*(b/(b+c));
+  const w2=(W-2*p)-w1;
+  return `<svg viewBox="0 0 ${W} ${H}">
+    <rect x="${p}" y="20" width="${w1}" height="60" fill="#bfdbfe" stroke="#3b82f6" stroke-width="2"/>
+    <rect x="${p+w1}" y="20" width="${w2}" height="60" fill="#bbf7d0" stroke="#16a34a" stroke-width="2"/>
+    <line x1="${p+w1}" y1="20" x2="${p+w1}" y2="80" stroke="#334155" stroke-dasharray="4,3" stroke-width="2"/>
+    <text x="${p+w1/2}" y="55" text-anchor="middle" font-size="14" font-weight="800" fill="#1d4ed8">${a}×${b}</text>
+    <text x="${p+w1+w2/2}" y="55" text-anchor="middle" font-size="14" font-weight="800" fill="#166534">${a}×${c}</text>
+    <text x="${W/2}" y="102" text-anchor="middle" font-size="12" fill="#334155">${a}×(${b}+${c}) = ${a*(b+c)}</text>
+  </svg>`;
+}
+
+function render(){
+  const done = !st.run;
+  const m = MISSIONS[Math.min(st.idx, MISSIONS.length-1)];
+  const c = m.n - st.b;
+
+  sim.innerHTML = `
+    <div class="stats">
+      <div class="stat"><div class="k">Mission</div><div class="v">${Math.min(st.idx+1,MISSIONS.length)}/${MISSIONS.length}</div></div>
+      <div class="stat"><div class="k">Score</div><div class="v">${st.score}</div></div>
+      <div class="stat"><div class="k">Lives</div><div class="v">${st.lives}</div></div>
+      <div class="stat"><div class="k">Attempts</div><div class="v">${st.left}</div></div>
+    </div>
+
+    <div class="mission">
+      <h3>Build ${m.need} unique splits for ${m.a}×(${m.n})</h3>
+      <p>Choose b and c so that b+c=${m.n}. Each new split earns progress.</p>
+    </div>
+
+    <div class="viz">${rectSvg(m.a,st.b,c)}</div>
+
+    <div class="read"><span>b = ${st.b}</span><span>c = ${c}</span><span>found ${st.used.size}/${m.need}</span></div>
+    <input type="range" id="b" min="1" max="${m.n-1}" step="1" value="${st.b}">
+
+    <div class="chips">${[...st.used].map(x=>{const [bb,cc]=x.split('|'); return `<span class="chip">${m.a}×${bb} + ${m.a}×${cc}</span>`;}).join('') || '<span class="chip">No locked splits yet</span>'}</div>
+
+    <div class="actions">
+      ${done ? `<button class="btn start" id="startBtn">Start Architect Run</button>` : (st.resolved ? `<button class="btn next" id="nextBtn">Next Mission</button>` : `<button class="btn lock" id="lockBtn">Lock This Split</button>`)}
+    </div>
+
+    ${st.msg ? `<div class="msg ${st.msgType}">${st.msg}</div>` : `<div class="msg info">Find different b values; duplicates do not count.</div>`}
+  `;
+
+  const b = sim.querySelector('#b'); if(b) b.oninput=()=>{st.b=parseInt(b.value,10); render();};
+  const s = sim.querySelector('#startBtn'); if(s) s.onclick=start;
+  const l = sim.querySelector('#lockBtn'); if(l) l.onclick=lockSplit;
+  const n = sim.querySelector('#nextBtn'); if(n) n.onclick=next;
+}
+
+setupRound();
+render();
+</script>
+</body>
+</html>
