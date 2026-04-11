@@ -20,6 +20,9 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:l
 .slot{background:#fff;border:2px solid #cbd5e1;border-radius:10px;padding:10px;text-align:center}
 .slot .n{font-size:26px;font-family:'Courier New',monospace;font-weight:900}
 .slider{width:100%;margin-top:8px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.sbtn{padding:8px;border:none;border-radius:8px;background:#d1fae5;color:#065f46;font-weight:800;cursor:pointer}
+.ninput{width:100%;margin-top:8px;padding:9px;border:2px solid #99f6e4;border-radius:9px;font-weight:800}
 .actions{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
 .check{background:#0f766e;color:#fff}.next{background:#0e7490;color:#fff}.retry{background:#334155;color:#fff}
@@ -52,6 +55,12 @@ function setupRound(){
 }
 function setN(v){if(!st.run||st.resolved)return; st.n=parseInt(v,10); render();}
 function setD(v){if(!st.run||st.resolved)return; st.d=parseInt(v,10); render();}
+function nudgeN(step){
+  if(!st.run||st.resolved) return;
+  const r=ROUNDS[Math.min(st.idx,ROUNDS.length-1)];
+  st.n=Math.max(1,Math.min(r.targetDen,st.n+step));
+  render();
+}
 function check(){
   if(!st.run||st.resolved)return;
   const r=ROUNDS[st.idx];
@@ -93,6 +102,13 @@ function render(){
       </div>
       <div style="margin-top:10px;font-size:12px;color:#0f766e">Numerator: ${st.n}</div>
       <input class="slider" type="range" min="1" max="${r.targetDen}" value="${st.n}" id="nSlider">
+      <div class="steps">
+        <button class="sbtn" id="nMinus5">-5</button>
+        <button class="sbtn" id="nMinus1">-1</button>
+        <button class="sbtn" id="nPlus1">+1</button>
+        <button class="sbtn" id="nPlus5">+5</button>
+      </div>
+      <input class="ninput" id="nInput" type="number" min="1" max="${r.targetDen}" value="${st.n}">
       <div style="margin-top:8px;font-size:12px;color:#0f766e">Denominator: ${st.d}</div>
       <input class="slider" type="range" min="${r.targetDen}" max="${r.targetDen}" value="${st.d}" id="dSlider">
       <div class="eq">${equal?'Equivalent ✓':'Not equivalent yet'}</div>
@@ -104,6 +120,11 @@ function render(){
   `;
   const ns=sim.querySelector('#nSlider'); if(ns) ns.oninput=e=>setN(e.target.value);
   const ds=sim.querySelector('#dSlider'); if(ds) ds.oninput=e=>setD(e.target.value);
+  const ni=sim.querySelector('#nInput'); if(ni) ni.oninput=e=>setN(e.target.value);
+  const nm5=sim.querySelector('#nMinus5'); if(nm5) nm5.onclick=()=>nudgeN(-5);
+  const nm1=sim.querySelector('#nMinus1'); if(nm1) nm1.onclick=()=>nudgeN(-1);
+  const np1=sim.querySelector('#nPlus1'); if(np1) np1.onclick=()=>nudgeN(1);
+  const np5=sim.querySelector('#nPlus5'); if(np5) np5.onclick=()=>nudgeN(5);
   const c=sim.querySelector('#checkBtn'); if(c) c.onclick=check;
   const rt=sim.querySelector('#retryBtn'); if(rt) rt.onclick=retry;
   const n=sim.querySelector('#nextBtn'); if(n) n.onclick=next;

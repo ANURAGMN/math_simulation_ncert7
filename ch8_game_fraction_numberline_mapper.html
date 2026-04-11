@@ -25,6 +25,14 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .tick{position:absolute;top:8px;width:2px;height:24px;background:#64748b}
 .tl{position:absolute;top:0;transform:translateX(-50%);font-size:10px;color:#475569}
 .marker{position:absolute;top:8px;width:14px;height:14px;border-radius:50%;background:#0284c7;transform:translate(-50%,0);cursor:pointer;touch-action:none;box-shadow:0 0 0 2px #fff}
+.precision{margin-top:8px;background:#fff;border:2px solid #cbd5e1;border-radius:10px;padding:8px}
+.precision .t{font-size:12px;color:#334155}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.stepBtn{padding:8px;border:none;border-radius:8px;background:#dbeafe;color:#1d4ed8;font-weight:800;cursor:pointer}
+.precSlider{width:100%;margin-top:8px}
+.direct{margin-top:8px;display:grid;grid-template-columns:1fr auto;gap:6px}
+.direct input{padding:8px;border:2px solid #cbd5e1;border-radius:8px;font-weight:700}
+.direct button{padding:8px 10px;border:none;border-radius:8px;background:#0284c7;color:#fff;font-weight:800;cursor:pointer}
 .hint{font-size:12px;color:#334155;margin-top:8px;text-align:center}
 .actions{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
@@ -65,6 +73,17 @@ let dragging=false;
 function target(){ const r=ROUNDS[st.idx]; return r.num/r.den; }
 function setup(){ st.pos=0.5; st.resolved=false; st.msg=''; st.msgType='info'; }
 function clamp(x,a,b){ return Math.max(a,Math.min(b,x)); }
+function quantStep(){ const r=ROUNDS[Math.min(st.idx,ROUNDS.length-1)]; return 1/(r.den*10); }
+function nudgePos(step){
+  if(!st.run||st.resolved) return;
+  st.pos=clamp(st.pos+step,0,1);
+  render();
+}
+function setPosDirect(v){
+  if(!st.run||st.resolved) return;
+  st.pos=clamp(parseFloat(v)||0,0,1);
+  render();
+}
 function reset(){ if(!st.run||st.resolved) return; setup(); render(); }
 function check(){
   if(!st.run||st.resolved) return;
@@ -120,6 +139,20 @@ function render(){
         </div>
         <div class="hint" id="readout">Marker: ${st.pos.toFixed(3)}</div>
       </div>
+      <div class="precision">
+        <div class="t">Precision mode (drag still works)</div>
+        <div class="steps">
+          <button class="stepBtn" data-step="-0.1">-0.1</button>
+          <button class="stepBtn" data-step="-0.01">-0.01</button>
+          <button class="stepBtn" data-step="0.01">+0.01</button>
+          <button class="stepBtn" data-step="0.1">+0.1</button>
+        </div>
+        <input class="precSlider" id="posSlider" type="range" min="0" max="1" step="${quantStep()}" value="${st.pos}">
+        <div class="direct">
+          <input id="posInput" type="number" min="0" max="1" step="0.001" value="${st.pos.toFixed(3)}">
+          <button id="setPosBtn">Set</button>
+        </div>
+      </div>
     </div>
     <div class="actions">
       ${done?`<button class="btn next" id="restartBtn">Restart</button>`:(st.resolved?`<button class="btn next" id="nextBtn">${st.idx===ROUNDS.length-1?'Finish':'Next Round'}</button>`:`<button class="btn reset" id="resetBtn">Reset Marker</button><button class="btn check" id="checkBtn">Check Placement</button>`)}
@@ -127,6 +160,11 @@ function render(){
     ${st.msg?`<div class="msg ${st.msgType}">${st.msg}</div>`:`<div class="msg info">Drag marker and lock your placement.</div>`}
   `;
   bindDrag();
+  sim.querySelectorAll('.stepBtn').forEach(b=>b.onclick=()=>nudgePos(parseFloat(b.dataset.step)));
+  const sl=sim.querySelector('#posSlider'); if(sl) sl.oninput=e=>setPosDirect(e.target.value);
+  const inp=sim.querySelector('#posInput');
+  const setBtn=sim.querySelector('#setPosBtn');
+  if(setBtn&&inp) setBtn.onclick=()=>setPosDirect(inp.value);
   const rs=sim.querySelector('#resetBtn'); if(rs) rs.onclick=reset;
   const c=sim.querySelector('#checkBtn'); if(c) c.onclick=check;
   const n=sim.querySelector('#nextBtn'); if(n) n.onclick=next;
