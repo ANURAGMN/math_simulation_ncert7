@@ -21,6 +21,12 @@ body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sa
 .mission p{font-size:12px;color:#4c1d95;line-height:1.45}
 .canvas{background:#f8fafc;border:2px solid #cbd5e1;border-radius:12px;padding:6px;margin-top:8px}
 svg{width:100%;height:auto;display:block;touch-action:none}
+.tuner{margin-top:10px;background:#f8fafc;border:2px solid #cbd5e1;border-radius:10px;padding:8px}
+.tuner .lbl{font-size:12px;color:#475569;margin-bottom:6px}
+.stepRow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.sbtn{padding:8px;border:none;border-radius:8px;background:#ede9fe;color:#4c1d95;font-weight:800;cursor:pointer}
+.sbtn:disabled{opacity:.45;cursor:not-allowed}
+.range{width:100%;margin-top:8px}
 .row{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;padding:11px;border:none;border-radius:10px;font-weight:700;cursor:pointer}
 .btn.check{background:#7c3aed;color:#fff}
@@ -66,6 +72,24 @@ function setupRound(){
 function current(){ return ROUNDS[Math.min(st.idx, ROUNDS.length-1)]; }
 function sumNow(){ const r=current(); return r.fixedA + r.fixedB + st.x; }
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function xBounds(){
+  const r=current();
+  return r.type==='line' ? {min:1,max:179} : {min:5,max:300};
+}
+function setX(v){
+  const b=xBounds();
+  st.x=clamp(Math.round(v),b.min,b.max);
+}
+function nudgeX(step){
+  if(!st.run||st.resolved) return;
+  setX(st.x+step);
+  render();
+}
+function slideX(v){
+  if(!st.run||st.resolved) return;
+  setX(parseInt(v,10));
+  render();
+}
 
 function updateFromDrag(clientX, clientY){
   if(!drag.active || st.resolved || !st.run) return;
@@ -79,11 +103,9 @@ function updateFromDrag(clientX, clientY){
   const r = current();
 
   if(r.type === 'line'){
-    const x = clamp(Math.round(theta), 1, 179);
-    st.x = x;
+    setX(theta);
   } else {
-    const x = clamp(Math.round(theta), 5, 300);
-    st.x = x;
+    setX(theta);
   }
   render();
 }
@@ -121,7 +143,7 @@ function next(){
 
 function resetDrag(){
   if(!st.run || st.resolved) return;
-  setupRound();
+  setX(30);
   render();
 }
 
@@ -134,6 +156,7 @@ function restart(){
 function render(){
   const done = !st.run;
   const r = current();
+  const b = xBounds();
   const total = sumNow();
   const remaining = r.target - (r.fixedA + r.fixedB);
   const valid = total === r.target;
@@ -174,6 +197,16 @@ function render(){
             <circle cx="0" cy="0" r="5" fill="#111827"/>
           </g>
         </svg>
+      </div>
+      <div class="tuner">
+        <div class="lbl">Precision controls for x (drag still works)</div>
+        <div class="stepRow">
+          <button class="sbtn" id="xMinus5" ${done||st.resolved?'disabled':''}>-5</button>
+          <button class="sbtn" id="xMinus1" ${done||st.resolved?'disabled':''}>-1</button>
+          <button class="sbtn" id="xPlus1" ${done||st.resolved?'disabled':''}>+1</button>
+          <button class="sbtn" id="xPlus5" ${done||st.resolved?'disabled':''}>+5</button>
+        </div>
+        <input id="xRange" class="range" type="range" min="${b.min}" max="${b.max}" value="${st.x}" ${done||st.resolved?'disabled':''}>
       </div>
     </div>
 
@@ -218,6 +251,11 @@ function render(){
   const nx = sim.querySelector('#nextBtn'); if(nx) nx.onclick = next;
   const rs = sim.querySelector('#resetBtn'); if(rs) rs.onclick = resetDrag;
   const rr = sim.querySelector('#restartBtn'); if(rr) rr.onclick = restart;
+  const xM5 = sim.querySelector('#xMinus5'); if(xM5) xM5.onclick=()=>nudgeX(-5);
+  const xM1 = sim.querySelector('#xMinus1'); if(xM1) xM1.onclick=()=>nudgeX(-1);
+  const xP1 = sim.querySelector('#xPlus1'); if(xP1) xP1.onclick=()=>nudgeX(1);
+  const xP5 = sim.querySelector('#xPlus5'); if(xP5) xP5.onclick=()=>nudgeX(5);
+  const xr = sim.querySelector('#xRange'); if(xr) xr.oninput=(e)=>slideX(e.target.value);
 }
 
 function pt(deg, r){
